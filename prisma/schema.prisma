@@ -1,0 +1,142 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas = ["identity", "cms"]
+}
+
+// IDENTITY
+
+enum TenantIssue {
+  NO_PROJECT_FOUND
+  NO_CLIENT_FOUND
+
+  @@schema("identity")
+  @@map("tenantIssueEnumType")
+}
+
+enum UserType {
+  PARTICIPANT
+  CLIENT
+
+  @@schema("identity")
+  @@map("userTypeEnumType")
+}
+
+enum UserIssue {
+  FIRST_LOGIN_WAS_NOT_MADE
+
+  @@map("userIssueEnumType")
+  @@schema("identity")
+}
+
+model Tenant {
+  id Int @id @default(autoincrement())
+  name String @db.VarChar(80)
+  identifier String @db.VarChar(80) @unique
+  ownerId Int? @db.Integer @map("ownerId") @unique
+  issues TenantIssue[] @default([NO_CLIENT_FOUND, NO_PROJECT_FOUND])
+  openProjectsCount Int @default(0) @db.SmallInt @map("openProjectsCount")
+  doneProjectsCount Int @default(0) @db.SmallInt @map("doneProjectsCount")
+  clientsCount Int @default(0) @db.SmallInt @map("clientsCount")
+  participantsCount Int @default(1) @db.SmallInt @map("participantsCount")
+  createdAt DateTime @default(now()) @map("createdAt")
+  updatedAt DateTime @default(now()) @updatedAt @map("updatedAt")
+
+  users User[]
+
+  @@index([createdAt(sort: Asc)])
+  @@index([issues], type: Gin)
+
+  @@map("tenants")
+  @@schema("identity")
+}
+
+model User {
+  id Int @id @default(autoincrement())
+  tenantId Int @db.Integer @map("tenantId")
+  name String @db.VarChar(80)
+  email String @db.VarChar(254)
+  type UserType
+  issues UserIssue[] @default([FIRST_LOGIN_WAS_NOT_MADE])
+  createdAt DateTime @default(now()) @map("createdAt")
+  updatedAt DateTime @default(now()) @updatedAt @map("updatedAt")
+
+  tenant Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([email, tenantId])
+
+  @@index([createdAt(sort: Desc)])
+  @@index([issues], type: Gin)
+
+  @@map("users")
+  @@schema("identity")
+}
+
+// CMS
+
+enum ProjectStatus {
+  OPEN
+  IN_PROGRESS
+  DONE
+
+  @@schema("cms")
+  @@map("projectStatusEnumType")
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  DONE
+
+  @@schema("cms")
+  @@map("ticketStatusEnumType")
+}
+
+model Project {
+  id Int @id @default(autoincrement())
+  tenantId Int @db.Integer @map("tenantId")
+  title String @db.VarChar(80)
+  description String @db.VarChar(1000)
+  status ProjectStatus @default(OPEN)
+  openTicketsCount Int @db.SmallInt @default(0) @map("openTicketsCount")
+  closedTicketsCount Int @db.SmallInt @default(0) @map("closedTicketsCount")
+  clientUserIds Int[] @db.Integer @default([]) @map("clientUserIds")
+  createdAt DateTime @default(now()) @map("createdAt")
+  updatedAt DateTime @default(now()) @updatedAt @map("updatedAt")
+
+  Ticket Ticket[]
+  
+  @@index([tenantId, createdAt(sort: Desc)])
+  @@index([clientUserIds], type: Gin)
+
+  @@map("projects")
+  @@schema("cms")
+}
+
+model Ticket {
+  id Int @id @default(autoincrement())
+  tenantId Int @db.Integer @map("tenantId")
+  projectId Int @db.Integer @map("projectId")
+  description String @db.VarChar(1000)
+  status TicketStatus @default(OPEN)
+  createdAt DateTime @default(now()) @map("createdAt")
+  updatedAt DateTime @default(now()) @updatedAt @map("updatedAt")
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([tenantId, createdAt(sort: Desc)])
+
+  @@map("tickets")
+  @@schema("cms")
+}

@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json.schemastore.org/nest-cli",
+  "collection": "@nestjs/schematics",
+  "compilerOptions": {
+    "deleteOutDir": true,
+    "webpack": true,
+    "tsConfigPath": "./tsconfig.json",
+    "assets": [
+      {
+        "include": "**/*.proto"
+      },
+      {
+        "include": "**/*.hbs"
+      }
+    ],
+    "watchAssets": true
+  },
+  "monorepo": true,
+  "root": "apps",
+  "projects": {
+    "notification": {
+      "type": "application",
+      "root": "apps/notification",
+      "entryFile": "main",
+      "sourceRoot": "apps/notification/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/notification/tsconfig.app.json"
+      }
+    },
+    "identity": {
+      "type": "application",
+      "root": "apps/identity",
+      "entryFile": "main",
+      "sourceRoot": "apps/identity/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/identity/tsconfig.app.json"
+      }
+    },
+    "cms": {
+      "type": "application",
+      "root": "apps/cms",
+      "entryFile": "main",
+      "sourceRoot": "apps/cms/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/cms/tsconfig.app.json"
+      }
+    },
+    "adapters": {
+      "type": "library",
+      "root": "libs/adapters",
+      "entryFile": "index",
+      "sourceRoot": "libs/adapters/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/adapters/tsconfig.lib.json"
+      }
+    },
+    "interfaces": {
+      "type": "library",
+      "root": "libs/interfaces",
+      "entryFile": "index",
+      "sourceRoot": "libs/interfaces/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/interfaces/tsconfig.lib.json"
+      }
+    },
+    "constants": {
+      "type": "library",
+      "root": "libs/constants",
+      "entryFile": "index",
+      "sourceRoot": "libs/constants/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/constants/tsconfig.lib.json"
+      }
+    },
+    "event-definitions": {
+      "type": "library",
+      "root": "libs/event-definitions",
+      "entryFile": "index",
+      "sourceRoot": "libs/event-definitions/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/event-definitions/tsconfig.lib.json"
+      }
+    },
+    "shared-utils": {
+      "type": "library",
+      "root": "libs/shared-utils",
+      "entryFile": "index",
+      "sourceRoot": "libs/shared-utils/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/shared-utils/tsconfig.lib.json"
+      }
+    },
+    "orchestrator": {
+      "type": "application",
+      "root": "apps/orchestrator",
+      "entryFile": "main",
+      "sourceRoot": "apps/orchestrator/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/orchestrator/tsconfig.app.json"
+      }
+    },
+    "gateway": {
+      "type": "application",
+      "root": "apps/gateway",
+      "entryFile": "main",
+      "sourceRoot": "apps/gateway/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/gateway/tsconfig.app.json"
+      }
+    },
+    "saga": {
+      "type": "library",
+      "root": "libs/saga",
+      "entryFile": "index",
+      "sourceRoot": "libs/saga/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/saga/tsconfig.lib.json"
+      }
+    }
+  }
+}
