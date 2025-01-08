@@ -8,7 +8,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { OrchestratorClient, IdentityClient } from '../grpc-clients';
+import { OrchestratorClient, IdentityGrpcClient } from '../grpc-clients';
 import { RegisterRequestDto, LoginRequestDto } from '../../application/dtos';
 import slugify from 'slugify';
 
@@ -16,7 +16,7 @@ import slugify from 'slugify';
 export class AuthController {
   constructor(
     private readonly orchestratorClient: OrchestratorClient,
-    private readonly identityClient: IdentityClient,
+    private readonly identityClient: IdentityGrpcClient,
   ) {}
 
   @Post('register')
@@ -48,7 +48,7 @@ export class AuthController {
     };
   }
 
-  @Get('access-request')
+  @Get('access-verification')
   async accessRequest(@Query('code') accessCode: string, @Res() res: Response) {
     if (!accessCode) {
       return res

@@ -1,22 +1,46 @@
 // apps/identity/src/identity.module.ts
 import { Module } from '@nestjs/common';
-import { IdentityServer } from './infrastructure/grpc/identity.server';
-import { IdentityServiceApp } from './application/identity.service';
 import { PrismaService } from './infrastructure/prisma/prisma.service';
 import {
   TenantRepository,
   UserRepository,
 } from './infrastructure/repositories';
 import { RedisModule } from 'libs/adapters/redis';
+import {
+  AuthGrpcServer,
+  TenantGrpcServer,
+  UserGrpcServer,
+} from './infrastructure';
+import { PRISMA_SERVICE, TENANT_REPOSITORY, USER_REPOSITORY } from './domain';
+import {
+  AuthUseCase,
+  CacheUseCase,
+  TenantUseCase,
+  UserUseCase,
+} from './application';
 
 @Module({
   imports: [RedisModule],
   providers: [
-    IdentityServer,
-    IdentityServiceApp,
-    PrismaService,
-    TenantRepository,
-    UserRepository,
+    AuthGrpcServer,
+    UserGrpcServer,
+    TenantGrpcServer,
+    {
+      provide: TENANT_REPOSITORY,
+      useClass: TenantRepository,
+    },
+    {
+      provide: USER_REPOSITORY,
+      useClass: UserRepository,
+    },
+    {
+      provide: PRISMA_SERVICE,
+      useClass: PrismaService,
+    },
+    AuthUseCase,
+    CacheUseCase,
+    TenantUseCase,
+    UserUseCase,
   ],
 })
 export class IdentityModule {}

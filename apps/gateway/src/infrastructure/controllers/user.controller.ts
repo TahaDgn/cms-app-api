@@ -1,5 +1,5 @@
 import { Controller, Post, Body, Get, Delete } from '@nestjs/common';
-import { OrchestratorClient, IdentityClient } from '../grpc-clients';
+import { OrchestratorClient, IdentityGrpcClient } from '../grpc-clients';
 import { AuthGuard, AuthorizedUser } from '../guards/auth.guard';
 import {
   CreateParticipantRequestDto,
@@ -13,7 +13,7 @@ import { User, UserType } from '@prisma/client';
 export class AuthController {
   constructor(
     private readonly orchestratorClient: OrchestratorClient,
-    private readonly identityClient: IdentityClient,
+    private readonly identityClient: IdentityGrpcClient,
   ) {}
 
   @AuthGuard(UserType.PARTICIPANT)

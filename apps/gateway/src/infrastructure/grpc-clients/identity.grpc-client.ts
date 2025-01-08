@@ -12,7 +12,7 @@ import {
 } from 'libs/interfaces/identity.interface';
 
 @Injectable()
-export class IdentityClient implements OnModuleInit {
+export class IdentityGrpcClient implements OnModuleInit {
   @Client({
     transport: Transport.GRPC,
     options: {

@@ -38,7 +38,7 @@ export async function userRegistrationSaga(
           payload: { tenant, user },
         } = stepContext;
 
-        const response = await identityGrpcClient.createTenantAndUser({
+        const response = await identityGrpcClient.createTenantWithOwner({
           tenant,
           user,
         });
@@ -95,7 +95,13 @@ export async function userRegistrationSaga(
           createTenantAndUserResponse: {
             user: { email },
           },
-          accessRequestResponse: { accessUrl, tenantName, userName, userType },
+          accessRequestResponse: {
+            accessUrl,
+            tenantName,
+            userName,
+            userType,
+            tenantIdentifier,
+          },
         } = stepContext;
 
         await rabbitMqAdapter.publish(NOTIFICATION_QUEUE, {
@@ -106,6 +112,7 @@ export async function userRegistrationSaga(
             tenantName,
             userType,
             accessUrl,
+            tenantIdentifier,
           },
         });
       },

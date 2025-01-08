@@ -7,11 +7,15 @@ export class RedisAdapter implements OnModuleInit, OnModuleDestroy {
 
   async onModuleInit() {
     const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
+
     this.client = createClient({ url: REDIS_URL });
+
     this.client.on('error', (err) => {
       console.error('Redis error: ', err);
     });
+
     await this.client.connect();
+
     console.log('Redis connected.');
   }
 
@@ -34,5 +38,13 @@ export class RedisAdapter implements OnModuleInit, OnModuleDestroy {
 
   public async delKey(key: string) {
     await this.client.del(key);
+  }
+
+  public async lPush(key: string, value: string) {
+    await this.client.lPush(key, value);
+  }
+
+  public async lRange(key: string, start = 0, stop = -1) {
+    return this.client.lRange(key, start, stop);
   }
 }

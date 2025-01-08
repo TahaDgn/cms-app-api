@@ -1,106 +1,99 @@
-// apps/identity/src/infrastructure/repositories/user.repository.ts
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { UserType } from '@prisma/client';
+import { Prisma, UserIssue } from '@prisma/client';
+import { UserRepositorySign } from '../../domain';
 
 @Injectable()
-export class UserRepository {
+export class UserRepository implements UserRepositorySign {
   constructor(private prisma: PrismaService) {}
 
-  async createUser(
-    tenantId: number,
-    email: string,
-    name: string,
-    type: UserType,
-  ) {
-    const user = await this.prisma.user.create({
+  async create(
+    payload: Pick<Prisma.UserCreateInput, 'email' | 'name' | 'type' | 'tenant'>,
+    transactionClient = this.prisma,
+  ): Promise<Prisma.UserGetPayload<{ include: { tenant: true } }>> {
+    return transactionClient.user.create({
       data: {
-        tenantId,
-        email,
-        name,
-        type,
+        ...payload,
+      },
+      include: {
+        tenant: true,
       },
     });
-    return {
-      id: user.id,
-      tenantId: user.tenantId,
-      email: user.email,
-      name: user.name,
-      type: user.type,
-      issues: user.issues,
-    };
   }
 
-  async findByEmailAndTenantIdentifier(
-    email: string,
-    tenantIdentifier: string,
-  ) {
-    // Prisma multi schema: identity.tenant, identity.user
-    // Tek tabloda join => or, bir custom query
-    const tenant = await this.prisma.tenant.findUnique({
-      where: { identifier: tenantIdentifier },
-    });
-    if (!tenant) return null;
+  async findFirst(payload: Prisma.UserFindFirstArgs) {
     const user = await this.prisma.user.findFirst({
-      where: { tenantId: tenant.id, email },
+      ...payload,
     });
-    return user
-      ? {
-          id: user.id,
-          tenantId: user.tenantId,
-          email: user.email,
-          name: user.name,
-          type: user.type,
-          issues: user.issues,
-        }
-      : null;
+
+    return user as Prisma.UserGetPayload<{ include: { tenant: true } }>;
   }
 
-  async findById(userId: number) {
+  async findUnique(payload: Prisma.UserFindUniqueArgs) {
     const user = await this.prisma.user.findUnique({
-      where: { id: userId },
+      ...payload,
     });
-    if (!user) return null;
-    return {
-      id: user.id,
-      tenantId: user.tenantId,
-      email: user.email,
-      name: user.name,
-      type: user.type,
-      issues: user.issues,
-    };
+
+    return user as Prisma.UserGetPayload<{ include: { tenant: true } }>;
   }
 
-  async removeFirstLoginIssue(userId: number) {
-    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+  async findAll(payload: Prisma.UserFindManyArgs) {
+    const users = await this.prisma.user.findMany({
+      ...payload,
+    });
+
+    return users as Prisma.UserGetPayload<{ include: { tenant: true } }>[];
+  }
+
+  async removeFirstLoginIssue(
+    payload: Pick<Prisma.UserWhereUniqueInput, 'id' | 'tenantId'>,
+    transactionClient = this.prisma,
+  ) {
+    const user = await this.findFirst({
+      where: {
+        ...payload,
+      },
+    });
+
     if (!user) return;
+
     const updatedIssues = user.issues.filter(
-      (iss) => iss !== 'FIRST_LOGIN_WAS_NOT_MADE',
+      (issue) => issue !== UserIssue.FIRST_LOGIN_WAS_NOT_MADE.toString(),
     );
-    await this.prisma.user.update({
-      where: { id: userId },
+
+    const { id } = payload;
+
+    await transactionClient.user.update({
+      where: {
+        id,
+      },
       data: {
         issues: updatedIssues,
       },
     });
   }
 
-  async findAllByTenant(tenantId: number) {
-    const users = await this.prisma.user.findMany({
-      where: { tenantId },
+  async delete(
+    payload: Pick<Prisma.UserWhereInput, 'id' | 'tenantId'>,
+    transactionClient = this.prisma,
+  ) {
+    const user = await this.findFirst({
+      where: {
+        ...payload,
+      },
     });
-    return users.map((u) => ({
-      id: u.id,
-      email: u.email,
-      name: u.name,
-      type: u.type,
-      issues: u.issues,
-    }));
-  }
 
-  async deleteUser(userId: number) {
-    await this.prisma.user.delete({
-      where: { id: userId },
+    if (!user) return;
+
+    const { id } = user;
+
+    return transactionClient.user.delete({
+      where: {
+        id,
+      },
+      include: {
+        tenant: true,
+      },
     });
   }
 }

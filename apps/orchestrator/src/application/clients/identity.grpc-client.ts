@@ -8,12 +8,27 @@ import {
   CreateUserResponse,
   DeleteTenantPayload,
   DeleteUserPayload,
-  IdentityService,
+  IdentityService as IdentityGrpcServer,
   RemoveAccessCodePayload,
+  RemoveAccessTokenPayload,
+  RemoveAccessTokenResponse,
 } from 'libs/interfaces';
 
 @Injectable()
-export class IdentityGrpcClient implements OnModuleInit {
+export class IdentityGrpcClient
+  implements
+    OnModuleInit,
+    Pick<
+      IdentityGrpcServer,
+      | 'createAccessRequestLink'
+      | 'createTenantWithOwner'
+      | 'deleteTenant'
+      | 'deleteUser'
+      | 'removeAccessCode'
+      | 'removeAccessToken'
+      | 'createUser'
+    >
+{
   @Client({
     transport: Transport.GRPC,
     options: {
@@ -23,34 +38,40 @@ export class IdentityGrpcClient implements OnModuleInit {
   })
   private client: ClientGrpc;
 
-  private identityService: IdentityService;
+  private identityGrpcServer: IdentityGrpcServer;
 
   onModuleInit() {
-    this.identityService =
-      this.client.getService<IdentityService>('IdentityService');
+    this.identityGrpcServer =
+      this.client.getService<IdentityGrpcServer>('IdentityService');
   }
 
   public createUser(payload: CreateUserPayload): Promise<CreateUserResponse> {
-    return this.identityService.createUser(payload);
+    return this.identityGrpcServer.createUser(payload);
   }
 
-  public createTenantAndUser(payload: CreateTenantAndUserPayload) {
-    return this.identityService.createTenantAndUser(payload);
+  public createTenantWithOwner(payload: CreateTenantAndUserPayload) {
+    return this.identityGrpcServer.createTenantWithOwner(payload);
   }
 
   public createAccessRequestLink(payload: AccessRequestPayload) {
-    return this.identityService.createAccessRequestLink(payload);
+    return this.identityGrpcServer.createAccessRequestLink(payload);
   }
 
   public deleteUser(payload: DeleteUserPayload) {
-    return this.identityService.deleteUser(payload);
+    return this.identityGrpcServer.deleteUser(payload);
   }
 
   public deleteTenant(payload: DeleteTenantPayload) {
-    return this.identityService.deleteTenant(payload);
+    return this.identityGrpcServer.deleteTenant(payload);
   }
 
   public removeAccessCode(payload: RemoveAccessCodePayload) {
-    return this.identityService.removeAccessCode(payload);
+    return this.identityGrpcServer.removeAccessCode(payload);
+  }
+
+  public removeAccessToken(
+    payload: RemoveAccessTokenPayload,
+  ): Promise<RemoveAccessTokenResponse> {
+    return this.identityGrpcServer.removeAccessToken(payload);
   }
 }

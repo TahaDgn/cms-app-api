@@ -90,13 +90,14 @@ export async function userCreationSaga(
       'SendMail',
       async (stepContext) => {
         const {
-          accessRequestResponse: { accessUrl },
-          createUserResponse: {
-            email,
-            type: userType,
-            name: userName,
-            tenant: { name: tenantName },
+          accessRequestResponse: {
+            accessUrl,
+            userType,
+            userName,
+            tenantIdentifier,
+            tenantName,
           },
+          createUserResponse: { email },
         } = stepContext;
 
         await rabbitMqAdapter.publish(NOTIFICATION_QUEUE, {
@@ -107,6 +108,7 @@ export async function userCreationSaga(
             tenantName,
             userType,
             accessUrl,
+            tenantIdentifier,
           },
         });
       },

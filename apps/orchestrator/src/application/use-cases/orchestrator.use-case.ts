@@ -17,7 +17,7 @@ import {
 } from '../sagas';
 
 @Injectable()
-export class OrchestratorService {
+export class OrchestratorUseCase {
   constructor(
     private readonly identityGrpcClient: IdentityGrpcClient,
     private readonly rabbitMqAdapter: RabbitMQAdapter,

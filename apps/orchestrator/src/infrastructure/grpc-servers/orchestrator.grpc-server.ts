@@ -1,6 +1,6 @@
 import { Controller } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
-import { OrchestratorService } from '../../application/use-cases';
+import { OrchestratorUseCase } from '../../application';
 import {
   UserRegistrationSagaPayload,
   UserLoginSagaPayload,
@@ -9,8 +9,8 @@ import {
 } from 'libs/interfaces';
 
 @Controller()
-export class OrchestratorServer {
-  constructor(private readonly orchestratorService: OrchestratorService) {}
+export class OrchestratorGrpcServer {
+  constructor(private readonly orchestratorService: OrchestratorUseCase) {}
 
   @GrpcMethod('OrchestratorService', 'userRegistrationSaga')
   async userRegistrationSaga(payload: UserRegistrationSagaPayload) {

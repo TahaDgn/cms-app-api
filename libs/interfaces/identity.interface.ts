@@ -2,7 +2,7 @@ import { Prisma, Tenant, User } from '@prisma/client';
 import { OneOf } from 'libs/shared-utils';
 
 export interface IdentityService {
-  createTenantAndUser(
+  createTenantWithOwner(
     payload: CreateTenantAndUserPayload,
   ): Promise<CreateTenantAndUserResponse>;
 
@@ -51,6 +51,7 @@ export interface AccessRequestResponse {
   userName: string;
   userType: string;
   tenantName: string;
+  tenantIdentifier: string;
 }
 
 export interface VerifyAccessPayload {

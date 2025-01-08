@@ -54,7 +54,13 @@ export async function userLoginSaga(
       'SendNotificationMail',
       async (stepContext) => {
         const {
-          accessRequestResponse: { accessUrl, userName, tenantName, userType },
+          accessRequestResponse: {
+            accessUrl,
+            userName,
+            tenantName,
+            userType,
+            tenantIdentifier,
+          },
           payload: { email },
         } = stepContext;
 
@@ -66,6 +72,7 @@ export async function userLoginSaga(
             tenantName,
             userType,
             accessUrl,
+            tenantIdentifier,
           },
         });
       },

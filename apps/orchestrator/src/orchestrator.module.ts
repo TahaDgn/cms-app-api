@@ -1,17 +1,20 @@
 import { Module } from '@nestjs/common';
-import { OrchestratorServer } from './infrastructure/grpc/orchestrator.server';
-import { OrchestratorService } from './application/use-cases';
-import { IdentityClient, CmsClient } from './application/clients';
-import { RabbitMQModule } from 'libs/adapters'; // Notification'a fire-and-forget
+import { RabbitMQModule } from 'libs/adapters';
 import { RedisModule } from 'libs/adapters/redis';
+import {
+  CmsGrpcClient,
+  IdentityGrpcClient,
+  OrchestratorUseCase,
+} from './application';
+import { OrchestratorGrpcServer } from './infrastructure';
 
 @Module({
   imports: [RabbitMQModule, RedisModule],
   providers: [
-    OrchestratorServer,
-    OrchestratorService,
-    IdentityClient,
-    CmsClient,
+    IdentityGrpcClient,
+    OrchestratorUseCase,
+    OrchestratorGrpcServer,
+    CmsGrpcClient,
   ],
 })
 export class OrchestratorModule {}
