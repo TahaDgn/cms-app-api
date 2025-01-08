@@ -1,0 +1,158 @@
+syntax = "proto3";
+
+package cms;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+enum ProjectStatus {
+  OPEN = 0;
+  IN_PROGRESS = 1;
+  DONE = 2;
+}
+
+enum TicketStatus {
+  OPEN = 0;
+  IN_PROGRESS = 1;
+  DONE = 2;
+}
+
+message Ticket {
+  int32 id = 1;
+  int32 tenantId = 2;
+  int32 projectId = 3;
+  string description = 4;
+  TicketStatus status = 5;
+  google.protobuf.Timestamp createdAt = 6;
+  google.protobuf.Timestamp updatedAt = 7;
+}
+
+message Project {
+  int32 id = 1;
+  int32 tenantId = 2;
+  string title = 3;
+  string description = 4;
+  ProjectStatus status = 5;
+  repeated int32 clientUserIds = 6;
+  google.protobuf.Timestamp createdAt = 7;
+  google.protobuf.Timestamp updatedAt = 8;
+}
+
+message ProjectWithTickets {
+  int32 id = 1;
+  int32 tenantId = 2;
+  string title = 3;
+  string description = 4;
+  ProjectStatus status = 5;
+  repeated int32 clientUserIds = 6;
+  google.protobuf.Timestamp createdAt = 7;
+  google.protobuf.Timestamp updatedAt = 8;
+  repeated Ticket tickets = 9;
+}
+
+message CreateProjectRequest {
+  string title = 1;
+  string description = 2;
+  int32 tenantId = 3;
+}
+
+message CreateProjectResponse {
+  Project project = 1;
+}
+
+message GetProjectRequest {
+  int32 id = 1;
+  int32 tenantId = 2;
+}
+
+message GetProjectResponse {
+  ProjectWithTickets project = 1;
+}
+
+message ListProjectsRequest {
+  int32 tenantId = 1;
+}
+
+message ListProjectsResponse {
+  repeated ProjectWithTickets projects = 1;
+}
+
+message ListClientProjectsRequest {
+  int32 tenantId = 1;
+  int32 clientId = 2;
+}
+
+message ListClientProjectsResponse {
+  repeated ProjectWithTickets projects = 1;
+}
+
+message DeleteProjectRequest {
+  int32 id = 1;
+  int32 tenantId = 2;
+}
+
+message DeleteProjectResponse {
+  Project project = 1;
+}
+
+message UpdateProjectRequest {
+  int32 id = 1;
+  int32 tenantId = 2;
+  string description = 3;
+  string title = 4;
+  ProjectStatus status = 5;
+}
+
+message UpdateProjectResponse {
+  ProjectWithTickets project = 1;
+}
+
+message AddOrRemoveClientFromProjectRequest {
+  int32 projectId = 1;
+  int32 tenantId = 2;
+  int32 clientId = 3;
+}
+
+message CreateTicketRequest {
+  string description = 1;
+  int32 projectId = 2;
+  int32 tenantId = 3;
+}
+
+message CreateTicketResponse {
+  Ticket ticket = 1;
+}
+
+message DeleteTicketRequest {
+  int32 id = 1;
+  int32 tenantId = 2;
+}
+
+message DeleteTicketResponse {
+  Ticket ticket = 1;
+}
+
+message UpdateTicketRequest {
+  int32 id = 1;
+  int32 tenantId = 2;
+  string description = 3;
+  TicketStatus status = 4;
+}
+
+message UpdateTicketResponse {
+  Ticket ticket = 1;
+}
+
+service CmsService {
+  rpc CreateProject(CreateProjectRequest) returns (CreateProjectResponse);
+  rpc GetProject(GetProjectRequest) returns (GetProjectResponse);
+  rpc ListProjects(ListProjectsRequest) returns (ListProjectsResponse);
+  rpc ListClientProjects(ListClientProjectsRequest) returns (ListClientProjectsResponse);
+  rpc DeleteProject(DeleteProjectRequest) returns (DeleteProjectResponse);
+  rpc UpdateProject(UpdateProjectRequest) returns (UpdateProjectResponse);
+  rpc AddClientToProject(AddOrRemoveClientFromProjectRequest) returns (google.protobuf.Empty);
+  rpc RemoveClientFromProject(AddOrRemoveClientFromProjectRequest) returns (google.protobuf.Empty);
+  rpc CreateTicket(CreateTicketRequest) returns (CreateTicketResponse);
+  rpc DeleteTicket(DeleteTicketRequest) returns (DeleteTicketResponse);
+  rpc UpdateTicket(UpdateTicketRequest) returns (UpdateTicketResponse);
+}

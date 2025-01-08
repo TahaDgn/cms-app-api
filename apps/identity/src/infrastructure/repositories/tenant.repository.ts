@@ -1,16 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma, Tenant } from '@prisma/client';
-import { TenantRepositorySign } from '../../domain';
+import { PRISMA_SERVICE, TenantRepositorySign } from '../../domain';
 import { DeleteTenantPayload } from 'libs/interfaces';
 
 @Injectable()
 export class TenantRepository implements TenantRepositorySign {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    @Inject(PRISMA_SERVICE) private readonly prismaService: PrismaService,
+  ) {}
 
   async create(
     payload: Pick<Prisma.TenantCreateInput, 'name' | 'identifier'>,
-    transactionClient = this.prisma,
+    transactionClient = this.prismaService,
   ): Promise<Prisma.TenantGetPayload<{ include: { users: true } }>> {
     return transactionClient.tenant.create({
       data: {
@@ -25,7 +27,7 @@ export class TenantRepository implements TenantRepositorySign {
   async setOwner(
     id: number,
     payload: Pick<Prisma.TenantUpdateInput, 'ownerId'>,
-    transactionClient = this.prisma,
+    transactionClient = this.prismaService,
   ): Promise<Tenant> {
     return transactionClient.tenant.update({
       where: { id },
@@ -35,7 +37,7 @@ export class TenantRepository implements TenantRepositorySign {
 
   async incrementClientCount(
     payload: Pick<Tenant, 'id'>,
-    transactionClient = this.prisma,
+    transactionClient = this.prismaService,
   ): Promise<Tenant> {
     const { id } = payload;
 
@@ -49,7 +51,7 @@ export class TenantRepository implements TenantRepositorySign {
 
   async incrementParticipantCount(
     payload: Pick<Tenant, 'id'>,
-    transactionClient = this.prisma,
+    transactionClient = this.prismaService,
   ): Promise<Tenant> {
     const { id } = payload;
 
@@ -63,7 +65,7 @@ export class TenantRepository implements TenantRepositorySign {
 
   async decrementClientCount(
     payload: Pick<Tenant, 'id'>,
-    transactionClient = this.prisma,
+    transactionClient = this.prismaService,
   ): Promise<Tenant> {
     const { id } = payload;
 
@@ -77,7 +79,7 @@ export class TenantRepository implements TenantRepositorySign {
 
   async decrementParticipantCount(
     payload: Pick<Tenant, 'id'>,
-    transactionClient = this.prisma,
+    transactionClient = this.prismaService,
   ): Promise<Tenant> {
     const { id } = payload;
 
@@ -91,7 +93,7 @@ export class TenantRepository implements TenantRepositorySign {
 
   delete(
     payload: DeleteTenantPayload,
-    transactionClient = this.prisma,
+    transactionClient = this.prismaService,
   ): Promise<Prisma.TenantGetPayload<{ include: { users: true } }>> {
     const { id } = payload;
 

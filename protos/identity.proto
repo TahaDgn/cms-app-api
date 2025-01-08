@@ -2,63 +2,34 @@ syntax = "proto3";
 
 package identity;
 
+import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
 
-service IdentityService {
-  rpc createTenantWithOwner (CreateTenantAndUserPayload) returns (CreateTenantAndUserResponse);
-
-  rpc createAccessRequestLink (AccessRequestPayload) returns (AccessRequestResponse);
-
-  rpc verifyAccessCode (VerifyAccessPayload) returns (VerifyAccessResponse);
-
-  rpc createUserIfNotExists (CreateUserPayload) returns (UserWithTenantResponse);
-
-  rpc listUsers (ListUserPayload) returns (ListUsersResponse);
-
-  rpc getUser (GetUserPayload) returns (GetUserResponse);
-
-  rpc deleteUser (DeleteUserPayload) returns (UserWithTenantResponse);
-
-  rpc deleteTenant (DeleteTenantPayload) returns (TenantWithUsersResponse);
-
-  rpc removeAccessCode (RemoveAccessCodePayload) returns (RemoveAccessCodeResponse);
-
-  rpc removeAccessToken (RemoveAccessTokenPayload) returns (RemoveAccessTokenResponse);
+enum TenantIssue {
+  NO_PROJECT_FOUND = 0;
+  NO_CLIENT_FOUND = 1;
 }
 
-message UserWithTenantResponse {
-  int32 id = 1;
-  int32 tenantId = 2;
-  string name = 3;
-  string email = 4;
-  string type = 5;
-  repeated string issues = 6;
-  Tenant tenant = 7;
+enum UserType {
+  PARTICIPANT = 0;
+  CLIENT = 1;
 }
 
-message TenantWithUsersResponse {
-  int32 id = 1;
-  string name = 2;
-  string identifier = 3;
-  int32 ownerId = 4;
-  repeated string issues = 5;
-  int32 openProjectsCount = 6;
-  int32 doneProjectsCount = 7;
-  int32 clientsCount = 8;
-  int32 participantsCount = 9;
-  repeated User users = 10;
+enum UserIssue {
+  FIRST_LOGIN_WAS_NOT_MADE = 0;
 }
+
 
 message Tenant {
   int32 id = 1;
   string name = 2;
   string identifier = 3;
   int32 ownerId = 4;
-  repeated string issues = 5;
-  int32 openProjectsCount = 6;
-  int32 doneProjectsCount = 7;
-  int32 clientsCount = 8;
-  int32 participantsCount = 9;
+  repeated TenantIssue issues = 5;
+  int32 clientsCount = 6;
+  int32 participantsCount = 7;
+  google.protobuf.Timestamp createdAt = 8;
+  google.protobuf.Timestamp updatedAt = 9;
 }
 
 message User {
@@ -66,39 +37,59 @@ message User {
   int32 tenantId = 2;
   string name = 3;
   string email = 4;
-  string type = 5;
-  repeated string issues = 6;
+  UserType type = 5;
+  repeated UserIssue issues = 6;
+  google.protobuf.Timestamp createdAt = 7;
+  google.protobuf.Timestamp updatedAt = 8;
+}
+
+message TenantWithUsers {
+  int32 id = 1;
+  string name = 2;
+  string identifier = 3;
+  int32 ownerId = 4;
+  repeated TenantIssue issues = 5;
+  int32 clientsCount = 6;
+  int32 participantsCount = 7;
+  google.protobuf.Timestamp createdAt = 8;
+  google.protobuf.Timestamp updatedAt = 9;
+  repeated User users = 10;
+}
+
+message UserWithTenant {
+  int32 id = 1;
+  int32 tenantId = 2;
+  string name = 3;
+  string email = 4;
+  UserType type = 5;
+  repeated UserIssue issues = 6;
+  google.protobuf.Timestamp createdAt = 7;
+  google.protobuf.Timestamp updatedAt = 8;
+  Tenant tenant = 9;
 }
 
 
-message CreateTenantAndUserPayload {
-  TenantCreatePayload tenant = 1;    
-  UserCreatePayload user = 2;        
+message CreateTenantWithOwnerRequest {
+  string tenantName = 1;
+  string tenantIdentifier = 2;
+  string userName = 3;
+  string userEmail = 4;
+  UserType userType = 5;
 }
 
-message TenantCreatePayload {
-  string name = 1;
-  string identifier = 2;
-}
-
-message UserCreatePayload {
-  string name = 1;
-  string email = 2;
-  string type = 3;
-}
-
-message CreateTenantAndUserResponse {
+message CreateTenantWithOwnerResponse {
   Tenant tenant = 1;
   User user = 2;
 }
 
 message AccessRequestPayload {
   string email = 1;
-  oneof tenantRef {
+  oneof tenantInfo {
     int32 tenantId = 2;
     string tenantIdentifier = 3;
   }
 }
+
 message AccessRequestResponse {
   string accessUrl = 1;
   string accessCode = 2;
@@ -108,52 +99,79 @@ message AccessRequestResponse {
   string tenantIdentifier = 6;
 }
 
-message VerifyAccessPayload {
+message VerifyAccessRequest {
   string accessCode = 1;
 }
+
 message VerifyAccessResponse {
   string accessToken = 1;
 }
 
-message CreateUserPayload {
+message CreateUserRequest {
   int32 tenantId = 1;
   string name = 2;
   string email = 3;
-  string type = 4;
+  UserType type = 4;
 }
 
-message ListUserPayload {
+message ListUsersRequest {
   int32 tenantId = 1;
 }
+
 message ListUsersResponse {
   repeated User users = 1;
 }
 
-message GetUserPayload {
-  int32 id = 1;
-  int32 tenantId = 2;
-}
-message GetUserResponse {
-  User user = 1;
-}
-
-message DeleteUserPayload {
+message GetUserRequest {
   int32 id = 1;
   int32 tenantId = 2;
 }
 
-message DeleteTenantPayload {
+message DeleteUserRequest {
+  int32 id = 1;
+  int32 tenantId = 2;
+}
+
+message DeleteTenantRequest {
   int32 id = 1;
 }
 
-message RemoveAccessCodePayload {
+message RemoveAccessCodeRequest {
   string accessCode = 1;
 }
 
-message RemoveAccessCodeResponse {}
-
-message RemoveAccessTokenPayload {
+message RemoveAccessTokenRequest {
   string accessToken = 1;
 }
 
-message RemoveAccessTokenResponse {}
+service IdentityService {
+  rpc createTenantWithOwner(CreateTenantWithOwnerRequest)
+    returns (CreateTenantWithOwnerResponse);
+
+  rpc createAccessRequestLink(AccessRequestPayload)
+    returns (AccessRequestResponse);
+
+  rpc verifyAccessCode(VerifyAccessRequest)
+    returns (VerifyAccessResponse);
+
+  rpc createUserIfNotExists(CreateUserRequest)
+    returns (UserWithTenant);
+
+  rpc listUsers(ListUsersRequest)
+    returns (ListUsersResponse);
+
+  rpc getUser(GetUserRequest)
+    returns (UserWithTenant);
+
+  rpc deleteUser(DeleteUserRequest)
+    returns (UserWithTenant);
+
+  rpc deleteTenant(DeleteTenantRequest)
+    returns (TenantWithUsers);
+
+  rpc removeAccessCode(RemoveAccessCodeRequest)
+    returns (google.protobuf.Empty);
+
+  rpc removeAccessToken(RemoveAccessTokenRequest)
+    returns (google.protobuf.Empty);
+}

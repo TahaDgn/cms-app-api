@@ -1,15 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma, UserIssue } from '@prisma/client';
-import { UserRepositorySign } from '../../domain';
+import { PRISMA_SERVICE, UserRepositorySign } from '../../domain';
 
 @Injectable()
 export class UserRepository implements UserRepositorySign {
-  constructor(private prisma: PrismaService) {}
+  constructor(@Inject(PRISMA_SERVICE) private prismaService: PrismaService) {}
 
   async create(
     payload: Pick<Prisma.UserCreateInput, 'email' | 'name' | 'type' | 'tenant'>,
-    transactionClient = this.prisma,
+    transactionClient = this.prismaService,
   ): Promise<Prisma.UserGetPayload<{ include: { tenant: true } }>> {
     return transactionClient.user.create({
       data: {
@@ -22,7 +22,7 @@ export class UserRepository implements UserRepositorySign {
   }
 
   async findFirst(payload: Prisma.UserFindFirstArgs) {
-    const user = await this.prisma.user.findFirst({
+    const user = await this.prismaService.user.findFirst({
       ...payload,
     });
 
@@ -30,7 +30,7 @@ export class UserRepository implements UserRepositorySign {
   }
 
   async findUnique(payload: Prisma.UserFindUniqueArgs) {
-    const user = await this.prisma.user.findUnique({
+    const user = await this.prismaService.user.findUnique({
       ...payload,
     });
 
@@ -38,7 +38,7 @@ export class UserRepository implements UserRepositorySign {
   }
 
   async findAll(payload: Prisma.UserFindManyArgs) {
-    const users = await this.prisma.user.findMany({
+    const users = await this.prismaService.user.findMany({
       ...payload,
     });
 
@@ -47,7 +47,7 @@ export class UserRepository implements UserRepositorySign {
 
   async removeFirstLoginIssue(
     payload: Pick<Prisma.UserWhereUniqueInput, 'id' | 'tenantId'>,
-    transactionClient = this.prisma,
+    transactionClient = this.prismaService,
   ) {
     const user = await this.findFirst({
       where: {
@@ -75,7 +75,7 @@ export class UserRepository implements UserRepositorySign {
 
   async delete(
     payload: Pick<Prisma.UserWhereInput, 'id' | 'tenantId'>,
-    transactionClient = this.prisma,
+    transactionClient = this.prismaService,
   ) {
     const user = await this.findFirst({
       where: {
