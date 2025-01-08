@@ -12,13 +12,15 @@ export interface IdentityService {
 
   verifyAccessCode(payload: VerifyAccessPayload): Promise<VerifyAccessResponse>;
 
-  createUser(payload: CreateUserPayload): Promise<CreateUserResponse>;
+  createUser(payload: CreateUserPayload): Promise<UserWithTenantResponse>;
 
-  listUsers(payload: ListUsersPayload): Promise<ListUsersResponse>;
+  listUsers(payload: ListUserPayload): Promise<ListUsersResponse>;
 
-  deleteUser(payload: DeleteUserPayload): Promise<DeleteUserResponse>;
+  getUser(payload: GetUserPayload): Promise<GetUserResponse>;
 
-  deleteTenant(payload: DeleteTenantPayload): Promise<DeleteTenantResponse>;
+  deleteUser(payload: DeleteUserPayload): Promise<UserWithTenantResponse>;
+
+  deleteTenant(payload: DeleteTenantPayload): Promise<TenantWithUsersResponse>;
 
   removeAccessCode(
     payload: RemoveAccessCodePayload,
@@ -67,29 +69,24 @@ export type CreateUserPayload = Pick<
   'tenantId' | 'name' | 'email' | 'type'
 >;
 
-export type CreateUserResponse = Prisma.UserGetPayload<{
-  include: {
-    tenant: true;
-  };
-}>;
-
-export interface ListUsersPayload {
-  tenantId: number;
-}
-
+export type ListUserPayload = Pick<User, 'tenantId'>;
 export interface ListUsersResponse {
   users: User[];
 }
+
+export type GetUserPayload = Pick<User, 'id' | 'tenantId'>;
+
+export type GetUserResponse = User;
 
 export type DeleteUserPayload = Pick<User, 'id' | 'tenantId'>;
 
 export type DeleteTenantPayload = Pick<Tenant, 'id'>;
 
-export type DeleteTenantResponse = Prisma.TenantGetPayload<{
+export type TenantWithUsersResponse = Prisma.TenantGetPayload<{
   include: { users: true };
 }>;
 
-export type DeleteUserResponse = Prisma.UserGetPayload<{
+export type UserWithTenantResponse = Prisma.UserGetPayload<{
   include: {
     tenant: true;
   };

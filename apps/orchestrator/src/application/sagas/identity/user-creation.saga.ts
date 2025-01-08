@@ -5,7 +5,7 @@ import { runSaga } from '../../saga-runner';
 import { SagaStep } from '../../saga-step';
 import {
   AccessRequestResponse,
-  CreateUserResponse,
+  UserWithTenantResponse,
   NotificationType,
   UserCreationSagaPayload,
   UserCreationSagaResult,
@@ -13,7 +13,7 @@ import {
 
 interface UserCreationContext {
   payload: UserCreationSagaPayload;
-  createUserResponse?: CreateUserResponse;
+  UserWithTenantResponse?: UserWithTenantResponse;
   accessRequestResponse?: AccessRequestResponse;
 }
 
@@ -24,7 +24,7 @@ export async function userCreationSaga(
 ): Promise<UserCreationSagaResult> {
   const context: UserCreationContext = {
     payload,
-    createUserResponse: undefined,
+    UserWithTenantResponse: undefined,
     accessRequestResponse: undefined,
   };
 
@@ -43,16 +43,16 @@ export async function userCreationSaga(
           type,
         });
 
-        stepContext.createUserResponse = response;
+        stepContext.UserWithTenantResponse = response;
       },
       async (stepContext) => {
-        const { createUserResponse } = stepContext;
+        const { UserWithTenantResponse } = stepContext;
 
-        if (!createUserResponse) {
+        if (!UserWithTenantResponse) {
           return;
         }
 
-        const { id, tenantId } = createUserResponse;
+        const { id, tenantId } = UserWithTenantResponse;
 
         await identityGrpcClient.deleteUser({
           id,
@@ -64,7 +64,7 @@ export async function userCreationSaga(
       'CreateAccessLink',
       async (stepContext) => {
         const {
-          createUserResponse: { email, tenantId },
+          UserWithTenantResponse: { email, tenantId },
         } = stepContext;
 
         const response = await identityGrpcClient.createAccessRequestLink({
@@ -97,7 +97,7 @@ export async function userCreationSaga(
             tenantIdentifier,
             tenantName,
           },
-          createUserResponse: { email },
+          UserWithTenantResponse: { email },
         } = stepContext;
 
         await rabbitMqAdapter.publish(NOTIFICATION_QUEUE, {
@@ -118,5 +118,5 @@ export async function userCreationSaga(
 
   await runSaga(steps, context);
 
-  return context.createUserResponse;
+  return context.UserWithTenantResponse;
 }

@@ -1,26 +1,27 @@
 import { Controller, Post, Body, Get, Delete } from '@nestjs/common';
-import { OrchestratorClient, IdentityGrpcClient } from '../grpc-clients';
+import { OrchestratorGrpcClient, IdentityGrpcClient } from '../grpc-clients';
 import { AuthGuard, AuthorizedUser } from '../guards/auth.guard';
 import {
   CreateParticipantRequestDto,
   CreateParticipantResponseDto,
   DeleteUserRequestDto,
   DeleteUserResponseDto,
-} from '../../application/dtos';
-import { User, UserType } from '@prisma/client';
+} from '../../application';
+import { Prisma, UserType } from '@prisma/client';
 
 @Controller('users')
-export class AuthController {
+export class UserController {
   constructor(
-    private readonly orchestratorClient: OrchestratorClient,
+    private readonly orchestratorClient: OrchestratorGrpcClient,
     private readonly identityClient: IdentityGrpcClient,
   ) {}
 
-  @AuthGuard(UserType.PARTICIPANT)
-  @Post()
+  @AuthGuard([UserType.PARTICIPANT])
+  @Post('participant')
   async createParticipant(
     @Body() dto: CreateParticipantRequestDto,
-    @AuthorizedUser() user: User,
+    @AuthorizedUser()
+    user: Prisma.UserGetPayload<{ include: { tenant: true } }>,
   ): Promise<CreateParticipantResponseDto> {
     const { email, name } = dto;
     const { tenantId } = user;
@@ -38,22 +39,27 @@ export class AuthController {
     };
   }
 
-  @AuthGuard(UserType.PARTICIPANT)
+  @AuthGuard([UserType.PARTICIPANT])
   @Get()
-  async listUsers(@AuthorizedUser() user: User) {
+  async listUsers(
+    @AuthorizedUser()
+    user: Prisma.UserGetPayload<{ include: { tenant: true } }>,
+  ) {
     const { tenantId } = user;
 
-    const resp = await this.identityClient.listTenantUsers({
+    const { users } = await this.identityClient.listTenantUsers({
       tenantId,
     });
-    return resp.users;
+
+    return users;
   }
 
-  @AuthGuard(UserType.PARTICIPANT)
+  @AuthGuard([UserType.PARTICIPANT])
   @Delete()
   async deleteUser(
     @Body() dto: DeleteUserRequestDto,
-    @AuthorizedUser() user: User,
+    @AuthorizedUser()
+    user: Prisma.UserGetPayload<{ include: { tenant: true } }>,
   ): Promise<DeleteUserResponseDto> {
     const { tenantId } = user;
     const { id } = dto;

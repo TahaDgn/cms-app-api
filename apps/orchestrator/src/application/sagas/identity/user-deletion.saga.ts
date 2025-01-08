@@ -4,7 +4,7 @@ import { NOTIFICATION_QUEUE } from 'libs/constants';
 import { runSaga } from '../../saga-runner';
 import { SagaStep } from '../../saga-step';
 import {
-  DeleteUserResponse,
+  UserWithTenantResponse,
   NotificationType,
   UserDeletionSagaPayload,
   UserDeletionSagaResult,
@@ -12,7 +12,7 @@ import {
 
 interface UserDeletionContext {
   payload: UserDeletionSagaPayload;
-  deleteUserResponse?: DeleteUserResponse;
+  deleteUserResponse?: UserWithTenantResponse;
 }
 
 export async function userDeletionSaga(

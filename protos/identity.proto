@@ -1,0 +1,159 @@
+syntax = "proto3";
+
+package identity;
+
+import "google/protobuf/empty.proto";
+
+service IdentityService {
+  rpc createTenantWithOwner (CreateTenantAndUserPayload) returns (CreateTenantAndUserResponse);
+
+  rpc createAccessRequestLink (AccessRequestPayload) returns (AccessRequestResponse);
+
+  rpc verifyAccessCode (VerifyAccessPayload) returns (VerifyAccessResponse);
+
+  rpc createUser (CreateUserPayload) returns (UserWithTenantResponse);
+
+  rpc listUsers (ListUserPayload) returns (ListUsersResponse);
+
+  rpc getUser (GetUserPayload) returns (GetUserResponse);
+
+  rpc deleteUser (DeleteUserPayload) returns (UserWithTenantResponse);
+
+  rpc deleteTenant (DeleteTenantPayload) returns (TenantWithUsersResponse);
+
+  rpc removeAccessCode (RemoveAccessCodePayload) returns (RemoveAccessCodeResponse);
+
+  rpc removeAccessToken (RemoveAccessTokenPayload) returns (RemoveAccessTokenResponse);
+}
+
+message UserWithTenantResponse {
+  int32 id = 1;
+  int32 tenantId = 2;
+  string name = 3;
+  string email = 4;
+  string type = 5;
+  repeated string issues = 6;
+  Tenant tenant = 7;
+}
+
+message TenantWithUsersResponse {
+  int32 id = 1;
+  string name = 2;
+  string identifier = 3;
+  int32 ownerId = 4;
+  repeated string issues = 5;
+  int32 openProjectsCount = 6;
+  int32 doneProjectsCount = 7;
+  int32 clientsCount = 8;
+  int32 participantsCount = 9;
+  repeated User users = 10;
+}
+
+message Tenant {
+  int32 id = 1;
+  string name = 2;
+  string identifier = 3;
+  int32 ownerId = 4;
+  repeated string issues = 5;
+  int32 openProjectsCount = 6;
+  int32 doneProjectsCount = 7;
+  int32 clientsCount = 8;
+  int32 participantsCount = 9;
+}
+
+message User {
+  int32 id = 1;
+  int32 tenantId = 2;
+  string name = 3;
+  string email = 4;
+  string type = 5;
+  repeated string issues = 6;
+}
+
+
+message CreateTenantAndUserPayload {
+  TenantCreatePayload tenant = 1;    
+  UserCreatePayload user = 2;        
+}
+
+message TenantCreatePayload {
+  string name = 1;
+  string identifier = 2;
+}
+
+message UserCreatePayload {
+  string name = 1;
+  string email = 2;
+  string type = 3;
+}
+
+message CreateTenantAndUserResponse {
+  Tenant tenant = 1;
+  User user = 2;
+}
+
+message AccessRequestPayload {
+  string email = 1;
+  oneof tenantRef {
+    int32 tenantId = 2;
+    string tenantIdentifier = 3;
+  }
+}
+message AccessRequestResponse {
+  string accessUrl = 1;
+  string accessCode = 2;
+  string userName = 3;
+  string userType = 4;
+  string tenantName = 5;
+  string tenantIdentifier = 6;
+}
+
+message VerifyAccessPayload {
+  string accessCode = 1;
+}
+message VerifyAccessResponse {
+  string accessToken = 1;
+}
+
+message CreateUserPayload {
+  int32 tenantId = 1;
+  string name = 2;
+  string email = 3;
+  string type = 4;
+}
+
+message ListUserPayload {
+  int32 tenantId = 1;
+}
+message ListUsersResponse {
+  repeated User users = 1;
+}
+
+message GetUserPayload {
+  int32 id = 1;
+  int32 tenantId = 2;
+}
+message GetUserResponse {
+  User user = 1;
+}
+
+message DeleteUserPayload {
+  int32 id = 1;
+  int32 tenantId = 2;
+}
+
+message DeleteTenantPayload {
+  int32 id = 1;
+}
+
+message RemoveAccessCodePayload {
+  string accessCode = 1;
+}
+
+message RemoveAccessCodeResponse {}
+
+message RemoveAccessTokenPayload {
+  string accessToken = 1;
+}
+
+message RemoveAccessTokenResponse {}

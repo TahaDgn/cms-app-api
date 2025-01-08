@@ -6,16 +6,19 @@ import {
   Query,
   Res,
   HttpStatus,
+  Headers,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { OrchestratorClient, IdentityGrpcClient } from '../grpc-clients';
-import { RegisterRequestDto, LoginRequestDto } from '../../application/dtos';
+import { IdentityGrpcClient, OrchestratorGrpcClient } from '../grpc-clients';
+import { RegisterRequestDto, LoginRequestDto } from '../../application';
 import slugify from 'slugify';
+import { UserType } from '@prisma/client';
+import { AuthGuard } from '../guards';
 
 @Controller('auth')
 export class AuthController {
   constructor(
-    private readonly orchestratorClient: OrchestratorClient,
+    private readonly orchestratorClient: OrchestratorGrpcClient,
     private readonly identityClient: IdentityGrpcClient,
   ) {}
 
@@ -56,12 +59,31 @@ export class AuthController {
         .json({ error: 'No code provided' });
     }
 
-    const verifyResp = await this.identityClient.verifyAccessCode({
-      accessCode,
+    try {
+      const verifyAccessCodeResponse =
+        await this.identityClient.verifyAccessCode({
+          accessCode,
+        });
+
+      const redirectUrl = `http://cms-app/auth/login?accessToken=${verifyAccessCodeResponse.accessToken}`;
+
+      return res.redirect(redirectUrl);
+    } catch {
+      const redirectUrl = `http://cms-app/auth/failed`;
+
+      return res.redirect(redirectUrl);
+    }
+  }
+
+  @AuthGuard([UserType.CLIENT, UserType.PARTICIPANT])
+  @Post('logout')
+  async logout(@Headers('Authorization') accessToken: string) {
+    await this.identityClient.removeAccessToken({
+      accessToken,
     });
 
-    const redirectUrl = `http://cms-app/auth/login?accessToken=${verifyResp.accessToken}`;
-
-    return res.redirect(redirectUrl);
+    return {
+      message: 'Login initiated. Check your email for the access link.',
+    };
   }
 }

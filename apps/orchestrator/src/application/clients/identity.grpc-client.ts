@@ -5,7 +5,7 @@ import {
   AccessRequestPayload,
   CreateTenantAndUserPayload,
   CreateUserPayload,
-  CreateUserResponse,
+  UserWithTenantResponse,
   DeleteTenantPayload,
   DeleteUserPayload,
   IdentityService as IdentityGrpcServer,
@@ -45,7 +45,7 @@ export class IdentityGrpcClient
       this.client.getService<IdentityGrpcServer>('IdentityService');
   }
 
-  public createUser(payload: CreateUserPayload): Promise<CreateUserResponse> {
+  public createUser(payload: CreateUserPayload): Promise<UserWithTenantResponse> {
     return this.identityGrpcServer.createUser(payload);
   }
 

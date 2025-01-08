@@ -6,25 +6,33 @@ import {
   CreateUserPayload,
   DeleteUserPayload,
   IdentityService,
-  CreateUserResponse,
-  ListUsersPayload,
+  UserWithTenantResponse,
+  ListUserPayload,
   ListUsersResponse,
+  GetUserResponse,
+  GetUserPayload,
 } from 'libs/interfaces';
 
 @Controller()
 export class UserGrpcServer
-  implements Pick<IdentityService, 'createUser' | 'deleteUser' | 'listUsers'>
+  implements
+    Pick<IdentityService, 'createUser' | 'deleteUser' | 'listUsers' | 'getUser'>
 {
   constructor(private readonly userUseCase: UserUseCase) {}
 
   @GrpcMethod('IdentityService', 'createUser')
-  createUser(payload: CreateUserPayload): Promise<CreateUserResponse> {
+  createUser(payload: CreateUserPayload): Promise<UserWithTenantResponse> {
     return this.userUseCase.create(payload);
   }
 
   @GrpcMethod('IdentityService', 'listUsers')
-  listUsers(payload: ListUsersPayload): Promise<ListUsersResponse> {
+  listUsers(payload: ListUserPayload): Promise<ListUsersResponse> {
     return this.userUseCase.list(payload);
+  }
+
+  @GrpcMethod('IdentityService', 'getUser')
+  getUser(payload: GetUserPayload): Promise<GetUserResponse> {
+    return this.userUseCase.getOrFail(payload);
   }
 
   @GrpcMethod('IdentityService', 'deleteUser')

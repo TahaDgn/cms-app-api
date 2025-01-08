@@ -2,7 +2,9 @@ import { Inject, Injectable } from '@nestjs/common';
 import {
   CreateUserPayload,
   DeleteUserPayload,
-  ListUsersPayload,
+  GetUserPayload,
+  GetUserResponse,
+  ListUserPayload,
   ListUsersResponse,
 } from 'libs/interfaces';
 import {
@@ -11,6 +13,7 @@ import {
   TENANT_REPOSITORY,
   TenantRepositorySign,
   USER_REPOSITORY,
+  UserNotFoundException,
   UserRepositorySign,
 } from '../../domain';
 import { Prisma, UserType } from '@prisma/client';
@@ -65,46 +68,55 @@ export class UserUseCase {
     return createdUser;
   }
 
-  public async list(payload: ListUsersPayload): Promise<ListUsersResponse> {
-    const { tenantId } = payload;
-
+  public async list(payload: ListUserPayload): Promise<ListUsersResponse> {
     const users = await this.userRepository.findAll({
       where: {
-        tenantId,
-      },
-      include: {
-        tenant: true,
+        ...payload,
       },
     });
 
     return { users };
   }
 
-  public async delete(payload: DeleteUserPayload) {
+  public async getOrFail(payload: GetUserPayload): Promise<GetUserResponse> {
     const { id, tenantId } = payload;
 
+    const user = await this.userRepository.findFirst({
+      where: {
+        id,
+        tenantId,
+      },
+    });
+
+    if (!user) throw new UserNotFoundException();
+
+    return user;
+  }
+
+  public async delete(payload: DeleteUserPayload) {
     const deletedUser = await this.prismaService.$transaction(
       async (transactionClient: Prisma.TransactionClient) => {
         const user = await this.userRepository.delete(
           {
-            id,
-            tenantId,
+            ...payload,
           },
           transactionClient,
         );
 
-        const { type } = deletedUser;
+        const { type, tenantId, id } = deletedUser;
 
         if (type === UserType.CLIENT) {
           await this.tenantRepository.decrementClientCount(
-            { id: tenantId },
+            { id: user.tenantId },
             transactionClient,
           );
         }
 
         if (type === UserType.PARTICIPANT) {
           await this.tenantRepository.decrementParticipantCount(
-            { id: tenantId },
+            {
+              id,
+            },
             transactionClient,
           );
         }

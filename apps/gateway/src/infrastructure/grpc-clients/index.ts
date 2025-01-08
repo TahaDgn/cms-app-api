@@ -1,2 +1,2 @@
-export * from './identity.client';
-export * from './orchestrator.client';
+export * from './identity.grpc-client';
+export * from './orchestrator.grpc-client';

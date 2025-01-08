@@ -10,7 +10,7 @@ import {
 } from 'libs/interfaces';
 
 @Injectable()
-export class OrchestratorClient implements OnModuleInit {
+export class OrchestratorGrpcClient implements OnModuleInit {
   @Client({
     transport: Transport.GRPC,
     options: {

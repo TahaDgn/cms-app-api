@@ -4,12 +4,12 @@ import { join } from 'path';
 import {
   IdentityService,
   ListUsersResponse,
-  ListUsersPayload,
+  ListUserPayload,
   VerifyAccessPayload,
   VerifyAccessResponse,
   RemoveAccessTokenPayload,
   RemoveAccessTokenResponse,
-} from 'libs/interfaces/identity.interface';
+} from 'libs/interfaces';
 
 @Injectable()
 export class IdentityGrpcClient implements OnModuleInit {
@@ -30,7 +30,7 @@ export class IdentityGrpcClient implements OnModuleInit {
   }
 
   public async listTenantUsers(
-    payload: ListUsersPayload,
+    payload: ListUserPayload,
   ): Promise<ListUsersResponse> {
     return this.identityService.listUsers(payload);
   }

@@ -4,7 +4,7 @@ import {
   CreateTenantAndUserPayload,
   CreateTenantAndUserResponse,
   DeleteTenantPayload,
-  DeleteTenantResponse,
+  TenantWithUsersResponse,
 } from 'libs/interfaces';
 import {
   PRISMA_SERVICE,
@@ -73,7 +73,7 @@ export class TenantUseCase {
 
   public async delete(
     payload: DeleteTenantPayload,
-  ): Promise<DeleteTenantResponse> {
+  ): Promise<TenantWithUsersResponse> {
     return this.tenantRepository.delete(payload);
   }
 }
