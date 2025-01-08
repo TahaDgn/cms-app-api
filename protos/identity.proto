@@ -11,7 +11,7 @@ service IdentityService {
 
   rpc verifyAccessCode (VerifyAccessPayload) returns (VerifyAccessResponse);
 
-  rpc createUser (CreateUserPayload) returns (UserWithTenantResponse);
+  rpc createUserIfNotExists (CreateUserPayload) returns (UserWithTenantResponse);
 
   rpc listUsers (ListUserPayload) returns (ListUsersResponse);
 

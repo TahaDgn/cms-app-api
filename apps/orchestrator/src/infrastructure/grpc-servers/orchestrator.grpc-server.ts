@@ -6,10 +6,19 @@ import {
   UserLoginSagaPayload,
   UserCreationSagaPayload,
   UserDeletionSagaPayload,
+  OrchestratorService,
+  AddClientToProjectSagaPayload,
+  AddClientToProjectSagaResult,
+  ProjectCreationSagaPayload,
+  ProjectCreationSagaResult,
+  ProjectDeletionSagaPayload,
+  ProjectDeletionSagaResult,
+  RemoveClientFromProjectSagaPayload,
+  RemoveClientFromProjectSagaResult,
 } from 'libs/interfaces';
 
 @Controller()
-export class OrchestratorGrpcServer {
+export class OrchestratorGrpcServer implements OrchestratorService {
   constructor(private readonly orchestratorService: OrchestratorUseCase) {}
 
   @GrpcMethod('OrchestratorService', 'userRegistrationSaga')
@@ -30,5 +39,25 @@ export class OrchestratorGrpcServer {
   @GrpcMethod('OrchestratorService', 'userDeletionSaga')
   async userDeletionSaga(payload: UserDeletionSagaPayload) {
     return this.orchestratorService.runUserDeletionSaga(payload);
+  }
+
+  @GrpcMethod('OrchestratorService', 'projectCreationSaga')
+  projectCreationSaga(payload: ProjectCreationSagaPayload): Promise<ProjectCreationSagaResult> {
+    return this.orchestratorService.
+  }
+
+  @GrpcMethod('OrchestratorService', 'projectDeletionSaga')
+  projectDeletionSaga(payload: ProjectDeletionSagaPayload): Promise<ProjectDeletionSagaResult> {
+    throw new Error('Method not implemented.');
+  }
+
+  @GrpcMethod('OrchestratorService', 'addClientToProjectSaga')
+  addClientToProjectSaga(payload: AddClientToProjectSagaPayload): Promise<AddClientToProjectSagaResult> {
+    throw new Error('Method not implemented.');
+  }
+
+  @GrpcMethod('OrchestratorService', 'removeClientFromProjectSaga')
+  removeClientFromProjectSaga(payload: RemoveClientFromProjectSagaPayload): Promise<RemoveClientFromProjectSagaResult> {
+    throw new Error('Method not implemented.');
   }
 }

@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { IdentityModule } from './identity.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { join } from 'path';
+import { IDENTITY_SERVICE_GRPC_URL } from 'libs/constants';
 
 async function bootstrap() {
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
@@ -10,13 +11,15 @@ async function bootstrap() {
       transport: Transport.GRPC,
       options: {
         package: 'identity',
-        protoPath: join(__dirname, './infrastructure/grpc/identity.proto'),
-        url: 'localhost:50001',
+        protoPath: join(process.cwd(), '/protos/identity.proto'),
+        url: IDENTITY_SERVICE_GRPC_URL,
       },
     },
   );
 
   await app.listen();
+
   console.log('Identity microservice is running via gRPC...');
 }
+
 bootstrap();

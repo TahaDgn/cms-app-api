@@ -31,14 +31,29 @@ export class UserUseCase {
     private readonly cacheUseCase: CacheUseCase,
   ) {}
 
-  public async create(payload: CreateUserPayload) {
-    const { tenantId, type, ...restOfUserPayload } = payload;
+  public async createUserIfNotExists(payload: CreateUserPayload) {
+    const { tenantId, type, name, email } = payload;
+
+    const existingUser = await this.userRepository.findFirst({
+      where: {
+        tenantId,
+        email,
+      },
+      include: {
+        tenant: true,
+      },
+    });
+
+    if (existingUser) {
+      return existingUser;
+    }
 
     const createdUser = await this.prismaService.$transaction(
       async (transactionClient: Prisma.TransactionClient) => {
         const user = await this.userRepository.create(
           {
-            ...restOfUserPayload,
+            email,
+            name,
             type,
             tenant: {
               connect: { id: tenantId },

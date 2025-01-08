@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { OrchestratorModule } from './orchestrator.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { join } from 'path';
+import { ORCHESTRATOR_SERVICE_GRPC_URL } from 'libs/constants';
 
 async function bootstrap() {
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
@@ -10,12 +11,13 @@ async function bootstrap() {
       transport: Transport.GRPC,
       options: {
         package: 'orchestrator',
-        protoPath: join(__dirname, 'orchestrator.proto'),
-        url: 'localhost:50001',
+        protoPath: join(process.cwd(), '/protos/orchestrator.proto'),
+        url: ORCHESTRATOR_SERVICE_GRPC_URL,
       },
     },
   );
   await app.listen();
+
   console.log('Orchestrator (Saga) microservice is running via gRPC...');
 }
 bootstrap();

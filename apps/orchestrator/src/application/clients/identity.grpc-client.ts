@@ -12,6 +12,7 @@ import {
   RemoveAccessCodePayload,
   RemoveAccessTokenPayload,
   RemoveAccessTokenResponse,
+  GetUserPayload,
 } from 'libs/interfaces';
 
 @Injectable()
@@ -26,7 +27,8 @@ export class IdentityGrpcClient
       | 'deleteUser'
       | 'removeAccessCode'
       | 'removeAccessToken'
-      | 'createUser'
+      | 'createUserIfNotExists'
+      | 'getUser'
     >
 {
   @Client({
@@ -45,8 +47,10 @@ export class IdentityGrpcClient
       this.client.getService<IdentityGrpcServer>('IdentityService');
   }
 
-  public createUser(payload: CreateUserPayload): Promise<UserWithTenantResponse> {
-    return this.identityGrpcServer.createUser(payload);
+  public createUserIfNotExists(
+    payload: CreateUserPayload,
+  ): Promise<UserWithTenantResponse> {
+    return this.identityGrpcServer.createUserIfNotExists(payload);
   }
 
   public createTenantWithOwner(payload: CreateTenantAndUserPayload) {
@@ -73,5 +77,9 @@ export class IdentityGrpcClient
     payload: RemoveAccessTokenPayload,
   ): Promise<RemoveAccessTokenResponse> {
     return this.identityGrpcServer.removeAccessToken(payload);
+  }
+
+  public getUser(payload: GetUserPayload): Promise<UserWithTenantResponse> {
+    return this.identityGrpcServer.getUser(payload);
   }
 }

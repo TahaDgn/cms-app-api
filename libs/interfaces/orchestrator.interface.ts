@@ -1,4 +1,4 @@
-import { Tenant, User } from '@prisma/client';
+import { Project, Tenant, User } from '@prisma/client';
 
 export interface OrchestratorService {
   userRegistrationSaga(
@@ -14,7 +14,44 @@ export interface OrchestratorService {
   userDeletionSaga(
     payload: UserDeletionSagaPayload,
   ): Promise<UserDeletionSagaResult>;
+
+  addClientToProjectSaga(
+    payload: AddClientToProjectSagaPayload,
+  ): Promise<AddClientToProjectSagaResult>;
+
+  removeClientFromProjectSaga(
+    payload: RemoveClientFromProjectSagaPayload,
+  ): Promise<RemoveClientFromProjectSagaResult>;
 }
+
+export type ProjectCreationSagaPayload = Pick<
+  Project,
+  'title' | 'description' | 'tenantId'
+>;
+
+export type ProjectCreationSagaResult = Project;
+
+export type ProjectDeletionSagaPayload = Pick<Project, 'id' | 'tenantId'>;
+
+export type ProjectDeletionSagaResult = Project;
+
+export interface AddClientToProjectSagaPayload {
+  project: Pick<Project, 'id' | 'tenantId'>;
+  user: Pick<User, 'email' | 'tenantId' | 'name' | 'type'>;
+}
+
+export type AddClientToProjectSagaResult = void;
+
+export interface RemoveClientFromProjectSagaPayload {
+  project: Pick<Project, 'id' | 'tenantId'>;
+  user: Pick<User, 'id'>;
+}
+
+export type RemoveClientFromProjectSagaResult = void;
+
+export type SetNewStatusToProjectSagaPayload = Pick<Project, 'tenantId' | 'id'>;
+
+export type SetNewStatusToProjectSagaResult = Project;
 
 export interface UserRegistrationSagaPayload {
   tenant: Pick<Tenant, 'name' | 'identifier'>;

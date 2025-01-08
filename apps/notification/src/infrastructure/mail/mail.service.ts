@@ -3,6 +3,7 @@ import * as nodemailer from 'nodemailer';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as handlebars from 'handlebars';
+import { MAIL_HOST, MAIL_PASS, MAIL_PORT, MAIL_USER } from 'libs/constants';
 
 @Injectable()
 export class MailService implements OnModuleInit {
@@ -10,12 +11,12 @@ export class MailService implements OnModuleInit {
 
   onModuleInit() {
     this.transporter = nodemailer.createTransport({
-      host: process.env.MAIL_HOST || 'smtp.gmail.com',
-      port: Number(process.env.MAIL_PORT) || 587,
+      host: MAIL_HOST,
+      port: MAIL_PORT,
       secure: false,
       auth: {
-        user: process.env.MAIL_USER || 'test@gmail.com',
-        pass: process.env.MAIL_PASS || 'password',
+        user: MAIL_USER,
+        pass: MAIL_PASS,
       },
     });
   }

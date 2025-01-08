@@ -12,11 +12,13 @@ export interface IdentityService {
 
   verifyAccessCode(payload: VerifyAccessPayload): Promise<VerifyAccessResponse>;
 
-  createUser(payload: CreateUserPayload): Promise<UserWithTenantResponse>;
+  createUserIfNotExists(
+    payload: CreateUserPayload,
+  ): Promise<UserWithTenantResponse>;
 
   listUsers(payload: ListUserPayload): Promise<ListUsersResponse>;
 
-  getUser(payload: GetUserPayload): Promise<GetUserResponse>;
+  getUser(payload: GetUserPayload): Promise<UserWithTenantResponse>;
 
   deleteUser(payload: DeleteUserPayload): Promise<UserWithTenantResponse>;
 
@@ -75,8 +77,6 @@ export interface ListUsersResponse {
 }
 
 export type GetUserPayload = Pick<User, 'id' | 'tenantId'>;
-
-export type GetUserResponse = User;
 
 export type DeleteUserPayload = Pick<User, 'id' | 'tenantId'>;
 

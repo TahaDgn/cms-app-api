@@ -46,8 +46,6 @@ model Tenant {
   identifier String @db.VarChar(80) @unique
   ownerId Int? @db.Integer @map("ownerId") @unique
   issues TenantIssue[] @default([NO_CLIENT_FOUND, NO_PROJECT_FOUND])
-  openProjectsCount Int @default(0) @db.SmallInt @map("openProjectsCount")
-  doneProjectsCount Int @default(0) @db.SmallInt @map("doneProjectsCount")
   clientsCount Int @default(0) @db.SmallInt @map("clientsCount")
   participantsCount Int @default(1) @db.SmallInt @map("participantsCount")
   createdAt DateTime @default(now()) @map("createdAt")
@@ -109,13 +107,11 @@ model Project {
   title String @db.VarChar(80)
   description String @db.VarChar(1000)
   status ProjectStatus @default(OPEN)
-  openTicketsCount Int @db.SmallInt @default(0) @map("openTicketsCount")
-  closedTicketsCount Int @db.SmallInt @default(0) @map("closedTicketsCount")
   clientUserIds Int[] @db.Integer @default([]) @map("clientUserIds")
   createdAt DateTime @default(now()) @map("createdAt")
   updatedAt DateTime @default(now()) @updatedAt @map("updatedAt")
 
-  Ticket Ticket[]
+  tickets Ticket[]
   
   @@index([tenantId, createdAt(sort: Desc)])
   @@index([clientUserIds], type: Gin)

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { IdentityGrpcClient } from '../clients';
+import { CmsGrpcClient, IdentityGrpcClient } from '../clients';
 import { RabbitMQAdapter } from 'libs/adapters';
 import {
   UserRegistrationSagaPayload,
@@ -8,8 +8,14 @@ import {
   UserDeletionSagaPayload,
   UserDeletionSagaResult,
   UserCreationSagaResult,
+  AddClientToProjectSagaPayload,
+  AddClientToProjectSagaResult,
+  RemoveClientFromProjectSagaPayload,
+  RemoveClientFromProjectSagaResult,
 } from 'libs/interfaces';
 import {
+  addClientToProjectSaga,
+  runRemoveClientFromProjectSaga,
   userCreationSaga,
   userDeletionSaga,
   userLoginSaga,
@@ -17,9 +23,10 @@ import {
 } from '../sagas';
 
 @Injectable()
-export class OrchestratorUseCase {
+export class OrchestratorService {
   constructor(
     private readonly identityGrpcClient: IdentityGrpcClient,
+    private readonly cmsGrpcClient: CmsGrpcClient,
     private readonly rabbitMqAdapter: RabbitMQAdapter,
   ) {}
 
@@ -55,6 +62,29 @@ export class OrchestratorUseCase {
     payload: UserDeletionSagaPayload,
   ): Promise<UserDeletionSagaResult> {
     return userDeletionSaga(
+      this.identityGrpcClient,
+      this.cmsGrpcClient,
+      this.rabbitMqAdapter,
+      payload,
+    );
+  }
+
+  async runAddClientToProjectSaga(
+    payload: AddClientToProjectSagaPayload,
+  ): Promise<AddClientToProjectSagaResult> {
+    return addClientToProjectSaga(
+      this.cmsGrpcClient,
+      this.identityGrpcClient,
+      this.rabbitMqAdapter,
+      payload,
+    );
+  }
+
+  async runRemoveClientFromProjectSaga(
+    payload: RemoveClientFromProjectSagaPayload,
+  ): Promise<RemoveClientFromProjectSagaResult> {
+    return runRemoveClientFromProjectSaga(
+      this.cmsGrpcClient,
       this.identityGrpcClient,
       this.rabbitMqAdapter,
       payload,

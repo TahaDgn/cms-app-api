@@ -13,7 +13,7 @@ import {
 
 interface UserCreationContext {
   payload: UserCreationSagaPayload;
-  UserWithTenantResponse?: UserWithTenantResponse;
+  userWithTenantResponse?: UserWithTenantResponse;
   accessRequestResponse?: AccessRequestResponse;
 }
 
@@ -24,7 +24,7 @@ export async function userCreationSaga(
 ): Promise<UserCreationSagaResult> {
   const context: UserCreationContext = {
     payload,
-    UserWithTenantResponse: undefined,
+    userWithTenantResponse: undefined,
     accessRequestResponse: undefined,
   };
 
@@ -36,17 +36,17 @@ export async function userCreationSaga(
           payload: { email, name, tenantId, type },
         } = stepContext;
 
-        const response = await identityGrpcClient.createUser({
+        const response = await identityGrpcClient.createUserIfNotExists({
           tenantId,
           name,
           email,
           type,
         });
 
-        stepContext.UserWithTenantResponse = response;
+        stepContext.userWithTenantResponse = response;
       },
       async (stepContext) => {
-        const { UserWithTenantResponse } = stepContext;
+        const { userWithTenantResponse: UserWithTenantResponse } = stepContext;
 
         if (!UserWithTenantResponse) {
           return;
@@ -64,7 +64,7 @@ export async function userCreationSaga(
       'CreateAccessLink',
       async (stepContext) => {
         const {
-          UserWithTenantResponse: { email, tenantId },
+          userWithTenantResponse: { email, tenantId },
         } = stepContext;
 
         const response = await identityGrpcClient.createAccessRequestLink({
@@ -97,7 +97,7 @@ export async function userCreationSaga(
             tenantIdentifier,
             tenantName,
           },
-          UserWithTenantResponse: { email },
+          userWithTenantResponse: { email },
         } = stepContext;
 
         await rabbitMqAdapter.publish(NOTIFICATION_QUEUE, {
@@ -118,5 +118,5 @@ export async function userCreationSaga(
 
   await runSaga(steps, context);
 
-  return context.UserWithTenantResponse;
+  return context.userWithTenantResponse;
 }
