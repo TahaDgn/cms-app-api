@@ -22,6 +22,7 @@ import {
   UpdateTicketPayload,
   UpdateTicketResponse,
 } from 'libs/interfaces';
+import { CMS_SERVICE_GRPC_URL } from 'libs/constants';
 
 @Injectable()
 export class CmsGrpcClient
@@ -45,6 +46,7 @@ export class CmsGrpcClient
     options: {
       package: 'cms',
       protoPath: join(process.cwd(), '/protos/cms.proto'),
+      url: CMS_SERVICE_GRPC_URL,
     },
   })
   private client: ClientGrpc;

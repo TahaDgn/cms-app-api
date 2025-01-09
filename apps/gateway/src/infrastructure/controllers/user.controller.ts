@@ -8,13 +8,15 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { OrchestratorGrpcClient, IdentityGrpcClient } from '../grpc-clients';
-import { AuthGuard, AuthorizedUser } from '../guards/auth.guard';
+import { AuthGuard, AuthorizedUser } from '../middlewares/auth.guard';
 import {
   CreateParticipantRequestDto,
   CreateParticipantResponseDto,
   DeleteUserResponseDto,
+  GetUserResponsePayload,
+  MeResponseDto,
 } from '../../application';
-import { Prisma, UserType } from '@prisma/client';
+import { Prisma, User, UserType } from '@prisma/client';
 
 @Controller('users')
 export class UserController {
@@ -27,10 +29,11 @@ export class UserController {
   @Post('participant')
   async createParticipant(
     @Body() dto: CreateParticipantRequestDto,
-    @AuthorizedUser()
-    user: Prisma.UserGetPayload<{ include: { tenant: true } }>,
+    @AuthorizedUser() user: User,
   ): Promise<CreateParticipantResponseDto> {
-    const { email, name } = dto;
+    const {
+      createPayload: { email, name },
+    } = dto;
     const { tenantId } = user;
 
     const createdParticipant = await this.orchestratorClient.userCreationSaga({
@@ -43,6 +46,17 @@ export class UserController {
     return {
       success: true,
       data: createdParticipant,
+    };
+  }
+
+  @AuthGuard([UserType.PARTICIPANT, UserType.CLIENT])
+  @Get('me')
+  async me(
+    @AuthorizedUser() dto: Prisma.UserGetPayload<{ include: { tenant: true } }>,
+  ): Promise<MeResponseDto> {
+    return {
+      success: true,
+      data: dto,
     };
   }
 

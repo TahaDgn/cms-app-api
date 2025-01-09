@@ -1,7 +1,30 @@
-import { Controller, Post, Body, Get, Patch, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Patch,
+  Delete,
+  Param,
+  Query,
+} from '@nestjs/common';
 import { CmsGrpcClient, OrchestratorGrpcClient } from '../grpc-clients';
 import { User } from '@prisma/client';
-import { AuthorizedUser } from '../guards';
+import { AuthorizedUser } from '../middlewares';
+import {
+  AddClientToProjectRequestDto,
+  AddClientToProjectResponseDto,
+  DeleteProjectRequestDto,
+  DeleteProjectResponseDto,
+  GetProjectRequestDto,
+  GetProjectResponseDto,
+  ListProjectRequestDto,
+  ListProjectResponseDto,
+  RemoveClientToProjectRequestDto,
+  RemoveClientToProjectResponseDto,
+  UpdateProjectRequestDto,
+  UpdateProjectResponseDto,
+} from '../../application';
 
 @Controller('projects')
 export class ProjectController {
@@ -11,26 +34,56 @@ export class ProjectController {
   ) {}
 
   @Post()
-  async create(@AuthorizedUser() user: User, @Body() dto) {}
+  async create(
+    @AuthorizedUser() user: User,
+    @Body() dto: ProjectCreateRequestDto,
+  ) {}
 
-  @Patch(':id')
-  async update(@AuthorizedUser() user: User, @Body() dto) {}
+  @Patch()
+  async update(
+    @AuthorizedUser() user: User,
+    @Body() dto: UpdateProjectRequestDto,
+  ): Promise<UpdateProjectResponseDto> {
+    return;
+  }
 
-  @Delete(':id')
-  async delete(@AuthorizedUser() user: User, @Body() dto) {}
-
-  @Get(':id')
-  async getById(@AuthorizedUser() user: User, @Body() dto) {}
+  @Get('/retrieve')
+  async get(
+    @AuthorizedUser() user: User,
+    @Query() dto: GetProjectRequestDto,
+  ): Promise<GetProjectResponseDto> {
+    return;
+  }
 
   @Get()
-  async getList(@AuthorizedUser() user: User) {}
-
-  @Get('mine')
-  async getListMine(@AuthorizedUser() user: User) {}
+  async getList(
+    @AuthorizedUser() user: User,
+    @Query() dto: ListProjectRequestDto,
+  ): Promise<ListProjectResponseDto> {
+    return;
+  }
 
   @Post('client')
-  async addClient(@AuthorizedUser() user: User, @Body() dto) {}
+  async addClient(
+    @AuthorizedUser() user: User,
+    @Body() dto: AddClientToProjectRequestDto,
+  ): Promise<AddClientToProjectResponseDto> {
+    return;
+  }
 
   @Delete('client')
-  async removeClient(@AuthorizedUser() user: User, @Body() dto) {}
+  async removeClient(
+    @AuthorizedUser() user: User,
+    @Body() dto: RemoveClientToProjectRequestDto,
+  ): Promise<RemoveClientToProjectResponseDto> {
+    return;
+  }
+
+  @Delete()
+  async delete(
+    @AuthorizedUser() user: User,
+    @Query() dto: DeleteProjectRequestDto,
+  ): Promise<DeleteProjectResponseDto> {
+    return;
+  }
 }

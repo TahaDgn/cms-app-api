@@ -13,7 +13,7 @@ import { IdentityGrpcClient, OrchestratorGrpcClient } from '../grpc-clients';
 import { RegisterRequestDto, LoginRequestDto } from '../../application';
 import slugify from 'slugify';
 import { UserType } from '@prisma/client';
-import { AuthGuard } from '../guards';
+import { AuthGuard } from '../middlewares';
 
 @Controller('auth')
 export class AuthController {
@@ -24,7 +24,9 @@ export class AuthController {
 
   @Post('register')
   async register(@Body() dto: RegisterRequestDto) {
-    const { email, name, tenantName } = dto;
+    const {
+      createPayload: { email, name, tenant },
+    } = dto;
 
     await this.orchestratorClient.userRegistrationSaga({
       user: {
@@ -33,8 +35,8 @@ export class AuthController {
         type: UserType.PARTICIPANT,
       },
       tenant: {
-        name: tenantName,
-        identifier: slugify(tenantName, { trim: true, lower: true }),
+        ...tenant,
+        identifier: slugify(tenant.name, { trim: true, lower: true }),
       },
     });
     return {
@@ -44,7 +46,11 @@ export class AuthController {
 
   @Post('login')
   async login(@Body() dto: LoginRequestDto) {
-    await this.orchestratorClient.userLoginSaga(dto);
+    const {
+      createPayload: { email, tenant },
+    } = dto;
+
+    await this.orchestratorClient.userLoginSaga({ email, tenant });
 
     return {
       message: 'Login initiated. Check your email for the access link.',

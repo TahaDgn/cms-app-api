@@ -1,7 +1,7 @@
 import { Controller, Post, Body, Patch, Delete } from '@nestjs/common';
 import { CmsGrpcClient } from '../grpc-clients';
 import { User } from '@prisma/client';
-import { AuthorizedUser } from '../guards';
+import { AuthorizedUser } from '../middlewares';
 
 @Controller('tickets')
 export class TicketController {

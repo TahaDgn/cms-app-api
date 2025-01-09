@@ -1,5 +1,6 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { Client, ClientGrpc, Transport } from '@nestjs/microservices';
+import { CMS_SERVICE_GRPC_URL } from 'libs/constants';
 import {
   AddOrRemoveClientFromProjectPayload,
   AddOrRemoveClientFromProjectResponse,
@@ -37,6 +38,7 @@ export class CmsGrpcClient
     options: {
       package: 'cms',
       protoPath: join(process.cwd(), '/protos/cms.proto'),
+      url: CMS_SERVICE_GRPC_URL,
     },
   })
   private client: ClientGrpc;

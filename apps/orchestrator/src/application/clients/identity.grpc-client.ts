@@ -14,6 +14,7 @@ import {
   RemoveAccessTokenResponse,
   GetUserPayload,
 } from 'libs/interfaces';
+import { IDENTITY_SERVICE_GRPC_URL } from 'libs/constants';
 
 @Injectable()
 export class IdentityGrpcClient
@@ -36,6 +37,7 @@ export class IdentityGrpcClient
     options: {
       package: 'identity',
       protoPath: join(process.cwd(), '/protos/identity.proto'),
+      url: IDENTITY_SERVICE_GRPC_URL,
     },
   })
   private client: ClientGrpc;

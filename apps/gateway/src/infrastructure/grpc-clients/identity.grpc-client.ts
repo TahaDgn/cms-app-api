@@ -10,6 +10,7 @@ import {
   RemoveAccessTokenPayload,
   RemoveAccessTokenResponse,
 } from 'libs/interfaces';
+import { IDENTITY_SERVICE_GRPC_URL } from 'libs/constants';
 
 @Injectable()
 export class IdentityGrpcClient implements OnModuleInit {
@@ -18,6 +19,7 @@ export class IdentityGrpcClient implements OnModuleInit {
     options: {
       package: 'identity',
       protoPath: join(process.cwd(), '/protos/identity.proto'),
+      url: IDENTITY_SERVICE_GRPC_URL,
     },
   })
   private client: ClientGrpc;

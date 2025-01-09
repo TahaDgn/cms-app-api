@@ -1,4 +1,5 @@
-import { Prisma, Project, Tenant, User } from '@prisma/client';
+import { Project, Tenant, User } from '@prisma/client';
+import { UserWithTenantResponse } from './identity.interface';
 
 export interface OrchestratorService {
   userRegistrationSaga(
@@ -46,7 +47,7 @@ export interface UserRegistrationSagaPayload {
 export type UserRegistrationSagaResult = void;
 
 export interface UserLoginSagaPayload extends Pick<User, 'email'> {
-  tenantIdentifier: string;
+  tenant: Pick<Tenant, 'identifier'>;
 }
 
 export type UserLoginSagaResult = void;
@@ -55,12 +56,6 @@ export type UserCreationSagaPayload = Pick<
   User,
   'tenantId' | 'name' | 'email' | 'type'
 >;
-
-type UserWithTenantResponse = Prisma.UserGetPayload<{
-  include: {
-    tenant: true;
-  };
-}>;
 
 export type UserCreationSagaResult = UserWithTenantResponse;
 

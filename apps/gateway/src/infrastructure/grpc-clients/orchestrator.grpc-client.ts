@@ -12,6 +12,7 @@ import {
   RemoveClientFromProjectSagaPayload,
   RemoveClientFromProjectSagaResult,
 } from 'libs/interfaces';
+import { ORCHESTRATOR_SERVICE_GRPC_URL } from 'libs/constants';
 
 @Injectable()
 export class OrchestratorGrpcClient
@@ -22,6 +23,7 @@ export class OrchestratorGrpcClient
     options: {
       package: 'orchestrator',
       protoPath: join(process.cwd(), '/protos/orchestrator.proto'),
+      url: ORCHESTRATOR_SERVICE_GRPC_URL,
     },
   })
   private client: ClientGrpc;
