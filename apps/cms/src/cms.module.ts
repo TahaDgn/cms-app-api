@@ -2,7 +2,12 @@
 import { Module } from '@nestjs/common';
 import { PrismaService } from './infrastructure/prisma/prisma.service';
 import { RedisModule } from 'libs/adapters/redis';
-import { ProjectGrpcServer, TicketGrpcServer } from './infrastructure';
+import {
+  ProjectGrpcServer,
+  ProjectRepository,
+  TicketGrpcServer,
+  TicketRepository,
+} from './infrastructure';
 import {
   PRISMA_SERVICE,
   PROJECT_REPOSITORY,
@@ -17,7 +22,7 @@ import { CacheUseCase, ProjectUseCase, TicketUseCase } from './application';
     TicketGrpcServer,
     {
       provide: TICKET_REPOSITORY,
-      useClass: TicketRepsitory,
+      useClass: TicketRepository,
     },
     {
       provide: PROJECT_REPOSITORY,

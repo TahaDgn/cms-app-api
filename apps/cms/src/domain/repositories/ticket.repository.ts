@@ -11,22 +11,17 @@ export interface TicketRepositorySign {
     transactionClient?: Prisma.TransactionClient,
   ): Promise<Ticket>;
 
-  findFirst(
-    payload: Prisma.TicketFindFirstArgs,
+  findFirst(payload: Prisma.TicketWhereInput): Promise<Ticket>;
+
+  findUnique(payload: Prisma.TicketWhereUniqueInput): Promise<Ticket>;
+
+  findAll(payload: Prisma.TicketWhereInput): Promise<Ticket[]>;
+
+  update(
+    id: number,
+    payload: Prisma.TicketUpdateInput,
     transactionClient?: Prisma.TransactionClient,
   ): Promise<Ticket>;
-
-  findUnique(
-    payload: Prisma.TicketFindUniqueArgs,
-    transactionClient?: Prisma.TransactionClient,
-  ): Promise<Ticket>;
-
-  findAll(
-    payload: Prisma.TicketFindManyArgs,
-    transactionClient?: Prisma.TransactionClient,
-  ): Promise<Ticket[]>;
-
-  update(payload: Prisma.TicketUpdateArgs): Promise<Ticket>;
 
   delete(
     payload: Pick<Prisma.TicketWhereInput, 'id' | 'tenantId'>,

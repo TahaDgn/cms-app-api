@@ -1,107 +1,85 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Prisma, Tenant } from '@prisma/client';
-import { TenantRepositorySign } from '../../domain';
-import { DeleteTenantPayload } from 'libs/interfaces';
+import { Prisma, Ticket } from '@prisma/client';
+import { PRISMA_SERVICE, TicketRepositorySign } from '../../domain';
 
 @Injectable()
-export class TenantRepository implements TenantRepositorySign {
-  constructor(private prisma: PrismaService) {}
+export class TicketRepository implements TicketRepositorySign {
+  constructor(@Inject(PRISMA_SERVICE) private prismaService: PrismaService) {}
 
   async create(
-    payload: Pick<Prisma.TenantCreateInput, 'name' | 'identifier'>,
-    transactionClient = this.prisma,
-  ): Promise<Prisma.TenantGetPayload<{ include: { users: true } }>> {
-    return transactionClient.tenant.create({
+    payload: Pick<
+      Prisma.TicketCreateInput,
+      'description' | 'project' | 'tenantId'
+    >,
+    transactionClient = this.prismaService,
+  ): Promise<Ticket> {
+    return transactionClient.ticket.create({
       data: {
         ...payload,
       },
-      include: {
-        users: true,
+    });
+  }
+
+  async findFirst(payload: Prisma.TicketWhereInput): Promise<Ticket> {
+    return this.prismaService.ticket.findFirst({
+      where: {
+        ...payload,
       },
     });
   }
 
-  async setOwner(
+  async findUnique(payload: Prisma.TicketWhereUniqueInput): Promise<Ticket> {
+    return this.prismaService.ticket.findUnique({
+      where: {
+        ...payload,
+      },
+    });
+  }
+
+  async findAll(payload: Prisma.TicketWhereInput): Promise<Ticket[]> {
+    return this.prismaService.ticket.findMany({
+      where: {
+        ...payload,
+      },
+    });
+  }
+
+  async update(
     id: number,
-    payload: Pick<Prisma.TenantUpdateInput, 'ownerId'>,
-    transactionClient = this.prisma,
-  ): Promise<Tenant> {
-    return transactionClient.tenant.update({
-      where: { id },
-      data: { ...payload },
-    });
-  }
-
-  async incrementClientCount(
-    payload: Pick<Tenant, 'id'>,
-    transactionClient = this.prisma,
-  ): Promise<Tenant> {
-    const { id } = payload;
-
-    return transactionClient.tenant.update({
-      where: { id },
-      data: {
-        clientsCount: { increment: 1 },
-      },
-    });
-  }
-
-  async incrementParticipantCount(
-    payload: Pick<Tenant, 'id'>,
-    transactionClient = this.prisma,
-  ): Promise<Tenant> {
-    const { id } = payload;
-
-    return transactionClient.tenant.update({
-      where: { id },
-      data: {
-        participantsCount: { increment: 1 },
-      },
-    });
-  }
-
-  async decrementClientCount(
-    payload: Pick<Tenant, 'id'>,
-    transactionClient = this.prisma,
-  ): Promise<Tenant> {
-    const { id } = payload;
-
-    return transactionClient.tenant.update({
-      where: { id },
-      data: {
-        clientsCount: { decrement: 1 },
-      },
-    });
-  }
-
-  async decrementParticipantCount(
-    payload: Pick<Tenant, 'id'>,
-    transactionClient = this.prisma,
-  ): Promise<Tenant> {
-    const { id } = payload;
-
-    return transactionClient.tenant.update({
-      where: { id },
-      data: {
-        participantsCount: { decrement: 1 },
-      },
-    });
-  }
-
-  delete(
-    payload: DeleteTenantPayload,
-    transactionClient = this.prisma,
-  ): Promise<Prisma.TenantGetPayload<{ include: { users: true } }>> {
-    const { id } = payload;
-
-    return transactionClient.tenant.delete({
+    payload: Prisma.TicketUpdateInput,
+    transactionClient = this.prismaService,
+  ): Promise<Ticket> {
+    return transactionClient.ticket.update({
       where: {
         id,
       },
-      include: {
-        users: true,
+      data: {
+        ...payload,
       },
     });
+  }
+
+  async delete(
+    payload: Pick<Prisma.TicketWhereInput, 'id' | 'tenantId'>,
+    transactionClient = this.prismaService,
+  ): Promise<Ticket> {
+    const ticket = await transactionClient.ticket.findFirst({
+      where: {
+        ...payload,
+      },
+    });
+
+    if (!ticket) return;
+
+    const { id } = ticket;
+
+    await transactionClient.ticket.delete({
+      where: {
+        id,
+      },
+    });
+
+    return ticket;
   }
 }

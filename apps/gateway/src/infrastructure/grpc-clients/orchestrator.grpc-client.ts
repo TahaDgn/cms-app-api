@@ -15,7 +15,7 @@ export class OrchestratorGrpcClient implements OnModuleInit {
     transport: Transport.GRPC,
     options: {
       package: 'orchestrator',
-      protoPath: join(__dirname, 'orchestrator.proto'),
+      protoPath: join(process.cwd(), '/protos/orchestrator.proto'),
     },
   })
   private client: ClientGrpc;

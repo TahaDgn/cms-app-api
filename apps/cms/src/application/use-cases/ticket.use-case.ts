@@ -6,6 +6,11 @@ import {
   TicketRepositorySign,
 } from '../../domain';
 import { CacheUseCase } from './cache.use-case';
+import {
+  CreateTicketPayload,
+  DeleteTicketPayload,
+  UpdateTicketPayload,
+} from 'libs/interfaces';
 
 @Injectable()
 export class TicketUseCase {
@@ -17,5 +22,26 @@ export class TicketUseCase {
     private readonly cacheUseCase: CacheUseCase,
   ) {}
 
-  
+  public async update(payload: UpdateTicketPayload) {
+    const { id, ...restOfPayload } = payload;
+
+    return this.ticketRepository.update(id, {
+      ...restOfPayload,
+    });
+  }
+
+  public async create(payload: CreateTicketPayload) {
+    const { projectId, ...restOfPayload } = payload;
+
+    return this.ticketRepository.create({
+      ...restOfPayload,
+      project: {
+        connect: { id: projectId },
+      },
+    });
+  }
+
+  public async delete(payload: DeleteTicketPayload) {
+    return this.ticketRepository.delete(payload);
+  }
 }

@@ -7,7 +7,7 @@
     "tsConfigPath": "./tsconfig.json",
     "assets": [
       {
-        "include": "**/*.proto"
+        "include": "/protos/*.proto"
       },
       {
         "include": "**/*.hbs"
@@ -16,7 +16,7 @@
     "watchAssets": true
   },
   "monorepo": true,
-  "root": "apps",
+  "root": "/apps",
   "projects": {
     "notification": {
       "type": "application",

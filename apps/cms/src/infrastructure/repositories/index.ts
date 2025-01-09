@@ -1,2 +1,2 @@
-export * from './tenant.repository';
-export * from './user.repository';
+export * from './project.repository';
+export * from './ticket.repository';

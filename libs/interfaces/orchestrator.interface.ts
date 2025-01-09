@@ -56,7 +56,7 @@ export type UserCreationSagaPayload = Pick<
   'tenantId' | 'name' | 'email' | 'type'
 >;
 
-export type UserWithTenantResponse = Prisma.UserGetPayload<{
+type UserWithTenantResponse = Prisma.UserGetPayload<{
   include: {
     tenant: true;
   };

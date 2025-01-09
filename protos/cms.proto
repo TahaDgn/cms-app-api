@@ -92,7 +92,7 @@ message DeleteProjectRequest {
 }
 
 message DeleteProjectResponse {
-  Project project = 1;
+  ProjectWithTickets project = 1;
 }
 
 message UpdateProjectRequest {

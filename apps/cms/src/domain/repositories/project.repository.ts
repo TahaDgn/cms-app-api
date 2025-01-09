@@ -9,30 +9,28 @@ export interface ProjectRepositorySign {
       'title' | 'description' | 'tenantId'
     >,
     transactionClient?: Prisma.TransactionClient,
-  ): Promise<Prisma.UserGetPayload<{ include: { tenant: true } }>>;
+  ): Promise<Project>;
 
   findFirst(
-    payload: Prisma.ProjectFindFirstArgs,
-    transactionClient?: Prisma.TransactionClient,
-  ): Promise<Project>;
+    payload: Prisma.ProjectWhereInput,
+  ): Promise<Prisma.ProjectGetPayload<{ include: { tickets: true } }>>;
 
   findUnique(
-    payload: Prisma.ProjectFindUniqueArgs,
-    transactionClient?: Prisma.TransactionClient,
-  ): Promise<Project>;
+    payload: Prisma.ProjectWhereUniqueInput,
+  ): Promise<Prisma.ProjectGetPayload<{ include: { tickets: true } }>>;
 
   findAll(
-    payload: Prisma.ProjectFindManyArgs,
-    transactionClient?: Prisma.TransactionClient,
-  ): Promise<Project[]>;
+    payload: Prisma.ProjectWhereInput,
+  ): Promise<Prisma.ProjectGetPayload<{ include: { tickets: true } }>[]>;
 
   update(
-    payload: Prisma.ProjectUpdateArgs,
+    id: number,
+    payload: Prisma.ProjectUpdateInput,
     transactionClient?: Prisma.TransactionClient,
-  ): Promise<Prisma.UserGetPayload<{ include: { tenant: true } }>>;
+  ): Promise<Prisma.ProjectGetPayload<{ include: { tickets: true } }>>;
 
   delete(
     payload: Pick<Prisma.ProjectWhereInput, 'id' | 'tenantId'>,
     transactionClient?: Prisma.TransactionClient,
-  ): Promise<Project>;
+  ): Promise<Prisma.ProjectGetPayload<{ include: { tickets: true } }>>;
 }

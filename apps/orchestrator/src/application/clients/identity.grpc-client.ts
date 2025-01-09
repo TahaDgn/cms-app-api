@@ -35,7 +35,7 @@ export class IdentityGrpcClient
     transport: Transport.GRPC,
     options: {
       package: 'identity',
-      protoPath: join(__dirname, 'identity.proto'),
+      protoPath: join(process.cwd(), '/protos/identity.proto'),
     },
   })
   private client: ClientGrpc;

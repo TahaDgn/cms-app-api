@@ -1,99 +1,93 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Prisma, UserIssue } from '@prisma/client';
-import { UserRepositorySign } from '../../domain';
+import { Prisma, Project } from '@prisma/client';
+import { PRISMA_SERVICE, ProjectRepositorySign } from '../../domain';
 
 @Injectable()
-export class UserRepository implements UserRepositorySign {
-  constructor(private prisma: PrismaService) {}
-
-  async create(
-    payload: Pick<Prisma.UserCreateInput, 'email' | 'name' | 'type' | 'tenant'>,
-    transactionClient = this.prisma,
-  ): Promise<Prisma.UserGetPayload<{ include: { tenant: true } }>> {
-    return transactionClient.user.create({
+export class ProjectRepository implements ProjectRepositorySign {
+  constructor(@Inject(PRISMA_SERVICE) private prismaService: PrismaService) {}
+  create(
+    payload: Pick<
+      Prisma.ProjectCreateInput,
+      'title' | 'description' | 'tenantId'
+    >,
+    transactionClient = this.prismaService,
+  ): Promise<Project> {
+    return transactionClient.project.create({
       data: {
         ...payload,
       },
-      include: {
-        tenant: true,
-      },
     });
   }
 
-  async findFirst(payload: Prisma.UserFindFirstArgs) {
-    const user = await this.prisma.user.findFirst({
-      ...payload,
+  async findFirst(
+    payload: Prisma.ProjectWhereInput,
+  ): Promise<Prisma.ProjectGetPayload<{ include: { tickets: true } }>> {
+    return this.prismaService.project.findFirst({
+      where: { ...payload },
+      include: { tickets: true },
     });
-
-    return user as Prisma.UserGetPayload<{ include: { tenant: true } }>;
   }
 
-  async findUnique(payload: Prisma.UserFindUniqueArgs) {
-    const user = await this.prisma.user.findUnique({
-      ...payload,
+  async findUnique(
+    payload: Prisma.ProjectWhereUniqueInput,
+  ): Promise<Prisma.ProjectGetPayload<{ include: { tickets: true } }>> {
+    return this.prismaService.project.findUnique({
+      where: { ...payload },
+      include: { tickets: true },
     });
-
-    return user as Prisma.UserGetPayload<{ include: { tenant: true } }>;
   }
 
-  async findAll(payload: Prisma.UserFindManyArgs) {
-    const users = await this.prisma.user.findMany({
-      ...payload,
+  async findAll(
+    payload: Prisma.ProjectWhereInput,
+  ): Promise<Prisma.ProjectGetPayload<{ include: { tickets: true } }>[]> {
+    return this.prismaService.project.findMany({
+      where: { ...payload },
+      include: { tickets: true },
     });
-
-    return users as Prisma.UserGetPayload<{ include: { tenant: true } }>[];
   }
 
-  async removeFirstLoginIssue(
-    payload: Pick<Prisma.UserWhereUniqueInput, 'id' | 'tenantId'>,
-    transactionClient = this.prisma,
-  ) {
-    const user = await this.findFirst({
-      where: {
-        ...payload,
-      },
-    });
-
-    if (!user) return;
-
-    const updatedIssues = user.issues.filter(
-      (issue) => issue !== UserIssue.FIRST_LOGIN_WAS_NOT_MADE.toString(),
-    );
-
-    const { id } = payload;
-
-    await transactionClient.user.update({
+  async update(
+    id: number,
+    payload: Prisma.ProjectUpdateInput,
+    transactionClient = this.prismaService,
+  ): Promise<Prisma.ProjectGetPayload<{ include: { tickets: true } }>> {
+    return transactionClient.project.update({
       where: {
         id,
       },
       data: {
-        issues: updatedIssues,
+        ...payload,
+      },
+      include: {
+        tickets: true,
       },
     });
   }
 
   async delete(
-    payload: Pick<Prisma.UserWhereInput, 'id' | 'tenantId'>,
-    transactionClient = this.prisma,
-  ) {
-    const user = await this.findFirst({
+    payload: Pick<Prisma.ProjectWhereInput, 'id' | 'tenantId'>,
+    transactionClient = this.prismaService,
+  ): Promise<Prisma.ProjectGetPayload<{ include: { tickets: true } }>> {
+    const project = await transactionClient.project.findFirst({
       where: {
         ...payload,
       },
+      include: {
+        tickets: true,
+      },
     });
 
-    if (!user) return;
+    if (!project) return;
 
-    const { id } = user;
+    const { id } = project;
 
-    return transactionClient.user.delete({
+    await transactionClient.project.delete({
       where: {
         id,
       },
-      include: {
-        tenant: true,
-      },
     });
+
+    return project;
   }
 }

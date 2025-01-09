@@ -1,4 +1,3 @@
-// apps/identity/src/infrastructure/grpc/identity.server.ts
 import { Controller } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
 import { ProjectUseCase } from '../../application';
@@ -38,48 +37,60 @@ export class ProjectGrpcServer
   constructor(private readonly projectUseCase: ProjectUseCase) {}
 
   @GrpcMethod('CmsService', 'createProject')
-  createProject(payload: CreateProjectPayload): Promise<CreateProjectResponse> {
+  async createProject(
+    payload: CreateProjectPayload,
+  ): Promise<CreateProjectResponse> {
     return this.projectUseCase.create(payload);
   }
 
   @GrpcMethod('CmsService', 'getProject')
-  getProject(payload: GetProjectPayload): Promise<GetProjectResponse> {
+  async getProject(payload: GetProjectPayload): Promise<GetProjectResponse> {
     return this.projectUseCase.getOrFail(payload);
   }
 
   @GrpcMethod('CmsService', 'listProjects')
-  listProjects(payload: ListProjectsPayload): Promise<ListProjectsResponse> {
-    return this.projectUseCase.list(payload);
+  async listProjects(
+    payload: ListProjectsPayload,
+  ): Promise<ListProjectsResponse> {
+    const projects = await this.projectUseCase.list(payload);
+
+    return { projects };
   }
 
   @GrpcMethod('CmsService', 'deleteProject')
-  deleteProject(payload: DeleteProjectPayload): Promise<DeleteProjectResponse> {
+  async deleteProject(
+    payload: DeleteProjectPayload,
+  ): Promise<DeleteProjectResponse> {
     return this.projectUseCase.delete(payload);
   }
 
   @GrpcMethod('CmsService', 'updateProject')
-  updateProject(payload: UpdateProjectPayload): Promise<UpdateProjectResponse> {
+  async updateProject(
+    payload: UpdateProjectPayload,
+  ): Promise<UpdateProjectResponse> {
     return this.projectUseCase.update(payload);
   }
 
   @GrpcMethod('CmsService', 'removeClientFromProject')
-  removeClientFromProject(
+  async removeClientFromProject(
     payload: AddOrRemoveClientFromProjectPayload,
   ): Promise<AddOrRemoveClientFromProjectResponse> {
-    return this.projectUseCase.removeClient(payload);
+    await this.projectUseCase.removeClient(payload);
   }
 
   @GrpcMethod('CmsService', 'addClientToProject')
-  addClientToProject(
+  async addClientToProject(
     payload: AddOrRemoveClientFromProjectPayload,
   ): Promise<AddOrRemoveClientFromProjectResponse> {
-    return this.projectUseCase.addClient(payload);
+    await this.projectUseCase.addClient(payload);
   }
 
   @GrpcMethod('CmsService', 'listClientProjects')
-  listClientProjects(
+  async listClientProjects(
     payload: ListClientProjectPayload,
   ): Promise<ListClientProjectsResponse> {
-    return this.projectUseCase.list(payload);
+    const projects = await this.projectUseCase.list(payload);
+
+    return { projects };
   }
 }
