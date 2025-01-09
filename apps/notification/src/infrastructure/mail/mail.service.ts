@@ -72,7 +72,7 @@ export class MailService implements OnModuleInit {
   }
 
   private compileTemplate(templateFilename: string, data: any): string {
-    const templatePath = path.join(__dirname, 'templates', templateFilename);
+    const templatePath = path.join(process.cwd(), '/assets', templateFilename);
     const templateFile = fs.readFileSync(templatePath, 'utf-8');
     const template = handlebars.compile(templateFile);
     return template(data);

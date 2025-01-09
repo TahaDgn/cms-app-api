@@ -19,6 +19,6 @@ async function bootstrap() {
 
   await app.listen();
 
-  console.log('Identity microservice is running via gRPC...');
+  console.log('Cms microservice is running via gRPC...');
 }
 bootstrap();

@@ -1,0 +1,85 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    // 1) GATEWAY
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug GATEWAY",
+      "program": "${workspaceFolder}/node_modules/@nestjs/cli/bin/nest.js",
+      "args": [
+        "start",            // Nest CLI komutu
+        "apps/gateway",     // "apps/gateway" projesi
+        "--watch",          // kod değişimlerinde restart
+        "--debug"           // debug mode
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "outFiles": [
+        "${workspaceFolder}/dist/apps/gateway/**/*.js"
+      ],
+      "preLaunchTask": "",
+      "sourceMaps": true
+    },
+
+    // 2) ORCHESTRATOR
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug ORCHESTRATOR",
+      "program": "${workspaceFolder}/node_modules/@nestjs/cli/bin/nest.js",
+      "args": [
+        "start",
+        "apps/orchestrator",
+        "--watch",
+        "--debug"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "outFiles": [
+        "${workspaceFolder}/dist/apps/orchestrator/**/*.js"
+      ],
+      "sourceMaps": true
+    },
+
+    // 3) IDENTITY
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug IDENTITY",
+      "program": "${workspaceFolder}/node_modules/@nestjs/cli/bin/nest.js",
+      "args": [
+        "start",
+        "apps/identity",
+        "--watch",
+        "--debug"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "outFiles": [
+        "${workspaceFolder}/dist/apps/identity/**/*.js"
+      ],
+      "sourceMaps": true
+    },
+
+    // 4) NOTIFICATION
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug NOTIFICATION",
+      "program": "${workspaceFolder}/node_modules/@nestjs/cli/bin/nest.js",
+      "args": [
+        "start",
+        "apps/notification",
+        "--watch",
+        "--debug"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "outFiles": [
+        "${workspaceFolder}/dist/apps/notification/**/*.js"
+      ],
+      "sourceMaps": true
+    }
+  ]
+}

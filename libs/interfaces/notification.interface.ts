@@ -9,8 +9,8 @@ export interface AccessUrlContext {
   accessUrl: string;
 }
 
-export interface NotificationMessage<Ctx> {
+export interface NotificationMessage {
   type: NotificationType;
   email: string;
-  payload: Ctx;
+  payload: any;
 }

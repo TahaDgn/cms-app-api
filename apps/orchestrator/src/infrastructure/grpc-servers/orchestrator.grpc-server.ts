@@ -19,6 +19,8 @@ export class OrchestratorGrpcServer implements OrchestratorService {
 
   @GrpcMethod('OrchestratorService', 'userRegistrationSaga')
   async userRegistrationSaga(payload: UserRegistrationSagaPayload) {
+    console.log('BURA CALISTIMI ?');
+
     return this.orchestratorUseCase.runUserRegistrationSaga(payload);
   }
 

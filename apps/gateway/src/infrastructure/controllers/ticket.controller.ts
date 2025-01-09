@@ -1,0 +1,18 @@
+import { Controller, Post, Body, Patch, Delete } from '@nestjs/common';
+import { CmsGrpcClient } from '../grpc-clients';
+import { User } from '@prisma/client';
+import { AuthorizedUser } from '../guards';
+
+@Controller('tickets')
+export class TicketController {
+  constructor(private readonly cmsGrpcClient: CmsGrpcClient) {}
+
+  @Post()
+  async create(@AuthorizedUser() user: User, @Body() dto) {}
+
+  @Patch(':id')
+  async update(@AuthorizedUser() user: User, @Body() dto) {}
+
+  @Delete(':id')
+  async delete(@AuthorizedUser() user: User, @Body() dto) {}
+}

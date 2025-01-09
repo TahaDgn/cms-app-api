@@ -22,9 +22,6 @@ import {
 @Module({
   imports: [RedisModule],
   providers: [
-    AuthGrpcServer,
-    UserGrpcServer,
-    TenantGrpcServer,
     {
       provide: TENANT_REPOSITORY,
       useClass: TenantRepository,
@@ -42,5 +39,6 @@ import {
     TenantUseCase,
     UserUseCase,
   ],
+  controllers: [AuthGrpcServer, UserGrpcServer, TenantGrpcServer],
 })
 export class IdentityModule {}

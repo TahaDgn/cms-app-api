@@ -2,15 +2,21 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import { Client, ClientGrpc, Transport } from '@nestjs/microservices';
 import { join } from 'path';
 import {
-  OrchestratorService,
+  OrchestratorService as OrchestratorGrpcServer,
   UserRegistrationSagaPayload,
   UserLoginSagaPayload,
   UserCreationSagaPayload,
   UserDeletionSagaPayload,
+  AddClientToProjectSagaPayload,
+  AddClientToProjectSagaResult,
+  RemoveClientFromProjectSagaPayload,
+  RemoveClientFromProjectSagaResult,
 } from 'libs/interfaces';
 
 @Injectable()
-export class OrchestratorGrpcClient implements OnModuleInit {
+export class OrchestratorGrpcClient
+  implements OnModuleInit, OrchestratorGrpcServer
+{
   @Client({
     transport: Transport.GRPC,
     options: {
@@ -20,10 +26,10 @@ export class OrchestratorGrpcClient implements OnModuleInit {
   })
   private client: ClientGrpc;
 
-  private orchestratorService: OrchestratorService;
+  private orchestratorService: OrchestratorGrpcServer;
 
   onModuleInit() {
-    this.orchestratorService = this.client.getService<OrchestratorService>(
+    this.orchestratorService = this.client.getService<OrchestratorGrpcServer>(
       'OrchestratorService',
     );
   }
@@ -42,5 +48,16 @@ export class OrchestratorGrpcClient implements OnModuleInit {
 
   async userDeletionSaga(payload: UserDeletionSagaPayload) {
     return this.orchestratorService.userDeletionSaga(payload);
+  }
+
+  addClientToProjectSaga(
+    payload: AddClientToProjectSagaPayload,
+  ): Promise<AddClientToProjectSagaResult> {
+    return this.orchestratorService.addClientToProjectSaga(payload);
+  }
+  removeClientFromProjectSaga(
+    payload: RemoveClientFromProjectSagaPayload,
+  ): Promise<RemoveClientFromProjectSagaResult> {
+    return this.orchestratorService.removeClientFromProjectSaga(payload);
   }
 }

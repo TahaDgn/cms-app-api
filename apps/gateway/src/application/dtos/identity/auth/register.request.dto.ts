@@ -14,9 +14,4 @@ export class RegisterRequestDto {
   @IsString()
   @IsNotEmpty()
   name: string;
-
-  @IsString()
-  @IsOptional()
-  @Exclude()
-  userType = UserType.PARTICIPANT;
 }

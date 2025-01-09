@@ -1,12 +1,30 @@
-// apps/gateway/src/gateway.module.ts
 import { Module } from '@nestjs/common';
-import { AuthController } from './infrastructure/controllers/auth.controller';
-import { AuthGuardInternal } from './infrastructure/guards/auth.guard';
-import { OrchestratorClient } from './infrastructure/grpc-clients/orchestrator.client';
+import {
+  AuthController,
+  AuthGuardInternal,
+  CmsGrpcClient,
+  IdentityGrpcClient,
+  OrchestratorGrpcClient,
+  ProjectController,
+  TicketController,
+  UserController,
+} from './infrastructure';
+import { APP_GUARD } from '@nestjs/core';
+import { RabbitMQModule, RedisModule } from 'libs/adapters';
 
 @Module({
-  imports: [],
-  controllers: [AuthController],
-  providers: [OrchestratorClient, AuthGuardInternal],
+  imports: [RedisModule, RabbitMQModule],
+  controllers: [
+    AuthController,
+    UserController,
+    ProjectController,
+    TicketController,
+  ],
+  providers: [
+    OrchestratorGrpcClient,
+    IdentityGrpcClient,
+    CmsGrpcClient,
+    { provide: APP_GUARD, useClass: AuthGuardInternal },
+  ],
 })
 export class GatewayModule {}

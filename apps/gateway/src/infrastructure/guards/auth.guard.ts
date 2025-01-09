@@ -29,6 +29,10 @@ export class AuthGuardInternal implements CanActivate {
       context.getHandler(),
     );
 
+    if (!userTypeRequired) {
+      return true;
+    }
+
     const authHeader = request.headers['authorization'];
     if (!authHeader) {
       throw new UnauthorizedException('No Authorization header found');
@@ -44,9 +48,12 @@ export class AuthGuardInternal implements CanActivate {
       JSON.parse(userDataStr)
     );
 
-    // userData = { email, issues, tenantId, tenantIssues, tenantOwnerId, type? }
-    if (userTypeRequired && userData.type !== userTypeRequired) {
-      throw new UnauthorizedException('User type not permitted');
+    if (userTypeRequired.length === 0) {
+      return true;
+    }
+
+    if (!userTypeRequired.includes(userData.type)) {
+      throw new UnauthorizedException('Invalid or expired token');
     }
 
     request.authorizedUser = userData;

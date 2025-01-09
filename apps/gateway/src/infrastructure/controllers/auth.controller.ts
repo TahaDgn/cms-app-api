@@ -24,13 +24,13 @@ export class AuthController {
 
   @Post('register')
   async register(@Body() dto: RegisterRequestDto) {
-    const { email, name, tenantName, userType } = dto;
+    const { email, name, tenantName } = dto;
 
     await this.orchestratorClient.userRegistrationSaga({
       user: {
         email,
         name,
-        type: userType,
+        type: UserType.PARTICIPANT,
       },
       tenant: {
         name: tenantName,

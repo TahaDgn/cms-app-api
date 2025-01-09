@@ -1,10 +1,17 @@
-import { Controller, Post, Body, Get, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Delete,
+  Param,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { OrchestratorGrpcClient, IdentityGrpcClient } from '../grpc-clients';
 import { AuthGuard, AuthorizedUser } from '../guards/auth.guard';
 import {
   CreateParticipantRequestDto,
   CreateParticipantResponseDto,
-  DeleteUserRequestDto,
   DeleteUserResponseDto,
 } from '../../application';
 import { Prisma, UserType } from '@prisma/client';
@@ -55,17 +62,20 @@ export class UserController {
   }
 
   @AuthGuard([UserType.PARTICIPANT])
-  @Delete()
+  @Delete(':id')
   async deleteUser(
-    @Body() dto: DeleteUserRequestDto,
     @AuthorizedUser()
     user: Prisma.UserGetPayload<{ include: { tenant: true } }>,
+    @Param('id') id: string,
   ): Promise<DeleteUserResponseDto> {
     const { tenantId } = user;
-    const { id } = dto;
+
+    if (!id) {
+      throw new UnprocessableEntityException('Id not be empty');
+    }
 
     const deletedUser = await this.orchestratorClient.userDeletionSaga({
-      id,
+      id: parseInt(id, 10),
       tenantId,
     });
 
