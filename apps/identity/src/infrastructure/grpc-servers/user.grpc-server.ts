@@ -6,7 +6,7 @@ import {
   CreateUserPayload,
   DeleteUserPayload,
   IdentityService,
-  UserWithTenantResponse,
+  GetUserResponse,
   ListUserPayload,
   ListUsersResponse,
   GetUserPayload,
@@ -23,9 +23,9 @@ export class UserGrpcServer
   constructor(private readonly userUseCase: UserUseCase) {}
 
   @GrpcMethod('IdentityService', 'createUserIfNotExists')
-  createUserIfNotExists(
+  createUser(
     payload: CreateUserPayload,
-  ): Promise<UserWithTenantResponse> {
+  ): Promise<GetUserResponse> {
     return this.userUseCase.createUserIfNotExists(payload);
   }
 
@@ -35,12 +35,12 @@ export class UserGrpcServer
   }
 
   @GrpcMethod('IdentityService', 'getUser')
-  getUser(payload: GetUserPayload): Promise<UserWithTenantResponse> {
+  getUser(payload: GetUserPayload): Promise<GetUserResponse> {
     return this.userUseCase.getOrFail(payload);
   }
 
   @GrpcMethod('IdentityService', 'deleteUser')
-  deleteUser(payload: DeleteUserPayload): Promise<UserWithTenantResponse> {
+  deleteUser(payload: DeleteUserPayload): Promise<GetUserResponse> {
     return this.userUseCase.delete(payload);
   }
 }

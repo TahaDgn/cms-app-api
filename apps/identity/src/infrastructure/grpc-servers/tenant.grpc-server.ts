@@ -6,7 +6,7 @@ import {
   CreateTenantAndUserPayload,
   CreateTenantAndUserResponse,
   DeleteTenantPayload,
-  TenantWithUsersResponse,
+  GetTenantResponse,
   IdentityService,
 } from 'libs/interfaces';
 
@@ -24,7 +24,7 @@ export class TenantGrpcServer
   }
 
   @GrpcMethod('IdentityService', 'deleteTenant')
-  deleteTenant(payload: DeleteTenantPayload): Promise<TenantWithUsersResponse> {
+  deleteTenant(payload: DeleteTenantPayload): Promise<GetTenantResponse> {
     return this.tenantUseCase.delete(payload);
   }
 }

@@ -1,3 +1,3 @@
 export * from './controllers';
-export * from './grpc-clients';
+export * from '../application/grpc-clients';
 export * from './middlewares';

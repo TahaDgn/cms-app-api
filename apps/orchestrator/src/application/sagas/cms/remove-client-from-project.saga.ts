@@ -1,18 +1,19 @@
-import { CmsGrpcClient, IdentityGrpcClient } from '../../clients';
+import { CmsGrpcClient, IdentityGrpcClient } from '../../grpc-clients';
 import { RabbitMQAdapter } from 'libs/adapters';
 import { runSaga } from '../../saga-runner';
 import { SagaStep } from '../../saga-step';
 import {
-  UserWithTenantResponse,
-  AddOrRemoveClientFromProjectResponse,
+  GetProjectResponse,
+  ListUsersResponse,
   RemoveClientFromProjectSagaPayload,
   RemoveClientFromProjectSagaResult,
 } from 'libs/interfaces';
+import { UserType } from '@prisma/client';
 
 interface RemoveClientFromProjectContext {
   payload: RemoveClientFromProjectSagaPayload;
-  addOrRemoveClientFromProjectResponse?: AddOrRemoveClientFromProjectResponse;
-  userWithTenantResponse?: UserWithTenantResponse;
+  getProjectResponse?: GetProjectResponse;
+  listUsersResponse?: ListUsersResponse;
 }
 
 export async function runRemoveClientFromProjectSaga(
@@ -23,69 +24,79 @@ export async function runRemoveClientFromProjectSaga(
 ): Promise<RemoveClientFromProjectSagaResult> {
   const context: RemoveClientFromProjectContext = {
     payload,
-    addOrRemoveClientFromProjectResponse: undefined,
-    userWithTenantResponse: undefined,
+    getProjectResponse: undefined,
+    listUsersResponse: undefined,
   };
 
   const steps: SagaStep<RemoveClientFromProjectContext>[] = [
     new SagaStep<RemoveClientFromProjectContext>(
-      'RemoveClientFromProject',
+      'GetUsers',
       async (stepContext) => {
         const {
-          payload: {
-            project: { id: projectId, tenantId },
-            user: { id: clientId },
-          },
+          payload: { tenantId, clientUserIds },
         } = stepContext;
 
-        const response = await cmsGrpcClient.removeClientFromProject({
-          clientId,
-          projectId,
-          tenantId,
+        const result = await identityGrpcClient.listUsers({
+          where: {
+            tenantId,
+            id: { in: clientUserIds },
+            type: UserType.CLIENT,
+          },
         });
 
-        stepContext.addOrRemoveClientFromProjectResponse = response;
+        stepContext.listUsersResponse = result;
       },
-      async (stepContext) => {
-        const {
-          payload: {
-            project: { id: projectId, tenantId },
-            user: { id: clientId },
-          },
-        } = stepContext;
-
-        await cmsGrpcClient.addClientToProject({
-          clientId,
-          tenantId,
-          projectId,
-        });
+      async () => {
+        // No Compensation
       },
     ),
     new SagaStep<RemoveClientFromProjectContext>(
-      'GetUser',
+      'RemoveUsersToProject',
       async (stepContext) => {
         const {
-          payload: {
-            project: { tenantId },
-            user: { id },
-          },
+          payload: { id, tenantId },
+          listUsersResponse,
         } = stepContext;
 
-        const response = await identityGrpcClient.getUser({
+        const clientUserIds = listUsersResponse.users.map((user) => user.id);
+
+        const result = await cmsGrpcClient.removeClientsFromProject({
           id,
           tenantId,
+          clientUserIds,
         });
 
-        stepContext.userWithTenantResponse = response;
+        stepContext.getProjectResponse = result;
       },
-      async () => {},
+      async (stepContext) => {
+        const {
+          payload: { id, tenantId },
+          listUsersResponse,
+        } = stepContext;
+
+        const { getProjectResponse } = stepContext;
+
+        if (!getProjectResponse) {
+          return;
+        }
+
+        const clientUserIds = listUsersResponse.users.map((user) => user.id);
+
+        await cmsGrpcClient.addClientsToProject({
+          id,
+          tenantId,
+          clientUserIds,
+        });
+      },
     ),
     new SagaStep<RemoveClientFromProjectContext>(
-      'SendMail',
+      'SendInformationMail',
       async () => {},
       async () => {},
     ),
   ];
 
   await runSaga(steps, context);
+
+  return context.getProjectResponse;
 }

@@ -1,5 +1,5 @@
 import { Controller, Post, Body, Patch, Delete } from '@nestjs/common';
-import { CmsGrpcClient } from '../grpc-clients';
+import { CmsGrpcClient } from '../../application/grpc-clients';
 import { User } from '@prisma/client';
 import { AuthorizedUser } from '../middlewares';
 

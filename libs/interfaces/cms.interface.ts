@@ -1,97 +1,131 @@
-import { Prisma, Project, Ticket } from '@prisma/client';
+import { Prisma, Project, Ticket, TicketComment } from '@prisma/client';
+import { Observable } from 'rxjs';
 
 export interface CmsService {
-  createProject(payload: CreateProjectPayload): Promise<CreateProjectResponse>;
+  // ---- PROJECT ---- //
 
-  getProject(payload: GetProjectPayload): Promise<GetProjectResponse>;
+  createProject(
+    payload: CreateProjectPayload,
+  ): Promise<GetProjectResponse> | Observable<GetProjectResponse>;
 
-  listProjects(payload: ListProjectsPayload): Promise<ListProjectsResponse>;
+  getProject(
+    payload: GetProjectPayload,
+  ): Promise<GetProjectResponse> | Observable<GetProjectResponse>;
 
-  listClientProjects(
-    payload: ListClientProjectPayload,
-  ): Promise<ListClientProjectsResponse>;
+  listProjects(
+    payload: ListProjectsPayload,
+  ): Promise<ListProjectsResponse> | Observable<ListProjectsResponse>;
 
-  deleteProject(payload: DeleteProjectPayload): Promise<DeleteProjectResponse>;
+  updateProject(
+    payload: UpdateProjectPayload,
+  ): Promise<GetProjectResponse> | Observable<GetProjectResponse>;
 
-  updateProject(payload: UpdateProjectPayload): Promise<UpdateProjectResponse>;
+  addClientsToProject(
+    payload: AddClientsToProject,
+  ): Promise<GetProjectResponse> | Observable<GetProjectResponse>;
 
-  addClientToProject(
-    payload: AddOrRemoveClientFromProjectPayload,
-  ): Promise<AddOrRemoveClientFromProjectResponse>;
+  removeClientsFromProject(
+    payload: RemoveClientsFromProjectPayload,
+  ): Promise<GetProjectResponse> | Observable<GetProjectResponse>;
 
-  removeClientFromProject(
-    payload: AddOrRemoveClientFromProjectPayload,
-  ): Promise<AddOrRemoveClientFromProjectResponse>;
+  deleteProject(
+    payload: DeleteProjectPayload,
+  ): Promise<GetProjectResponse> | Observable<GetProjectResponse>;
 
-  createTicket(payload: CreateTicketPayload): Promise<CreateTicketResponse>;
+  // ---- TICKET ---- //
 
-  updateTicket(payload: UpdateTicketPayload): Promise<UpdateTicketResponse>;
+  createTicket(
+    payload: CreateTicketPayload,
+  ): Promise<GetTicketResponse> | Observable<GetTicketResponse>;
 
-  deleteTicket(payload: DeleteTicketPayload): Promise<DeleteTicketResponse>;
+  getTicket(
+    payload: GetTicketPayload,
+  ): Promise<GetTicketResponse> | Observable<GetTicketResponse>;
+
+  listTickets(
+    payload: ListTicketPayload,
+  ): Promise<ListTicketResponse> | Observable<ListTicketResponse>;
+
+  updateTicket(
+    payload: UpdateTicketPayload,
+  ): Promise<GetTicketResponse> | Observable<GetTicketResponse>;
+
+  deleteTicket(
+    payload: DeleteTicketPayload,
+  ): Promise<GetTicketResponse> | Observable<GetTicketResponse>;
+
+  // ---- TICKET COMMENT ---- //
+
+  createTicketComment(
+    payload: CreateTicketCommentPayload,
+  ): Promise<GetTicketResponse> | Observable<GetTicketResponse>;
+
+  deleteTicketComment(
+    payload: DeleteTicketCommentPayload,
+  ): Promise<GetTicketResponse> | Observable<GetTicketResponse>;
 }
 
-export type ProjectWithTicketsResponse = Prisma.ProjectGetPayload<{
-  include: { tickets: true };
-}>;
+// ---- PROJECT ---- //
 
 export type CreateProjectPayload = Pick<
   Project,
   'title' | 'description' | 'tenantId'
 >;
 
-export type CreateProjectResponse = Project;
+export type GetProjectPayload = Prisma.ProjectFindFirstArgs;
 
-export type GetProjectPayload = Pick<Project, 'id' | 'tenantId'>;
+export type GetProjectResponse = Prisma.ProjectGetPayload<{
+  include: { tickets: true };
+}>;
 
-export type GetProjectResponse = ProjectWithTicketsResponse;
-
-export type ListProjectsPayload = Pick<Project, 'tenantId'>;
+export type ListProjectsPayload = Prisma.ProjectFindManyArgs;
 
 export interface ListProjectsResponse {
-  projects: ProjectWithTicketsResponse[];
+  projects: Project[];
 }
 
-export interface ListClientProjectPayload extends Pick<Project, 'tenantId'> {
-  clientId: number;
-}
+export type UpdateProjectPayload = Prisma.ProjectUpdateArgs;
 
-export interface ListClientProjectsResponse {
-  projects: ProjectWithTicketsResponse[];
-}
-
-export type DeleteProjectPayload = Pick<Project, 'id' | 'tenantId'>;
-
-export type DeleteProjectResponse = Project;
-
-export type UpdateProjectPayload = Pick<
+export type AddClientsToProject = Pick<
   Project,
-  'id' | 'tenantId' | 'status' | 'description' | 'title'
+  'id' | 'clientUserIds' | 'tenantId'
 >;
 
-export type UpdateProjectResponse = ProjectWithTicketsResponse;
+export type RemoveClientsFromProjectPayload = Pick<
+  Project,
+  'id' | 'clientUserIds' | 'tenantId'
+>;
 
-export interface AddOrRemoveClientFromProjectPayload {
-  projectId: number;
-  tenantId: number;
-  clientId: number;
-}
+export type DeleteProjectPayload = GetProjectPayload;
 
-export type AddOrRemoveClientFromProjectResponse = void;
+// ---- TICKET ---- //
 
 export type CreateTicketPayload = Pick<
   Ticket,
   'description' | 'projectId' | 'tenantId'
 >;
 
-export type CreateTicketResponse = Ticket;
+export type GetTicketPayload = Prisma.TicketFindFirstArgs;
 
-export type DeleteTicketPayload = Pick<Ticket, 'id' | 'tenantId'>;
+export type GetTicketResponse = Prisma.TicketGetPayload<{
+  include: { ticketComments: true };
+}>;
 
-export type DeleteTicketResponse = Ticket;
+export type ListTicketPayload = Prisma.TicketFindManyArgs;
 
-export type UpdateTicketPayload = Pick<
-  Ticket,
-  'id' | 'tenantId' | 'status' | 'description'
+export interface ListTicketResponse {
+  tickets: Ticket[];
+}
+
+export type UpdateTicketPayload = Prisma.TicketUpdateArgs;
+
+export type DeleteTicketPayload = GetTicketPayload;
+
+// ---- TICKET COMMENT ---- //
+
+export type CreateTicketCommentPayload = Pick<
+  TicketComment,
+  'tenantId' | 'ticketId' | 'createdBy' | 'content'
 >;
 
-export type UpdateTicketResponse = Ticket;
+export type DeleteTicketCommentPayload = GetTicketPayload;

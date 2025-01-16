@@ -1,13 +1,13 @@
-import { CmsGrpcClient, IdentityGrpcClient } from '../../clients';
+import { CmsGrpcClient, IdentityGrpcClient } from '../../grpc-clients';
 import { RabbitMQAdapter } from 'libs/adapters';
 import { runSaga } from '../../saga-runner';
 import { SagaStep } from '../../saga-step';
 import {
-  UserWithTenantResponse,
+  GetUserResponse,
   UserDeletionSagaPayload,
   UserDeletionSagaResult,
   ListClientProjectsResponse,
-  AddOrRemoveClientFromProjectPayload,
+  AddClientsToProject,
   NotificationType,
 } from 'libs/interfaces';
 import { UserType } from '@prisma/client';
@@ -15,9 +15,9 @@ import { NOTIFICATION_QUEUE } from 'libs/constants';
 
 interface UserDeletionContext {
   payload: UserDeletionSagaPayload;
-  userWithTenantResponse?: UserWithTenantResponse;
+  userWithTenantResponse?: GetUserResponse;
   listClientProjectsResponse?: ListClientProjectsResponse;
-  addOrRemoveClientFromProjectPayloads?: AddOrRemoveClientFromProjectPayload[];
+  addOrRemoveClientFromProjectPayloads?: AddClientsToProject[];
 }
 
 export async function userDeletionSaga(
@@ -55,7 +55,7 @@ export async function userDeletionSaga(
 
         const { email, name, tenantId, type } = deletedUserResponse;
 
-        await identityGrpcClient.createUserIfNotExists({
+        await identityGrpcClient.createUser({
           email,
           name,
           tenantId,
@@ -105,18 +105,18 @@ export async function userDeletionSaga(
 
         const responses = await Promise.all(
           projects.map(
-            async (project): Promise<AddOrRemoveClientFromProjectPayload> => {
+            async (project): Promise<AddClientsToProject> => {
               const { id: projectId, tenantId } = project;
 
-              await cmsGrpcClient.removeClientFromProject({
-                clientId,
-                projectId,
+              await cmsGrpcClient.removeClientsFromProject({
+                clientUserId: clientId,
+                id: projectId,
                 tenantId,
               });
 
               return {
-                clientId,
-                projectId,
+                clientUserId: clientId,
+                id: projectId,
                 tenantId,
               };
             },
@@ -135,7 +135,7 @@ export async function userDeletionSaga(
         await Promise.all(
           addOrRemoveClientFromProjectPayloads.map(
             async (addOrRemoveClientFromProjectPayload) => {
-              await cmsGrpcClient.addClientToProject(
+              await cmsGrpcClient.addClientsToProject(
                 addOrRemoveClientFromProjectPayload,
               );
             },

@@ -5,10 +5,9 @@ import {
   Get,
   Patch,
   Delete,
-  Param,
   Query,
 } from '@nestjs/common';
-import { CmsGrpcClient, OrchestratorGrpcClient } from '../grpc-clients';
+import { CmsGrpcClient, OrchestratorGrpcClient } from '../../application';
 import { User } from '@prisma/client';
 import { AuthorizedUser } from '../middlewares';
 import {

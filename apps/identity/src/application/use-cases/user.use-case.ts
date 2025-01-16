@@ -5,7 +5,7 @@ import {
   GetUserPayload,
   ListUserPayload,
   ListUsersResponse,
-  UserWithTenantResponse,
+  GetUserResponse,
 } from 'libs/interfaces';
 import {
   PRISMA_SERVICE,
@@ -95,7 +95,7 @@ export class UserUseCase {
 
   public async getOrFail(
     payload: GetUserPayload,
-  ): Promise<UserWithTenantResponse> {
+  ): Promise<GetUserResponse> {
     const { id, tenantId } = payload;
 
     const user = await this.userRepository.findFirst({

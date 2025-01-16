@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CmsGrpcClient, IdentityGrpcClient } from '../clients';
+import { CmsGrpcClient, IdentityGrpcClient } from '../../infrastructure';
 import { RabbitMQAdapter } from 'libs/adapters';
 import {
   UserRegistrationSagaPayload,

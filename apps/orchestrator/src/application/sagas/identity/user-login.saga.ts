@@ -1,4 +1,4 @@
-import { IdentityGrpcClient } from '../../clients';
+import { IdentityGrpcClient } from '../../grpc-clients';
 import { RabbitMQAdapter } from 'libs/adapters';
 import { NOTIFICATION_QUEUE } from 'libs/constants';
 import { runSaga } from '../../saga-runner';

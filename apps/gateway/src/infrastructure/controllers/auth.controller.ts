@@ -9,7 +9,7 @@ import {
   Headers,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { IdentityGrpcClient, OrchestratorGrpcClient } from '../grpc-clients';
+import { IdentityGrpcClient, OrchestratorGrpcClient } from '../../application';
 import { RegisterRequestDto, LoginRequestDto } from '../../application';
 import slugify from 'slugify';
 import { UserType } from '@prisma/client';

@@ -1,11 +1,11 @@
-import { IdentityGrpcClient } from '../../clients';
+import { IdentityGrpcClient } from '../../grpc-clients';
 import { RabbitMQAdapter } from 'libs/adapters';
 import { NOTIFICATION_QUEUE } from 'libs/constants';
 import { runSaga } from '../../saga-runner';
 import { SagaStep } from '../../saga-step';
 import {
   AccessRequestResponse,
-  UserWithTenantResponse,
+  GetUserResponse,
   NotificationType,
   UserCreationSagaPayload,
   UserCreationSagaResult,
@@ -13,7 +13,7 @@ import {
 
 interface UserCreationContext {
   payload: UserCreationSagaPayload;
-  userWithTenantResponse?: UserWithTenantResponse;
+  userWithTenantResponse?: GetUserResponse;
   accessRequestResponse?: AccessRequestResponse;
 }
 
@@ -36,7 +36,7 @@ export async function userCreationSaga(
           payload: { email, name, tenantId, type },
         } = stepContext;
 
-        const response = await identityGrpcClient.createUserIfNotExists({
+        const response = await identityGrpcClient.createUser({
           tenantId,
           name,
           email,
@@ -46,13 +46,13 @@ export async function userCreationSaga(
         stepContext.userWithTenantResponse = response;
       },
       async (stepContext) => {
-        const { userWithTenantResponse: UserWithTenantResponse } = stepContext;
+        const { userWithTenantResponse } = stepContext;
 
-        if (!UserWithTenantResponse) {
+        if (!userWithTenantResponse) {
           return;
         }
 
-        const { id, tenantId } = UserWithTenantResponse;
+        const { id, tenantId } = userWithTenantResponse;
 
         await identityGrpcClient.deleteUser({
           id,

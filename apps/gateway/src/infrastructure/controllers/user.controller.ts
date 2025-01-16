@@ -7,7 +7,7 @@ import {
   Param,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { OrchestratorGrpcClient, IdentityGrpcClient } from '../grpc-clients';
+import { OrchestratorGrpcClient, IdentityGrpcClient } from '../../application';
 import { AuthGuard, AuthorizedUser } from '../middlewares/auth.guard';
 import {
   CreateParticipantRequestDto,
