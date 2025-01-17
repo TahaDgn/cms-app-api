@@ -10,6 +10,6 @@ class Payload {
   email: string;
 }
 
-export class CreateParticipantRequestDto {
+export class CreateUserRequestDto {
   createPayload: Payload;
 }

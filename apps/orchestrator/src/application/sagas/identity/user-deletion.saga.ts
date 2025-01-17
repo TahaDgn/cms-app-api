@@ -6,18 +6,17 @@ import {
   GetUserResponse,
   UserDeletionSagaPayload,
   UserDeletionSagaResult,
-  ListClientProjectsResponse,
-  AddClientsToProject,
   NotificationType,
+  ListProjectsResponse,
 } from 'libs/interfaces';
 import { UserType } from '@prisma/client';
 import { NOTIFICATION_QUEUE } from 'libs/constants';
 
 interface UserDeletionContext {
   payload: UserDeletionSagaPayload;
-  userWithTenantResponse?: GetUserResponse;
-  listClientProjectsResponse?: ListClientProjectsResponse;
-  addOrRemoveClientFromProjectPayloads?: AddClientsToProject[];
+  getUserResponse?: GetUserResponse;
+  listProjectsResponse?: ListProjectsResponse;
+  listProjectsResponseAfterClientsRemoval?: ListProjectsResponse;
 }
 
 export async function userDeletionSaga(
@@ -28,8 +27,8 @@ export async function userDeletionSaga(
 ): Promise<UserDeletionSagaResult> {
   const context: UserDeletionContext = {
     payload,
-    userWithTenantResponse: undefined,
-    listClientProjectsResponse: undefined,
+    getUserResponse: undefined,
+    listProjectsResponse: undefined,
   };
 
   const steps: SagaStep<UserDeletionContext>[] = [
@@ -45,10 +44,10 @@ export async function userDeletionSaga(
           tenantId,
         });
 
-        stepContext.userWithTenantResponse = response;
+        stepContext.getUserResponse = response;
       },
       async (stepContext) => {
-        const { userWithTenantResponse: deletedUserResponse } = stepContext;
+        const { getUserResponse: deletedUserResponse } = stepContext;
         if (!deletedUserResponse) {
           return;
         }
@@ -64,90 +63,83 @@ export async function userDeletionSaga(
       },
     ),
     new SagaStep<UserDeletionContext>(
-      'GetClientProjects',
+      'ListProjects',
       async (stepContext) => {
         const {
-          userWithTenantResponse: { id: clientId, type, tenantId },
+          payload: { id, tenantId },
+        } = stepContext;
+
+        const response = await cmsGrpcClient.listProjects({
+          where: {
+            tenantId,
+            clientUserIds: {
+              has: id,
+            },
+          },
+        });
+
+        stepContext.listProjectsResponse = response;
+      },
+      async () => {
+        // No Compensation
+      },
+    ),
+    new SagaStep<UserDeletionContext>(
+      'RemoveClientsFromAllProjects',
+      async (stepContext) => {
+        const {
+          getUserResponse: { id: clientId, type, tenantId },
+          listProjectsResponse: { projects },
         } = stepContext;
 
         if (type !== UserType.CLIENT) {
           return;
         }
 
-        const response = await cmsGrpcClient.listClientProjects({
-          clientId,
+        if (projects.length < 1) {
+          return;
+        }
+
+        const projectIds = projects.map((project) => project.id);
+
+        const response = await cmsGrpcClient.removeClientsFromProjects({
+          ids: projectIds,
+          clientUserIds: [clientId],
           tenantId,
         });
 
-        const { projects } = response;
+        stepContext.listProjectsResponseAfterClientsRemoval = response;
+      },
+      async (stepContext) => {
+        const {
+          listProjectsResponseAfterClientsRemoval,
+          getUserResponse: { id: clientId, tenantId },
+        } = stepContext;
+
+        if (!listProjectsResponseAfterClientsRemoval) {
+          return;
+        }
+
+        const { projects } = listProjectsResponseAfterClientsRemoval;
 
         if (projects.length < 1) {
           return;
         }
 
-        stepContext.listClientProjectsResponse = response;
-      },
-      async () => {},
-    ),
-    new SagaStep<UserDeletionContext>(
-      'RemoveClientFromProjects',
-      async (stepContext) => {
-        const {
-          listClientProjectsResponse,
-          userWithTenantResponse: { id: clientId },
-        } = stepContext;
+        const ids = projects.map((project) => project.id);
 
-        if (!listClientProjectsResponse) {
-          return;
-        }
-
-        const { projects } = listClientProjectsResponse;
-
-        const responses = await Promise.all(
-          projects.map(
-            async (project): Promise<AddClientsToProject> => {
-              const { id: projectId, tenantId } = project;
-
-              await cmsGrpcClient.removeClientsFromProject({
-                clientUserId: clientId,
-                id: projectId,
-                tenantId,
-              });
-
-              return {
-                clientUserId: clientId,
-                id: projectId,
-                tenantId,
-              };
-            },
-          ),
-        );
-
-        context.addOrRemoveClientFromProjectPayloads = responses;
-      },
-      async (stepContext) => {
-        const { addOrRemoveClientFromProjectPayloads } = stepContext;
-
-        if (!addOrRemoveClientFromProjectPayloads) {
-          return;
-        }
-
-        await Promise.all(
-          addOrRemoveClientFromProjectPayloads.map(
-            async (addOrRemoveClientFromProjectPayload) => {
-              await cmsGrpcClient.addClientsToProject(
-                addOrRemoveClientFromProjectPayload,
-              );
-            },
-          ),
-        );
+        await cmsGrpcClient.addClientsToProjects({
+          ids,
+          tenantId,
+          clientUserIds: [clientId],
+        });
       },
     ),
     new SagaStep<UserDeletionContext>(
       'SendMail',
       async (stepContext) => {
         const {
-          userWithTenantResponse: {
+          getUserResponse: {
             name: userName,
             type: userType,
             email,
@@ -172,5 +164,5 @@ export async function userDeletionSaga(
 
   await runSaga(steps, context);
 
-  return context.userWithTenantResponse;
+  return context.getUserResponse;
 }

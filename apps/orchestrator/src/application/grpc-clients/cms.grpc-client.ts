@@ -3,7 +3,7 @@ import { Client, ClientGrpc, Transport } from '@nestjs/microservices';
 import { CMS_SERVICE_GRPC_URL } from 'libs/constants';
 import {
   CmsService as CmsGrpcServer,
-  AddClientsToProject,
+  AddClientsToProjectsPayload,
   CreateProjectPayload,
   CreateTicketCommentPayload,
   CreateTicketPayload,
@@ -18,9 +18,9 @@ import {
   ListProjectsResponse,
   ListTicketPayload,
   ListTicketResponse,
-  RemoveClientsFromProjectPayload,
   UpdateProjectPayload,
   UpdateTicketPayload,
+  RemoveClientsFromProjectsPayload,
 } from 'libs/interfaces';
 import { join } from 'path';
 import { lastValueFrom, Observable } from 'rxjs';
@@ -77,22 +77,22 @@ export class CmsGrpcClient implements OnModuleInit, CmsGrpcServer {
     );
   }
 
-  public async addClientsToProject(
-    payload: AddClientsToProject,
-  ): Promise<GetProjectResponse> {
+  public async addClientsToProjects(
+    payload: AddClientsToProjectsPayload,
+  ): Promise<ListProjectsResponse> {
     return lastValueFrom(
-      <Observable<GetProjectResponse>>(
-        this.cmsGrpcServer.addClientsToProject(payload)
+      <Observable<ListProjectsResponse>>(
+        this.cmsGrpcServer.addClientsToProjects(payload)
       ),
     );
   }
 
-  public async removeClientsFromProject(
-    payload: RemoveClientsFromProjectPayload,
-  ): Promise<GetProjectResponse> {
+  public async removeClientsFromProjects(
+    payload: RemoveClientsFromProjectsPayload,
+  ): Promise<ListProjectsResponse> {
     return lastValueFrom(
-      <Observable<GetProjectResponse>>(
-        this.cmsGrpcServer.removeClientsFromProject(payload)
+      <Observable<ListProjectsResponse>>(
+        this.cmsGrpcServer.removeClientsFromProjects(payload)
       ),
     );
   }

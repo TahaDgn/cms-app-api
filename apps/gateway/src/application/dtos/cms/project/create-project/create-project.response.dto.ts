@@ -1,7 +1,7 @@
 import { ResponseDto } from 'libs/interfaces';
 import { GetProjectResponsePayload } from '../get-project/get-project.response.dto';
 
-export class CreateProjectResponseDto
+export class ProjectCreateResponseDto
   implements ResponseDto<GetProjectResponsePayload>
 {
   success: boolean;

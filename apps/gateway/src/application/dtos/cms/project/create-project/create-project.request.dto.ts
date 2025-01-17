@@ -5,6 +5,6 @@ class Payload implements Pick<Project, 'title' | 'description'> {
   description: string;
 }
 
-export class ProjectCreateRequestDto {
+export class CreateProjectRequestDto {
   createPayload: Payload;
 }

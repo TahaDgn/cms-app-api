@@ -1,6 +1,7 @@
 import { Prisma, Tenant, User } from '@prisma/client';
 import { OneOf } from 'libs/shared-utils';
 import { Observable } from 'rxjs';
+import { TotalItemsCount } from './shared.interface';
 
 export interface IdentityService {
   createTenantWithOwner(
@@ -97,7 +98,7 @@ export type CreateUserPayload = Pick<
 >;
 
 export type ListUserPayload = Prisma.UserFindManyArgs;
-export interface ListUsersResponse {
+export interface ListUsersResponse extends TotalItemsCount {
   users: User[];
 }
 

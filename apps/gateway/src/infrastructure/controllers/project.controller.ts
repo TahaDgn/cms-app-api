@@ -7,7 +7,7 @@ import {
   Delete,
   Query,
 } from '@nestjs/common';
-import { CmsGrpcClient, OrchestratorGrpcClient } from '../../application';
+import { CmsGrpcClient, OrchestratorGrpcClient, PagingRequestDto } from '../../application';
 import { User } from '@prisma/client';
 import { AuthorizedUser } from '../middlewares';
 import {
@@ -58,11 +58,12 @@ export class ProjectController {
   async getList(
     @AuthorizedUser() user: User,
     @Query() dto: ListProjectRequestDto,
+    @Query() paging: PagingRequestDto,
   ): Promise<ListProjectResponseDto> {
     return;
   }
 
-  @Post('client')
+  @Post('clients')
   async addClient(
     @AuthorizedUser() user: User,
     @Body() dto: AddClientToProjectRequestDto,
@@ -70,7 +71,7 @@ export class ProjectController {
     return;
   }
 
-  @Delete('client')
+  @Delete('clients')
   async removeClient(
     @AuthorizedUser() user: User,
     @Body() dto: RemoveClientToProjectRequestDto,

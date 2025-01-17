@@ -1,7 +1,7 @@
 import { User, UserIssue, UserType } from '@prisma/client';
 import { ResponseDto } from 'libs/interfaces';
 
-class UserListItemResponseDto implements User {
+export class ListUserItemResponsePayload implements User {
   id: number;
 
   tenantId: number;
@@ -20,9 +20,9 @@ class UserListItemResponseDto implements User {
 }
 
 export class ListUsersResponseDto
-  implements ResponseDto<UserListItemResponseDto[]>
+  implements ResponseDto<ListUserItemResponsePayload[]>
 {
   success: boolean;
 
-  data?: UserListItemResponseDto[];
+  data?: ListUserItemResponsePayload[];
 }

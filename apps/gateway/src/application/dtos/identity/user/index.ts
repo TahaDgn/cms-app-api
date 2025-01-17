@@ -1,5 +1,5 @@
-export * from './create-participant-user/create-participant-user.request.dto';
-export * from './create-participant-user/create-participant-user.response.dto';
+export * from './create-user/create-user.request.dto';
+export * from './create-user/create-user.response.dto';
 export * from './delete-user/delete-user.request.dto';
 export * from './delete-user/delete-user.response.dto';
 export * from './list-users/list-users.request.dto';

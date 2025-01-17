@@ -10,7 +10,7 @@ import {
 import { OrchestratorGrpcClient, IdentityGrpcClient } from '../../application';
 import { AuthGuard, AuthorizedUser } from '../middlewares/auth.guard';
 import {
-  CreateParticipantRequestDto,
+  CreateUserRequestDto,
   CreateParticipantResponseDto,
   DeleteUserResponseDto,
   GetUserResponsePayload,
@@ -26,9 +26,9 @@ export class UserController {
   ) {}
 
   @AuthGuard([UserType.PARTICIPANT])
-  @Post('participant')
+  @Post()
   async createParticipant(
-    @Body() dto: CreateParticipantRequestDto,
+    @Body() dto: CreateUserRequestDto,
     @AuthorizedUser() user: User,
   ): Promise<CreateParticipantResponseDto> {
     const {
@@ -76,11 +76,11 @@ export class UserController {
   }
 
   @AuthGuard([UserType.PARTICIPANT])
-  @Delete(':id')
+  @Delete()
   async deleteUser(
     @AuthorizedUser()
     user: Prisma.UserGetPayload<{ include: { tenant: true } }>,
-    @Param('id') id: string,
+
   ): Promise<DeleteUserResponseDto> {
     const { tenantId } = user;
 

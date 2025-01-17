@@ -8,7 +8,7 @@ import {
 } from '../../domain';
 import { CacheUseCase } from './cache.use-case';
 import {
-  AddClientsToProject,
+  AddClientsToProjectsPayload,
   CreateProjectPayload,
   DeleteProjectPayload,
   GetProjectPayload,
@@ -72,7 +72,7 @@ export class ProjectUseCase {
     return project;
   }
 
-  public async addClient(payload: AddClientsToProject) {
+  public async addClient(payload: AddClientsToProjectsPayload) {
     const { clientUserId: clientId, id: projectId, tenantId } = payload;
 
     const project = await this.projectRepository.findFirst({
@@ -87,7 +87,7 @@ export class ProjectUseCase {
     });
   }
 
-  public async removeClient(payload: AddClientsToProject) {
+  public async removeClient(payload: AddClientsToProjectsPayload) {
     const { clientUserId: clientId, id: projectId, tenantId } = payload;
 
     const project = await this.projectRepository.findFirst({

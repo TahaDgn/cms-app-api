@@ -5,15 +5,15 @@ import { SagaStep } from '../../saga-step';
 import {
   AddClientToProjectSagaPayload,
   AddClientToProjectSagaResult,
-  GetProjectResponse,
+  ListProjectsResponse,
   ListUsersResponse,
 } from 'libs/interfaces';
 import { UserType } from '@prisma/client';
 
 interface AddClientToProjectContext {
   payload: AddClientToProjectSagaPayload;
-  getProjectResponse?: GetProjectResponse;
   listUsersResponse?: ListUsersResponse;
+  listProjectsResponseAfterClientsAddition?: ListProjectsResponse;
 }
 
 export async function addClientToProjectSaga(
@@ -24,7 +24,7 @@ export async function addClientToProjectSaga(
 ): Promise<AddClientToProjectSagaResult> {
   const context: AddClientToProjectContext = {
     payload,
-    getProjectResponse: undefined,
+    listProjectsResponseAfterClientsAddition: undefined,
     listUsersResponse: undefined,
   };
 
@@ -36,7 +36,7 @@ export async function addClientToProjectSaga(
           payload: { tenantId, clientUserIds },
         } = stepContext;
 
-        const result = await identityGrpcClient.listUsers({
+        const response = await identityGrpcClient.listUsers({
           where: {
             tenantId,
             id: { in: clientUserIds },
@@ -44,7 +44,7 @@ export async function addClientToProjectSaga(
           },
         });
 
-        stepContext.listUsersResponse = result;
+        stepContext.listUsersResponse = response;
       },
       async () => {
         // No Compensation
@@ -54,36 +54,41 @@ export async function addClientToProjectSaga(
       'AddUsersToProject',
       async (stepContext) => {
         const {
-          payload: { id, tenantId },
+          payload: { ids, tenantId },
           listUsersResponse,
         } = stepContext;
 
         const clientUserIds = listUsersResponse.users.map((user) => user.id);
 
-        const result = await cmsGrpcClient.addClientsToProject({
-          id,
+        const response = await cmsGrpcClient.addClientsToProjects({
+          ids,
           tenantId,
           clientUserIds,
         });
 
-        stepContext.getProjectResponse = result;
+        stepContext.listProjectsResponseAfterClientsAddition = response;
       },
       async (stepContext) => {
         const {
-          payload: { id, tenantId },
+          payload: { ids, tenantId },
           listUsersResponse,
+          listProjectsResponseAfterClientsAddition,
         } = stepContext;
 
-        const { getProjectResponse } = stepContext;
+        if (!listProjectsResponseAfterClientsAddition) {
+          return;
+        }
 
-        if (!getProjectResponse) {
+        const { projects } = listProjectsResponseAfterClientsAddition;
+
+        if (projects.length < 1) {
           return;
         }
 
         const clientUserIds = listUsersResponse.users.map((user) => user.id);
 
-        await cmsGrpcClient.removeClientsFromProject({
-          id,
+        await cmsGrpcClient.removeClientsFromProjects({
+          ids,
           tenantId,
           clientUserIds,
         });
@@ -98,5 +103,5 @@ export async function addClientToProjectSaga(
 
   await runSaga(steps, context);
 
-  return context.getProjectResponse;
+  return context.listProjectsResponseAfterClientsAddition;
 }

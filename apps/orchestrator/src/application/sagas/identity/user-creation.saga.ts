@@ -13,7 +13,7 @@ import {
 
 interface UserCreationContext {
   payload: UserCreationSagaPayload;
-  userWithTenantResponse?: GetUserResponse;
+  getUserResponse?: GetUserResponse;
   accessRequestResponse?: AccessRequestResponse;
 }
 
@@ -24,7 +24,7 @@ export async function userCreationSaga(
 ): Promise<UserCreationSagaResult> {
   const context: UserCreationContext = {
     payload,
-    userWithTenantResponse: undefined,
+    getUserResponse: undefined,
     accessRequestResponse: undefined,
   };
 
@@ -43,10 +43,10 @@ export async function userCreationSaga(
           type,
         });
 
-        stepContext.userWithTenantResponse = response;
+        stepContext.getUserResponse = response;
       },
       async (stepContext) => {
-        const { userWithTenantResponse } = stepContext;
+        const { getUserResponse: userWithTenantResponse } = stepContext;
 
         if (!userWithTenantResponse) {
           return;
@@ -64,7 +64,7 @@ export async function userCreationSaga(
       'CreateAccessLink',
       async (stepContext) => {
         const {
-          userWithTenantResponse: { email, tenantId },
+          getUserResponse: { email, tenantId },
         } = stepContext;
 
         const response = await identityGrpcClient.createAccessRequestLink({
@@ -97,7 +97,7 @@ export async function userCreationSaga(
             tenantIdentifier,
             tenantName,
           },
-          userWithTenantResponse: { email },
+          getUserResponse: { email },
         } = stepContext;
 
         await rabbitMqAdapter.publish(NOTIFICATION_QUEUE, {
@@ -118,5 +118,5 @@ export async function userCreationSaga(
 
   await runSaga(steps, context);
 
-  return context.userWithTenantResponse;
+  return context.getUserResponse;
 }

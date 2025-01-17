@@ -1,5 +1,6 @@
 import { Prisma, Project, Ticket, TicketComment } from '@prisma/client';
 import { Observable } from 'rxjs';
+import { TotalItemsCount } from './shared.interface';
 
 export interface CmsService {
   // ---- PROJECT ---- //
@@ -20,13 +21,13 @@ export interface CmsService {
     payload: UpdateProjectPayload,
   ): Promise<GetProjectResponse> | Observable<GetProjectResponse>;
 
-  addClientsToProject(
-    payload: AddClientsToProject,
-  ): Promise<GetProjectResponse> | Observable<GetProjectResponse>;
+  addClientsToProjects(
+    payload: AddClientsToProjectsPayload,
+  ): Promise<ListProjectsResponse> | Observable<ListProjectsResponse>;
 
-  removeClientsFromProject(
-    payload: RemoveClientsFromProjectPayload,
-  ): Promise<GetProjectResponse> | Observable<GetProjectResponse>;
+  removeClientsFromProjects(
+    payload: RemoveClientsFromProjectsPayload,
+  ): Promise<ListProjectsResponse> | Observable<ListProjectsResponse>;
 
   deleteProject(
     payload: DeleteProjectPayload,
@@ -80,21 +81,21 @@ export type GetProjectResponse = Prisma.ProjectGetPayload<{
 
 export type ListProjectsPayload = Prisma.ProjectFindManyArgs;
 
-export interface ListProjectsResponse {
+export interface ListProjectsResponse extends TotalItemsCount {
   projects: Project[];
 }
 
 export type UpdateProjectPayload = Prisma.ProjectUpdateArgs;
 
-export type AddClientsToProject = Pick<
-  Project,
-  'id' | 'clientUserIds' | 'tenantId'
->;
+export interface AddClientsToProjectsPayload
+  extends Pick<Project, 'clientUserIds' | 'tenantId'> {
+  ids: number[];
+}
 
-export type RemoveClientsFromProjectPayload = Pick<
-  Project,
-  'id' | 'clientUserIds' | 'tenantId'
->;
+export interface RemoveClientsFromProjectsPayload
+  extends Pick<Project, 'clientUserIds' | 'tenantId'> {
+  ids: number[];
+}
 
 export type DeleteProjectPayload = GetProjectPayload;
 
@@ -113,7 +114,7 @@ export type GetTicketResponse = Prisma.TicketGetPayload<{
 
 export type ListTicketPayload = Prisma.TicketFindManyArgs;
 
-export interface ListTicketResponse {
+export interface ListTicketResponse extends TotalItemsCount {
   tickets: Ticket[];
 }
 

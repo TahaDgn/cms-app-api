@@ -3,7 +3,7 @@ import { GrpcMethod } from '@nestjs/microservices';
 import { ProjectUseCase } from '../../application';
 import {
   CmsService,
-  AddClientsToProject,
+  AddClientsToProjectsPayload,
   AddOrRemoveClientFromProjectResponse,
   CreateProjectPayload,
   CreateProjectResponse,
@@ -73,14 +73,14 @@ export class ProjectGrpcServer
 
   @GrpcMethod('CmsService', 'removeClientFromProject')
   async removeClientsFromProject(
-    payload: AddClientsToProject,
+    payload: AddClientsToProjectsPayload,
   ): Promise<AddOrRemoveClientFromProjectResponse> {
     await this.projectUseCase.removeClient(payload);
   }
 
   @GrpcMethod('CmsService', 'addClientToProject')
   async addClientsToProject(
-    payload: AddClientsToProject,
+    payload: AddClientsToProjectsPayload,
   ): Promise<AddOrRemoveClientFromProjectResponse> {
     await this.projectUseCase.addClient(payload);
   }
