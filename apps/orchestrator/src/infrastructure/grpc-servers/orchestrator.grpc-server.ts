@@ -11,7 +11,12 @@ import {
   AddClientToProjectSagaResult,
   RemoveClientFromProjectSagaPayload,
   RemoveClientFromProjectSagaResult,
+  CreateProjectSagaPayload,
+  CreateProjectSagaResult,
+  DeleteProjectSagaPayload,
+  DeleteProjectSagaResult,
 } from 'libs/interfaces';
+import { Observable } from 'rxjs';
 
 @Controller()
 export class OrchestratorGrpcServer implements OrchestratorService {
@@ -19,8 +24,6 @@ export class OrchestratorGrpcServer implements OrchestratorService {
 
   @GrpcMethod('OrchestratorService', 'userRegistrationSaga')
   async userRegistrationSaga(payload: UserRegistrationSagaPayload) {
-    console.log('BURA CALISTIMI ?');
-
     return this.orchestratorUseCase.runUserRegistrationSaga(payload);
   }
 
@@ -51,5 +54,19 @@ export class OrchestratorGrpcServer implements OrchestratorService {
     payload: RemoveClientFromProjectSagaPayload,
   ): Promise<RemoveClientFromProjectSagaResult> {
     return this.orchestratorUseCase.runRemoveClientFromProjectSaga(payload);
+  }
+
+  @GrpcMethod('OrchestratorService', 'createProjectSaga')
+  createProjectSaga(
+    payload: CreateProjectSagaPayload,
+  ): Promise<CreateProjectSagaResult> | Observable<CreateProjectSagaResult> {
+    return this.orchestratorUseCase.runCreateProjectSaga(payload);
+  }
+
+  @GrpcMethod('OrchestratorService', 'deleteProjectSaga')
+  deleteProjectSaga(
+    payload: DeleteProjectSagaPayload,
+  ): Promise<DeleteProjectSagaResult> | Observable<DeleteProjectSagaResult> {
+    return this.orchestratorUseCase.runDeleteProjectSaga(payload);
   }
 }

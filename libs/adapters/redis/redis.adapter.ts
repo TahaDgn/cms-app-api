@@ -47,4 +47,8 @@ export class RedisAdapter implements OnModuleInit, OnModuleDestroy {
   public async lRange(key: string, start = 0, stop = -1) {
     return this.client.lRange(key, start, stop);
   }
+
+  public async lRem(key: string, count: number, element: string) {
+    return this.client.lRem(key, count, element);
+  }
 }

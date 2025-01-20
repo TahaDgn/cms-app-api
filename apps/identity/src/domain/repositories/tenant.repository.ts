@@ -1,42 +1,55 @@
 import { Prisma, Tenant } from '@prisma/client';
-import { DeleteTenantPayload } from 'libs/interfaces';
 
 export const TENANT_REPOSITORY = Symbol('TENANT_REPOSITORY');
 
 export interface TenantRepositorySign {
   create(
-    payload: Pick<Prisma.TenantCreateInput, 'name' | 'identifier' | 'users'>,
+    payload: Prisma.TenantCreateInput,
     transactionClient?: Prisma.TransactionClient,
   ): Promise<Prisma.TenantGetPayload<{ include: { users: true } }>>;
 
   setOwner(
-    id: number,
-    payload: Pick<Prisma.TenantUpdateInput, 'ownerId'>,
+    payload: Pick<Tenant, 'id' | 'ownerId'>,
     transactionClient?: Prisma.TransactionClient,
-  ): Promise<Tenant>;
+  ): Promise<Prisma.TenantGetPayload<{ include: { users: true } }>>;
 
   incrementClientCount(
     payload: Pick<Tenant, 'id'>,
     transactionClient?: Prisma.TransactionClient,
-  ): Promise<Tenant>;
+  ): Promise<Prisma.TenantGetPayload<{ include: { users: true } }>>;
 
   incrementParticipantCount(
     payload: Pick<Tenant, 'id'>,
     transactionClient?: Prisma.TransactionClient,
-  ): Promise<Tenant>;
+  ): Promise<Prisma.TenantGetPayload<{ include: { users: true } }>>;
 
   decrementClientCount(
     payload: Pick<Tenant, 'id'>,
     transactionClient?: Prisma.TransactionClient,
-  ): Promise<Tenant>;
+  ): Promise<Prisma.TenantGetPayload<{ include: { users: true } }>>;
 
   decrementParticipantCount(
     payload: Pick<Tenant, 'id'>,
     transactionClient?: Prisma.TransactionClient,
-  ): Promise<Tenant>;
+  ): Promise<Prisma.TenantGetPayload<{ include: { users: true } }>>;
+
+  incrementProjectCount(
+    payload: Pick<Tenant, 'id'>,
+    transactionClient?: Prisma.TransactionClient,
+  ): Promise<Prisma.TenantGetPayload<{ include: { users: true } }>>;
+
+  decrementProjectCount(
+    payload: Pick<Tenant, 'id'>,
+    transactionClient?: Prisma.TransactionClient,
+  ): Promise<Prisma.TenantGetPayload<{ include: { users: true } }>>;
+
+  update(
+    payload: Prisma.TenantUpdateArgs,
+    transactionClient?: Prisma.TransactionClient,
+  ): Promise<Prisma.TenantGetPayload<{ include: { users: true } }>>;
 
   delete(
-    payload: DeleteTenantPayload,
+    payload: Prisma.TenantDeleteArgs,
     transactionClient?: Prisma.TransactionClient,
   ): Promise<Prisma.TenantGetPayload<{ include: { users: true } }>>;
 }

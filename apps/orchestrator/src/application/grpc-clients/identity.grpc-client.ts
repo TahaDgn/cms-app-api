@@ -21,6 +21,8 @@ import {
   VerifyAccessPayload,
   VerifyAccessResponse,
   UpdateTenantPayload,
+  DecrementTenantProjectsCountPayload,
+  IncrementTenantProjectsCountPayload,
 } from 'libs/interfaces';
 import { IDENTITY_SERVICE_GRPC_URL } from 'libs/constants';
 import { lastValueFrom, Observable } from 'rxjs';
@@ -84,6 +86,26 @@ export class IdentityGrpcClient implements OnModuleInit, IdentityGrpcServer {
     );
   }
 
+  public async incrementTenantProjectsCount(
+    payload: IncrementTenantProjectsCountPayload,
+  ): Promise<GetTenantResponse> {
+    return lastValueFrom(
+      <Observable<GetTenantResponse>>(
+        this.identityGrpcServer.incrementTenantProjectsCount(payload)
+      ),
+    );
+  }
+
+  public async decrementTenantProjectsCount(
+    payload: DecrementTenantProjectsCountPayload,
+  ): Promise<GetTenantResponse> {
+    return lastValueFrom(
+      <Observable<GetTenantResponse>>(
+        this.identityGrpcServer.decrementTenantProjectsCount(payload)
+      ),
+    );
+  }
+
   public async deleteTenant(
     payload: DeleteTenantPayload,
   ): Promise<GetTenantResponse> {
@@ -112,9 +134,21 @@ export class IdentityGrpcClient implements OnModuleInit, IdentityGrpcServer {
     );
   }
 
-  public async getUser(payload: GetUserPayload): Promise<GetUserResponse> {
+  getUser(
+    payload: GetUserPayload,
+  ): Promise<GetUserResponse> | Observable<GetUserResponse> {
     return lastValueFrom(
       <Observable<GetUserResponse>>this.identityGrpcServer.getUser(payload),
+    );
+  }
+
+  public async getUserOrFail(
+    payload: GetUserPayload,
+  ): Promise<GetUserResponse> {
+    return lastValueFrom(
+      <Observable<GetUserResponse>>(
+        this.identityGrpcServer.getUserOrFail(payload)
+      ),
     );
   }
 

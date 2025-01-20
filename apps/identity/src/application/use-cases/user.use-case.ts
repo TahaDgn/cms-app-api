@@ -3,9 +3,9 @@ import {
   CreateUserPayload,
   DeleteUserPayload,
   GetUserPayload,
+  GetUserResponse,
   ListUserPayload,
   ListUsersResponse,
-  GetUserResponse,
 } from 'libs/interfaces';
 import {
   PRISMA_SERVICE,
@@ -31,7 +31,7 @@ export class UserUseCase {
     private readonly cacheUseCase: CacheUseCase,
   ) {}
 
-  public async createUserIfNotExists(payload: CreateUserPayload) {
+  public async create(payload: CreateUserPayload) {
     const { tenantId, type, name, email } = payload;
 
     const existingUser = await this.userRepository.findFirst({
@@ -84,26 +84,28 @@ export class UserUseCase {
   }
 
   public async list(payload: ListUserPayload): Promise<ListUsersResponse> {
-    const users = await this.userRepository.findAll({
-      where: {
-        ...payload,
-      },
+    const users = await this.userRepository.findAll(payload);
+
+    const { where } = payload;
+
+    const totalItemsCount = await this.userRepository.count({
+      where,
     });
 
-    return { users };
+    return {
+      users,
+      totalItemsCount,
+    };
   }
 
-  public async getOrFail(
-    payload: GetUserPayload,
-  ): Promise<GetUserResponse> {
-    const { id, tenantId } = payload;
+  public async get(payload: GetUserPayload): Promise<GetUserResponse> {
+    const user = await this.userRepository.findFirst(payload);
 
-    const user = await this.userRepository.findFirst({
-      where: {
-        id,
-        tenantId,
-      },
-    });
+    return user;
+  }
+
+  public async getOrFail(payload: GetUserPayload): Promise<GetUserResponse> {
+    const user = await this.userRepository.findFirst(payload);
 
     if (!user) throw new UserNotFoundException();
 
@@ -111,16 +113,29 @@ export class UserUseCase {
   }
 
   public async delete(payload: DeleteUserPayload) {
+    const { id, tenantId } = payload;
+
     const deletedUser = await this.prismaService.$transaction(
       async (transactionClient: Prisma.TransactionClient) => {
-        const user = await this.userRepository.delete(
+        const user = await this.userRepository.findUnique({
+          where: {
+            id,
+            tenantId,
+          },
+        });
+
+        if (!user) {
+          throw new UserNotFoundException();
+        }
+
+        await this.userRepository.delete(
           {
-            ...payload,
+            where: { id, tenantId },
           },
           transactionClient,
         );
 
-        const { type, tenantId, id } = deletedUser;
+        const { type } = user;
 
         if (type === UserType.CLIENT) {
           await this.tenantRepository.decrementClientCount(

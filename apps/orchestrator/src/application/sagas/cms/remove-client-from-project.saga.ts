@@ -16,7 +16,7 @@ interface RemoveClientFromProjectContext {
   listUsersResponse?: ListUsersResponse;
 }
 
-export async function runRemoveClientFromProjectSaga(
+export async function removeClientFromProjectSaga(
   cmsGrpcClient: CmsGrpcClient,
   identityGrpcClient: IdentityGrpcClient,
   rabbitMqAdapter: RabbitMQAdapter,
@@ -51,7 +51,7 @@ export async function runRemoveClientFromProjectSaga(
       },
     ),
     new SagaStep<RemoveClientFromProjectContext>(
-      'RemoveUsersFromProject',
+      'RemoveClientsFromProjects',
       async (stepContext) => {
         const {
           payload: { ids, tenantId },

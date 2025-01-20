@@ -51,7 +51,7 @@ export async function addClientToProjectSaga(
       },
     ),
     new SagaStep<AddClientToProjectContext>(
-      'AddUsersToProject',
+      'AddClientsToProjects',
       async (stepContext) => {
         const {
           payload: { ids, tenantId },

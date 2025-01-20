@@ -1,8 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Prisma, Tenant } from '@prisma/client';
+import { Prisma, Tenant, TenantIssue } from '@prisma/client';
 import { PRISMA_SERVICE, TenantRepositorySign } from '../../domain';
-import { DeleteTenantPayload } from 'libs/interfaces';
 
 @Injectable()
 export class TenantRepository implements TenantRepositorySign {
@@ -25,82 +24,279 @@ export class TenantRepository implements TenantRepositorySign {
   }
 
   async setOwner(
-    id: number,
-    payload: Pick<Prisma.TenantUpdateInput, 'ownerId'>,
-    transactionClient = this.prismaService,
-  ): Promise<Tenant> {
+    payload: Pick<Tenant, 'id' | 'ownerId'>,
+    transactionClient?: Prisma.TransactionClient,
+  ): Promise<Prisma.TenantGetPayload<{ include: { users: true } }>> {
+    const { id, ownerId } = payload;
+
     return transactionClient.tenant.update({
-      where: { id },
-      data: { ...payload },
+      where: {
+        id,
+      },
+      data: {
+        ownerId,
+      },
+      include: {
+        users: true,
+      },
     });
   }
 
   async incrementClientCount(
     payload: Pick<Tenant, 'id'>,
-    transactionClient = this.prismaService,
-  ): Promise<Tenant> {
+    transactionClient?: Prisma.TransactionClient,
+  ): Promise<Prisma.TenantGetPayload<{ include: { users: true } }>> {
     const { id } = payload;
 
-    return transactionClient.tenant.update({
-      where: { id },
+    const updatedTenant = await transactionClient.tenant.update({
+      where: {
+        id,
+      },
       data: {
-        clientsCount: { increment: 1 },
+        clientsCount: {
+          increment: 1,
+        },
+      },
+      include: {
+        users: true,
+      },
+    });
+
+    const { issues } = updatedTenant;
+
+    if (!issues.includes(TenantIssue.NO_CLIENT_FOUND)) return updatedTenant;
+
+    const modifiedIssues = issues.filter(
+      (issue) => issue !== TenantIssue.NO_CLIENT_FOUND,
+    );
+
+    return transactionClient.tenant.update({
+      where: {
+        id,
+      },
+      data: {
+        issues: modifiedIssues,
+      },
+      include: {
+        users: true,
       },
     });
   }
 
   async incrementParticipantCount(
     payload: Pick<Tenant, 'id'>,
-    transactionClient = this.prismaService,
-  ): Promise<Tenant> {
+    transactionClient?: Prisma.TransactionClient,
+  ): Promise<Prisma.TenantGetPayload<{ include: { users: true } }>> {
     const { id } = payload;
 
-    return transactionClient.tenant.update({
-      where: { id },
+    const updatedTenant = await transactionClient.tenant.update({
+      where: {
+        id,
+      },
       data: {
-        participantsCount: { increment: 1 },
+        participantsCount: {
+          increment: 1,
+        },
+      },
+      include: {
+        users: true,
+      },
+    });
+
+    const { issues } = updatedTenant;
+
+    if (!issues.includes(TenantIssue.NO_PARTICIPANT_FOUND))
+      return updatedTenant;
+
+    const modifiedIssues = issues.filter(
+      (issue) => issue !== TenantIssue.NO_PARTICIPANT_FOUND,
+    );
+
+    return transactionClient.tenant.update({
+      where: {
+        id,
+      },
+      data: {
+        issues: modifiedIssues,
+      },
+      include: {
+        users: true,
       },
     });
   }
-
   async decrementClientCount(
     payload: Pick<Tenant, 'id'>,
-    transactionClient = this.prismaService,
-  ): Promise<Tenant> {
+    transactionClient?: Prisma.TransactionClient,
+  ): Promise<Prisma.TenantGetPayload<{ include: { users: true } }>> {
     const { id } = payload;
 
-    return transactionClient.tenant.update({
-      where: { id },
+    const updatedTenant = await transactionClient.tenant.update({
+      where: {
+        id,
+      },
       data: {
-        clientsCount: { decrement: 1 },
+        clientsCount: {
+          increment: -1,
+        },
+      },
+      include: {
+        users: true,
+      },
+    });
+
+    const { clientsCount } = updatedTenant;
+
+    if (clientsCount > 0) return updatedTenant;
+
+    return transactionClient.tenant.update({
+      where: {
+        id,
+      },
+      data: {
+        issues: {
+          push: TenantIssue.NO_CLIENT_FOUND,
+        },
+      },
+      include: {
+        users: true,
+      },
+    });
+  }
+  async decrementParticipantCount(
+    payload: Pick<Tenant, 'id'>,
+    transactionClient?: Prisma.TransactionClient,
+  ): Promise<Prisma.TenantGetPayload<{ include: { users: true } }>> {
+    const { id } = payload;
+
+    const updatedTenant = await transactionClient.tenant.update({
+      where: {
+        id,
+      },
+      data: {
+        participantsCount: {
+          increment: -1,
+        },
+      },
+      include: {
+        users: true,
+      },
+    });
+
+    const { participantsCount } = updatedTenant;
+
+    if (participantsCount > 0) return updatedTenant;
+
+    return transactionClient.tenant.update({
+      where: {
+        id,
+      },
+      data: {
+        issues: {
+          push: TenantIssue.NO_PARTICIPANT_FOUND,
+        },
+      },
+      include: {
+        users: true,
+      },
+    });
+  }
+  async incrementProjectCount(
+    payload: Pick<Tenant, 'id'>,
+    transactionClient?: Prisma.TransactionClient,
+  ): Promise<Prisma.TenantGetPayload<{ include: { users: true } }>> {
+    const { id } = payload;
+
+    const updatedTenant = await transactionClient.tenant.update({
+      where: {
+        id,
+      },
+      data: {
+        projectsCount: {
+          increment: 1,
+        },
+      },
+      include: {
+        users: true,
+      },
+    });
+
+    const { issues } = updatedTenant;
+
+    if (!issues.includes(TenantIssue.NO_PROJECT_FOUND)) return updatedTenant;
+
+    const modifiedIssues = issues.filter(
+      (issue) => issue !== TenantIssue.NO_PROJECT_FOUND,
+    );
+
+    return transactionClient.tenant.update({
+      where: {
+        id,
+      },
+      data: {
+        issues: modifiedIssues,
+      },
+      include: {
+        users: true,
+      },
+    });
+  }
+  async decrementProjectCount(
+    payload: Pick<Tenant, 'id'>,
+    transactionClient?: Prisma.TransactionClient,
+  ): Promise<Prisma.TenantGetPayload<{ include: { users: true } }>> {
+    const { id } = payload;
+
+    const updatedTenant = await transactionClient.tenant.update({
+      where: {
+        id,
+      },
+      data: {
+        clientsCount: {
+          increment: -1,
+        },
+      },
+      include: {
+        users: true,
+      },
+    });
+
+    const { projectsCount } = updatedTenant;
+
+    if (projectsCount > 0) return updatedTenant;
+
+    return transactionClient.tenant.update({
+      where: {
+        id,
+      },
+      data: {
+        issues: {
+          push: TenantIssue.NO_PROJECT_FOUND,
+        },
+      },
+      include: {
+        users: true,
       },
     });
   }
 
-  async decrementParticipantCount(
-    payload: Pick<Tenant, 'id'>,
-    transactionClient = this.prismaService,
-  ): Promise<Tenant> {
-    const { id } = payload;
-
+  update(
+    payload: Prisma.TenantUpdateArgs,
+    transactionClient?: Prisma.TransactionClient,
+  ): Promise<Prisma.TenantGetPayload<{ include: { users: true } }>> {
     return transactionClient.tenant.update({
-      where: { id },
-      data: {
-        participantsCount: { decrement: 1 },
+      ...payload,
+      include: {
+        users: true,
       },
     });
   }
 
   delete(
-    payload: DeleteTenantPayload,
-    transactionClient = this.prismaService,
+    payload: Prisma.TenantDeleteArgs,
+    transactionClient?: Prisma.TransactionClient,
   ): Promise<Prisma.TenantGetPayload<{ include: { users: true } }>> {
-    const { id } = payload;
-
     return transactionClient.tenant.delete({
-      where: {
-        id,
-      },
+      ...payload,
       include: {
         users: true,
       },

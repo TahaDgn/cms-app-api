@@ -11,6 +11,7 @@ import { RedisAdapter } from 'libs/adapters/redis';
 import { REDIS_EXPIRE_5_MIN } from 'libs/constants';
 import { generateRandomString } from 'libs/shared-utils';
 import { Prisma, User } from '@prisma/client';
+import { AccessCodeInvalidException } from '../../domain';
 
 @Injectable()
 export class CacheUseCase {
@@ -74,9 +75,28 @@ export class CacheUseCase {
   ): Promise<RemoveAccessCodeResponse> {
     const { accessCode } = payload;
 
+    const userJsonString = await this.redisAdapter.getKey(accessCode);
+
+    if (!userJsonString) {
+      throw new AccessCodeInvalidException();
+    }
+
+    const user = <Prisma.UserGetPayload<{ include: { tenant: true } }>>(
+      JSON.parse(userJsonString)
+    );
+
+    const { id, tenantId } = user;
+
     const accessRequestCodeKey = `accessRequestCode:${accessCode}`;
 
-    await this.redisAdapter.delKey(accessRequestCodeKey);
+    await Promise.all([
+      await this.redisAdapter.lRem(
+        `tenant:${tenantId}:user:${id}:accessTokenCacheKeys`,
+        0,
+        accessCode,
+      ),
+      await this.redisAdapter.delKey(accessRequestCodeKey),
+    ]);
   }
 
   public async removeAccessToken(
@@ -90,6 +110,45 @@ export class CacheUseCase {
   }
 
   public async dropUserAccessTokens(user: Pick<User, 'id' | 'tenantId'>) {
+    const userAccessTokenKeysList = await this.getUserAccessTokenKeysList(user);
+
+    if (!userAccessTokenKeysList) {
+      return;
+    }
+
+    await Promise.all(
+      userAccessTokenKeysList.map(async (accessTokenKey) => {
+        this.redisAdapter.delKey(accessTokenKey);
+      }),
+    );
+  }
+
+  public async regenerateAndCacheAccessTokens(
+    users: Prisma.UserGetPayload<{ include: { tenant: true } }>[],
+  ) {
+    await Promise.all(
+      users.map(async (user) => {
+        const userAccessTokenKeysList =
+          await this.getUserAccessTokenKeysList(user);
+
+        if (!userAccessTokenKeysList) return;
+
+        await Promise.all(
+          userAccessTokenKeysList.map(async (userAccessTokenKey) => {
+            await this.redisAdapter.setKey(
+              userAccessTokenKey,
+              JSON.stringify(user),
+              60 * 60,
+            );
+          }),
+        );
+      }),
+    );
+  }
+
+  private async getUserAccessTokenKeysList(
+    user: Pick<User, 'id' | 'tenantId'>,
+  ) {
     const { id, tenantId } = user;
 
     const userAccessTokenKeysListKey = `tenant:${tenantId}:user:${id}:accessTokenCacheKeys`;
@@ -102,10 +161,6 @@ export class CacheUseCase {
       return;
     }
 
-    await Promise.all(
-      accessTokenKeysList.map(async (accessTokenKey) => {
-        this.redisAdapter.delKey(accessTokenKey);
-      }),
-    );
+    return accessTokenKeysList;
   }
 }

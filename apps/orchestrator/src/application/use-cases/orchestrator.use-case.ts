@@ -12,10 +12,16 @@ import {
   AddClientToProjectSagaResult,
   RemoveClientFromProjectSagaPayload,
   RemoveClientFromProjectSagaResult,
+  CreateProjectSagaPayload,
+  CreateProjectSagaResult,
+  DeleteProjectSagaPayload,
+  DeleteProjectSagaResult,
 } from 'libs/interfaces';
 import {
   addClientToProjectSaga,
-  runRemoveClientFromProjectSaga,
+  createProjectSaga,
+  deleteProjectSaga,
+  removeClientFromProjectSaga,
   userCreationSaga,
   userDeletionSaga,
   userLoginSaga,
@@ -83,7 +89,29 @@ export class OrchestratorUseCase {
   async runRemoveClientFromProjectSaga(
     payload: RemoveClientFromProjectSagaPayload,
   ): Promise<RemoveClientFromProjectSagaResult> {
-    return runRemoveClientFromProjectSaga(
+    return removeClientFromProjectSaga(
+      this.cmsGrpcClient,
+      this.identityGrpcClient,
+      this.rabbitMqAdapter,
+      payload,
+    );
+  }
+
+  async runCreateProjectSaga(
+    payload: CreateProjectSagaPayload,
+  ): Promise<CreateProjectSagaResult> {
+    return createProjectSaga(
+      this.cmsGrpcClient,
+      this.identityGrpcClient,
+      this.rabbitMqAdapter,
+      payload,
+    );
+  }
+
+  async runDeleteProjectSaga(
+    payload: DeleteProjectSagaPayload,
+  ): Promise<DeleteProjectSagaResult> {
+    return deleteProjectSaga(
       this.cmsGrpcClient,
       this.identityGrpcClient,
       this.rabbitMqAdapter,

@@ -2,33 +2,61 @@ import { Tenant, User } from '@prisma/client';
 import { GetUserResponse } from './identity.interface';
 import {
   AddClientsToProjectsPayload,
+  CreateProjectPayload,
+  DeleteProjectPayload,
+  GetProjectResponse,
   ListProjectsResponse,
   RemoveClientsFromProjectsPayload,
 } from './cms.interface';
+import { Observable } from 'rxjs';
 
 export interface OrchestratorService {
   userRegistrationSaga(
     payload: UserRegistrationSagaPayload,
-  ): Promise<UserRegistrationSagaResult>;
+  ):
+    | Promise<UserRegistrationSagaResult>
+    | Observable<UserRegistrationSagaResult>;
 
-  userLoginSaga(payload: UserLoginSagaPayload): Promise<UserLoginSagaResult>;
+  userLoginSaga(
+    payload: UserLoginSagaPayload,
+  ): Promise<UserLoginSagaResult> | Observable<UserLoginSagaResult>;
 
   userCreationSaga(
     payload: UserCreationSagaPayload,
-  ): Promise<UserCreationSagaResult>;
+  ): Promise<UserCreationSagaResult> | Observable<UserCreationSagaResult>;
 
   userDeletionSaga(
     payload: UserDeletionSagaPayload,
-  ): Promise<UserDeletionSagaResult>;
+  ): Promise<UserDeletionSagaResult> | Observable<UserDeletionSagaResult>;
 
   addClientToProjectSaga(
     payload: AddClientToProjectSagaPayload,
-  ): Promise<AddClientToProjectSagaResult>;
+  ):
+    | Promise<AddClientToProjectSagaResult>
+    | Observable<AddClientToProjectSagaResult>;
 
   removeClientFromProjectSaga(
     payload: RemoveClientFromProjectSagaPayload,
-  ): Promise<RemoveClientFromProjectSagaResult>;
+  ):
+    | Promise<RemoveClientFromProjectSagaResult>
+    | Observable<RemoveClientFromProjectSagaResult>;
+
+  createProjectSaga(
+    payload: CreateProjectSagaPayload,
+  ): Promise<CreateProjectSagaResult> | Observable<CreateProjectSagaResult>;
+
+  deleteProjectSaga(
+    payload: DeleteProjectSagaPayload,
+  ): Promise<DeleteProjectSagaResult> | Observable<DeleteProjectSagaResult>;
 }
+
+export type CreateProjectSagaPayload = CreateProjectPayload;
+
+export type CreateProjectSagaResult = GetProjectResponse;
+
+export type DeleteProjectSagaPayload = DeleteProjectPayload;
+
+export type DeleteProjectSagaResult = GetProjectResponse;
 
 export type AddClientToProjectSagaPayload = AddClientsToProjectsPayload;
 

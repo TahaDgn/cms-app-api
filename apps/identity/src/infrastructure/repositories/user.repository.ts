@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Prisma, UserIssue } from '@prisma/client';
+import { Prisma, User, UserIssue } from '@prisma/client';
 import { PRISMA_SERVICE, UserRepositorySign } from '../../domain';
 
 @Injectable()
@@ -46,51 +46,48 @@ export class UserRepository implements UserRepositorySign {
   }
 
   async removeFirstLoginIssue(
-    payload: Pick<Prisma.UserWhereUniqueInput, 'id' | 'tenantId'>,
+    payload: Pick<User, 'id' | 'tenantId'>,
     transactionClient = this.prismaService,
   ) {
+    const { id, tenantId } = payload;
+
     const user = await this.findFirst({
       where: {
-        ...payload,
+        id,
+        tenantId,
       },
     });
 
-    if (!user) return;
+    const { issues } = user;
 
-    const updatedIssues = user.issues.filter(
-      (issue) => issue !== UserIssue.FIRST_LOGIN_WAS_NOT_MADE.toString(),
+    const modifiedIssues = issues.filter(
+      (issue) => issue !== UserIssue.FIRST_LOGIN_WAS_NOT_MADE,
     );
 
-    const { id } = payload;
-
-    await transactionClient.user.update({
+    return transactionClient.user.update({
       where: {
         id,
+        tenantId,
       },
       data: {
-        issues: updatedIssues,
+        issues: modifiedIssues,
+      },
+      include: {
+        tenant: true,
       },
     });
   }
 
+  async count(payload: Prisma.UserCountArgs): Promise<number> {
+    return this.prismaService.user.count(payload);
+  }
+
   async delete(
-    payload: Pick<Prisma.UserWhereInput, 'id' | 'tenantId'>,
+    payload: Prisma.UserDeleteArgs,
     transactionClient = this.prismaService,
   ) {
-    const user = await this.findFirst({
-      where: {
-        ...payload,
-      },
-    });
-
-    if (!user) return;
-
-    const { id } = user;
-
     return transactionClient.user.delete({
-      where: {
-        id,
-      },
+      ...payload,
       include: {
         tenant: true,
       },

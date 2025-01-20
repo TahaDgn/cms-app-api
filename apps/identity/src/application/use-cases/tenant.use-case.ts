@@ -1,10 +1,12 @@
-// apps/identity/src/application/identity.service.ts
 import { Inject, Injectable } from '@nestjs/common';
 import {
   CreateTenantAndUserPayload,
   CreateTenantAndUserResponse,
+  DecrementTenantProjectsCountPayload,
   DeleteTenantPayload,
   GetTenantResponse,
+  IncrementTenantProjectsCountPayload,
+  UpdateTenantPayload,
 } from 'libs/interfaces';
 import {
   PRISMA_SERVICE,
@@ -15,6 +17,7 @@ import {
   UserRepositorySign,
 } from '../../domain';
 import { Prisma } from '@prisma/client';
+import { CacheUseCase } from './cache.use-case';
 
 @Injectable()
 export class TenantUseCase {
@@ -25,6 +28,7 @@ export class TenantUseCase {
     private readonly tenantRepository: TenantRepositorySign,
     @Inject(USER_REPOSITORY)
     private readonly userRepository: UserRepositorySign,
+    private readonly cacheUseCase: CacheUseCase,
   ) {}
 
   public async createWithOwner(
@@ -54,8 +58,8 @@ export class TenantUseCase {
         );
 
         await this.tenantRepository.setOwner(
-          createdTenant.id,
           {
+            id: createdTenant.id,
             ownerId: createdUser.id,
           },
           transactionClient,
@@ -71,9 +75,96 @@ export class TenantUseCase {
     return createdTenantAndUser;
   }
 
+  public async update(payload: UpdateTenantPayload) {
+    const { id, ...updatePayload } = payload;
+    const updatedTenant = await this.prismaService.$transaction(
+      async (transactionClient: Prisma.TransactionClient) => {
+        const tenant = await this.tenantRepository.update(
+          {
+            where: {
+              id,
+            },
+            data: {
+              ...updatePayload,
+            },
+            include: {
+              users: true,
+            },
+          },
+          transactionClient,
+        );
+
+        const users = await this.userRepository.findAll({
+          where: { tenantId: id },
+          include: {
+            tenant: true,
+          },
+        });
+
+        if (users.length < 1) return;
+
+        await this.cacheUseCase.regenerateAndCacheAccessTokens(users);
+
+        return tenant;
+      },
+    );
+
+    return updatedTenant;
+  }
+
+  public async incrementProjectsCount(
+    payload: IncrementTenantProjectsCountPayload,
+  ) {
+    const { id } = payload;
+
+    return this.tenantRepository.incrementProjectCount({
+      id,
+    });
+  }
+
+  public async decrementProjectsCount(
+    payload: DecrementTenantProjectsCountPayload,
+  ) {
+    const { id } = payload;
+
+    return this.tenantRepository.decrementProjectCount({
+      id,
+    });
+  }
+
   public async delete(
     payload: DeleteTenantPayload,
   ): Promise<GetTenantResponse> {
-    return this.tenantRepository.delete(payload);
+    const { id } = payload;
+
+    const deletedTenant = await this.prismaService.$transaction(
+      async (transactionClient: Prisma.TransactionClient) => {
+        const tenant = await this.tenantRepository.delete(
+          {
+            where: {
+              id,
+            },
+            include: {
+              users: true,
+            },
+          },
+          transactionClient,
+        );
+
+        const { users } = tenant;
+
+        if (!users) return;
+
+        await Promise.all(
+          users.map(async (user) => {
+            this.cacheUseCase.dropUserAccessTokens(user);
+          }),
+        );
+
+        return tenant;
+      },
+    );
+
+    return deletedTenant;
   }
 }

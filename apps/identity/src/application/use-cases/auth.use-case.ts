@@ -12,6 +12,7 @@ import {
   UserRepositorySign,
 } from '../../domain';
 import { CacheUseCase } from './cache.use-case';
+import { UserIssue } from '@prisma/client';
 
 @Injectable()
 export class AuthUseCase {
@@ -92,16 +93,17 @@ export class AuthUseCase {
 
     if (!user) throw new UserNotFoundException();
 
-    const { tenantId } = user;
+    const { tenantId, issues } = user;
 
-    await this.userRepository.removeFirstLoginIssue({
-      id: userId,
-      tenantId,
-    });
+    if (issues.includes(UserIssue.FIRST_LOGIN_WAS_NOT_MADE)) {
+      const updatedUser = await this.userRepository.removeFirstLoginIssue({
+        id: userId,
+        tenantId,
+      });
 
-    const { accessToken } =
-      await this.cacheUseCase.createAndCacheAccessToken(user);
+      return this.cacheUseCase.createAndCacheAccessToken(updatedUser);
+    }
 
-    return { accessToken };
+    return this.cacheUseCase.createAndCacheAccessToken(user);
   }
 }

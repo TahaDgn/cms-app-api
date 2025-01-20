@@ -10,13 +10,21 @@ export interface IdentityService {
     | Promise<CreateTenantAndUserResponse>
     | Observable<CreateTenantAndUserResponse>;
 
-  createAccessRequestLink(
-    payload: AccessRequestPayload,
-  ): Promise<AccessRequestResponse> | Observable<AccessRequestResponse>;
+  updateTenant(
+    payload: UpdateTenantPayload,
+  ): Promise<GetTenantResponse> | Observable<GetTenantResponse>;
 
-  verifyAccessCode(
-    payload: VerifyAccessPayload,
-  ): Promise<VerifyAccessResponse> | Observable<VerifyAccessResponse>;
+  incrementTenantProjectsCount(
+    payload: IncrementTenantProjectsCountPayload,
+  ): Promise<GetTenantResponse> | Observable<GetTenantResponse>;
+
+  decrementTenantProjectsCount(
+    payload: DecrementTenantProjectsCountPayload,
+  ): Promise<GetTenantResponse> | Observable<GetTenantResponse>;
+
+  deleteTenant(
+    payload: DeleteTenantPayload,
+  ): Promise<GetTenantResponse> | Observable<GetTenantResponse>;
 
   createUser(
     payload: CreateUserPayload,
@@ -26,6 +34,10 @@ export interface IdentityService {
     payload: ListUserPayload,
   ): Promise<ListUsersResponse> | Observable<ListUsersResponse>;
 
+  getUserOrFail(
+    payload: GetUserPayload,
+  ): Promise<GetUserResponse> | Observable<GetUserResponse>;
+
   getUser(
     payload: GetUserPayload,
   ): Promise<GetUserResponse> | Observable<GetUserResponse>;
@@ -34,13 +46,13 @@ export interface IdentityService {
     payload: DeleteUserPayload,
   ): Promise<GetUserResponse> | Observable<GetUserResponse>;
 
-  deleteTenant(
-    payload: DeleteTenantPayload,
-  ): Promise<GetTenantResponse> | Observable<GetTenantResponse>;
+  createAccessRequestLink(
+    payload: AccessRequestPayload,
+  ): Promise<AccessRequestResponse> | Observable<AccessRequestResponse>;
 
-  updateTenant(
-    payload: UpdateTenantPayload,
-  ): Promise<GetTenantResponse> | Observable<GetTenantResponse>;
+  verifyAccessCode(
+    payload: VerifyAccessPayload,
+  ): Promise<VerifyAccessResponse> | Observable<VerifyAccessResponse>;
 
   removeAccessCode(
     payload: RemoveAccessCodePayload,
@@ -51,14 +63,6 @@ export interface IdentityService {
   ): Promise<RemoveAccessTokenResponse> | Observable<RemoveAccessTokenResponse>;
 }
 
-export type UpdateTenantPayload = Prisma.TenantUpdateArgs;
-
-export type DeleteTenantPayload = Pick<Tenant, 'id'>;
-
-export type GetTenantResponse = Prisma.TenantGetPayload<{
-  include: { users: true };
-}>;
-
 export interface CreateTenantAndUserPayload {
   tenant: Pick<Tenant, 'name' | 'identifier'>;
   user: Pick<User, 'name' | 'email' | 'type'>;
@@ -68,6 +72,41 @@ export interface CreateTenantAndUserResponse {
   tenant: Tenant;
   user: User;
 }
+
+export type IncrementTenantProjectsCountPayload = Pick<Tenant, 'id'>;
+
+export type DecrementTenantProjectsCountPayload = Pick<Tenant, 'id'>;
+
+export type GetTenantResponse = Prisma.TenantGetPayload<{
+  include: { users: true };
+}>;
+
+export type UpdateTenantPayload = Pick<Tenant, 'id' | 'name' | 'identifier'>;
+
+export type DeleteTenantPayload = {
+  id: number;
+};
+
+export type CreateUserPayload = Pick<
+  User,
+  'tenantId' | 'name' | 'email' | 'type'
+>;
+
+export type GetUserPayload = Prisma.UserFindFirstArgs;
+
+export type GetUserResponse = Prisma.UserGetPayload<{
+  include: {
+    tenant: true;
+  };
+}>;
+
+export type ListUserPayload = Prisma.UserFindManyArgs;
+
+export interface ListUsersResponse extends TotalItemsCount {
+  users: User[];
+}
+
+export type DeleteUserPayload = Pick<User, 'id' | 'tenantId'>;
 
 export type AccessRequestPayload = Pick<User, 'email'> &
   OneOf<{
@@ -92,25 +131,11 @@ export interface VerifyAccessResponse {
   accessToken: string;
 }
 
-export type CreateUserPayload = Pick<
-  User,
-  'tenantId' | 'name' | 'email' | 'type'
->;
-
-export type ListUserPayload = Prisma.UserFindManyArgs;
-export interface ListUsersResponse extends TotalItemsCount {
-  users: User[];
+export interface LogoutPayload {
+  accessToken: string;
 }
 
-export type GetUserPayload = Prisma.UserFindFirstArgs;
-
-export type GetUserResponse = Prisma.UserGetPayload<{
-  include: {
-    tenant: true;
-  };
-}>;
-
-export type DeleteUserPayload = Pick<User, 'id' | 'tenantId'>;
+export type LogoutResponse = void;
 
 export interface RemoveAccessCodePayload {
   accessCode: string;

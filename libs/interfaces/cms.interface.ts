@@ -97,7 +97,7 @@ export interface RemoveClientsFromProjectsPayload
   ids: number[];
 }
 
-export type DeleteProjectPayload = GetProjectPayload;
+export type DeleteProjectPayload = Pick<Project, 'id' | 'tenantId'>;
 
 // ---- TICKET ---- //
 
@@ -120,7 +120,7 @@ export interface ListTicketResponse extends TotalItemsCount {
 
 export type UpdateTicketPayload = Prisma.TicketUpdateArgs;
 
-export type DeleteTicketPayload = GetTicketPayload;
+export type DeleteTicketPayload = Pick<Ticket, 'id' | 'tenantId'>;
 
 // ---- TICKET COMMENT ---- //
 
@@ -129,4 +129,4 @@ export type CreateTicketCommentPayload = Pick<
   'tenantId' | 'ticketId' | 'createdBy' | 'content'
 >;
 
-export type DeleteTicketCommentPayload = GetTicketPayload;
+export type DeleteTicketCommentPayload = Pick<TicketComment, 'id' | 'tenantId'>;
