@@ -7,6 +7,7 @@ import {
   GetProjectResponse,
   GetTenantResponse,
 } from 'libs/interfaces';
+import { Metadata } from '@grpc/grpc-js';
 
 interface CreateProjectContext {
   payload: CreateProjectSagaPayload;
@@ -19,6 +20,7 @@ export async function createProjectSaga(
   identityGrpcClient: IdentityGrpcClient,
   rabbitMqAdapter: RabbitMQAdapter,
   payload: CreateProjectSagaPayload,
+  metadata: Metadata,
 ): Promise<GetProjectResponse> {
   const context: CreateProjectContext = {
     payload,
@@ -32,7 +34,7 @@ export async function createProjectSaga(
       async (stepContext) => {
         const { payload } = stepContext;
 
-        const response = await cmsGrpcClient.createProject(payload);
+        const response = await cmsGrpcClient.createProject(payload, metadata);
 
         stepContext.getProjectResponse = response;
       },
@@ -41,24 +43,23 @@ export async function createProjectSaga(
 
         if (!getProjectResponse) return;
 
-        const { id, tenantId } = getProjectResponse;
+        const { id } = getProjectResponse;
 
-        await cmsGrpcClient.deleteProject({
-          id,
-          tenantId,
-        });
+        await cmsGrpcClient.deleteProject(
+          {
+            id,
+          },
+          metadata,
+        );
       },
     ),
     new SagaStep<CreateProjectContext>(
       'IncrementTenantProjectsCount',
       async (stepContext) => {
-        const {
-          payload: { tenantId },
-        } = stepContext;
-
-        const response = await identityGrpcClient.incrementTenantProjectsCount({
-          id: tenantId,
-        });
+        const response = await identityGrpcClient.incrementTenantProjectsCount(
+          undefined,
+          metadata,
+        );
 
         stepContext.getTenantResponse = response;
       },
@@ -67,9 +68,10 @@ export async function createProjectSaga(
 
         if (!getTenantResponse) return;
 
-        const { id } = getTenantResponse;
-
-        await identityGrpcClient.decrementTenantProjectsCount({ id });
+        await identityGrpcClient.decrementTenantProjectsCount(
+          undefined,
+          metadata,
+        );
       },
     ),
     new SagaStep<CreateProjectContext>(

@@ -8,6 +8,7 @@ import {
   UserLoginSagaResult,
 } from 'libs/interfaces/orchestrator.interface';
 import { AccessRequestResponse, NotificationType } from 'libs/interfaces';
+import { Metadata } from '@grpc/grpc-js';
 
 interface UserLoginContext {
   payload: UserLoginSagaPayload;
@@ -18,6 +19,7 @@ export async function userLoginSaga(
   identityGrpcClient: IdentityGrpcClient,
   rabbitMqAdapter: RabbitMQAdapter,
   payload: UserLoginSagaPayload,
+  metadata: Metadata,
 ): Promise<UserLoginSagaResult> {
   const context: UserLoginContext = { payload };
 
@@ -32,10 +34,13 @@ export async function userLoginSaga(
           },
         } = stepContext;
 
-        const response = await identityGrpcClient.createAccessRequestLink({
-          email,
-          tenantIdentifier,
-        });
+        const response = await identityGrpcClient.createAccessRequestLink(
+          {
+            email,
+            tenantIdentifier,
+          },
+          metadata,
+        );
 
         stepContext.accessRequestResponse = response;
       },
@@ -48,9 +53,12 @@ export async function userLoginSaga(
 
         const { accessCode } = accessRequestResponse;
 
-        identityGrpcClient.removeAccessCode({
-          accessCode,
-        });
+        identityGrpcClient.removeAccessCode(
+          {
+            accessCode,
+          },
+          metadata,
+        );
       },
     ),
     new SagaStep<UserLoginContext>(

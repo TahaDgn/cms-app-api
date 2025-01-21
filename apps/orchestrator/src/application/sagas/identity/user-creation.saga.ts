@@ -10,6 +10,7 @@ import {
   UserCreationSagaPayload,
   UserCreationSagaResult,
 } from 'libs/interfaces';
+import { Metadata } from '@grpc/grpc-js';
 
 interface UserCreationContext {
   payload: UserCreationSagaPayload;
@@ -21,6 +22,7 @@ export async function userCreationSaga(
   identityGrpcClient: IdentityGrpcClient,
   rabbitMqAdapter: RabbitMQAdapter,
   payload: UserCreationSagaPayload,
+  metadata: Metadata,
 ): Promise<UserCreationSagaResult> {
   const context: UserCreationContext = {
     payload,
@@ -33,15 +35,17 @@ export async function userCreationSaga(
       'CreateUserUnderTenant',
       async (stepContext) => {
         const {
-          payload: { email, name, tenantId, type },
+          payload: { email, name, type },
         } = stepContext;
 
-        const response = await identityGrpcClient.createUser({
-          tenantId,
-          name,
-          email,
-          type,
-        });
+        const response = await identityGrpcClient.createUser(
+          {
+            name,
+            email,
+            type,
+          },
+          metadata,
+        );
 
         stepContext.getUserResponse = response;
       },
@@ -52,12 +56,14 @@ export async function userCreationSaga(
           return;
         }
 
-        const { id, tenantId } = userWithTenantResponse;
+        const { id } = userWithTenantResponse;
 
-        await identityGrpcClient.deleteUser({
-          id,
-          tenantId,
-        });
+        await identityGrpcClient.deleteUser(
+          {
+            id,
+          },
+          metadata,
+        );
       },
     ),
     new SagaStep<UserCreationContext>(
@@ -67,10 +73,13 @@ export async function userCreationSaga(
           getUserResponse: { email, tenantId },
         } = stepContext;
 
-        const response = await identityGrpcClient.createAccessRequestLink({
-          email,
-          tenantId,
-        });
+        const response = await identityGrpcClient.createAccessRequestLink(
+          {
+            email,
+            tenantId,
+          },
+          metadata,
+        );
 
         stepContext.accessRequestResponse = response;
       },
@@ -83,7 +92,7 @@ export async function userCreationSaga(
 
         const { accessCode } = accessRequestResponse;
 
-        await identityGrpcClient.removeAccessCode({ accessCode });
+        await identityGrpcClient.removeAccessCode({ accessCode }, metadata);
       },
     ),
     new SagaStep<UserCreationContext>(

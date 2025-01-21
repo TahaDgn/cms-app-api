@@ -21,8 +21,6 @@ import {
   UpdateProjectResponseDto,
   createPagingResponse,
   AddClientsToProjectRequestDto,
-  AddClientToProjectResponseDto,
-  RemoveClientsFromProjectResponseDto,
   RemoveClientsFromProjectRequestDto,
   DeleteProjectResponseDto,
   DeleteProjectQueryDto,
@@ -157,7 +155,7 @@ export class ProjectController {
   async addClient(
     @AuthorizedUser() user: AuthorizedUserPayload,
     @Body() updateDto: AddClientsToProjectRequestDto,
-  ): Promise<AddClientToProjectResponseDto> {
+  ) {
     const metadata = new Metadata();
 
     metadata.add('User', JSON.stringify(user));
@@ -186,7 +184,7 @@ export class ProjectController {
   async removeClient(
     @AuthorizedUser() user: AuthorizedUserPayload,
     @Body() updateDto: RemoveClientsFromProjectRequestDto,
-  ): Promise<RemoveClientsFromProjectResponseDto> {
+  ) {
     const metadata = new Metadata();
 
     metadata.add('User', JSON.stringify(user));

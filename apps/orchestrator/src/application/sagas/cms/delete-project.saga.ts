@@ -7,6 +7,7 @@ import {
   GetProjectResponse,
   GetTenantResponse,
 } from 'libs/interfaces';
+import { Metadata } from '@grpc/grpc-js';
 
 interface CreateProjectContext {
   payload: DeleteProjectSagaPayload;
@@ -19,6 +20,7 @@ export async function deleteProjectSaga(
   identityGrpcClient: IdentityGrpcClient,
   rabbitMqAdapter: RabbitMQAdapter,
   payload: DeleteProjectSagaPayload,
+  metadata: Metadata,
 ): Promise<GetProjectResponse> {
   const context: CreateProjectContext = {
     payload,
@@ -32,7 +34,7 @@ export async function deleteProjectSaga(
       async (stepContext) => {
         const { payload } = stepContext;
 
-        const response = await cmsGrpcClient.deleteProject(payload);
+        const response = await cmsGrpcClient.deleteProject(payload, metadata);
 
         stepContext.getProjectResponse = response;
       },
@@ -41,21 +43,21 @@ export async function deleteProjectSaga(
 
         if (!getProjectResponse) return;
 
-        await cmsGrpcClient.createProject({
-          ...getProjectResponse,
-        });
+        await cmsGrpcClient.createProject(
+          {
+            ...getProjectResponse,
+          },
+          metadata,
+        );
       },
     ),
     new SagaStep<CreateProjectContext>(
       'DecrementTenantProjectsCount',
       async (stepContext) => {
-        const {
-          payload: { tenantId },
-        } = stepContext;
-
-        const response = await identityGrpcClient.decrementTenantProjectsCount({
-          id: tenantId,
-        });
+        const response = await identityGrpcClient.decrementTenantProjectsCount(
+          undefined,
+          metadata,
+        );
 
         stepContext.getTenantResponse = response;
       },
@@ -64,9 +66,10 @@ export async function deleteProjectSaga(
 
         if (!getTenantResponse) return;
 
-        const { id } = getTenantResponse;
-
-        await identityGrpcClient.incrementTenantProjectsCount({ id });
+        await identityGrpcClient.incrementTenantProjectsCount(
+          undefined,
+          metadata,
+        );
       },
     ),
     new SagaStep<CreateProjectContext>(

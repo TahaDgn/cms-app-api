@@ -9,6 +9,7 @@ import {
   ListUsersResponse,
 } from 'libs/interfaces';
 import { UserType } from '@prisma/client';
+import { Metadata } from '@grpc/grpc-js';
 
 interface AddClientToProjectContext {
   payload: AddClientsToProjectsSagaPayload;
@@ -21,6 +22,7 @@ export async function addClientToProjectSaga(
   identityGrpcClient: IdentityGrpcClient,
   rabbitMqAdapter: RabbitMQAdapter,
   payload: AddClientsToProjectsSagaPayload,
+  metadata: Metadata,
 ): Promise<AddClientsToProjectsSagaResult> {
   const context: AddClientToProjectContext = {
     payload,
@@ -33,16 +35,20 @@ export async function addClientToProjectSaga(
       'GetUsers',
       async (stepContext) => {
         const {
-          payload: { tenantId, clientUserIds },
+          payload: { clientUserIds },
         } = stepContext;
 
-        const response = await identityGrpcClient.listUsers({
-          where: {
-            tenantId,
-            id: { in: clientUserIds },
-            type: UserType.CLIENT,
+        const response = await identityGrpcClient.listUsers(
+          {
+            where: {
+              id: { in: clientUserIds },
+              type: UserType.CLIENT,
+            },
+            skip: 0,
+            take: clientUserIds.length,
           },
-        });
+          metadata,
+        );
 
         stepContext.listUsersResponse = response;
       },
@@ -54,23 +60,25 @@ export async function addClientToProjectSaga(
       'AddClientsToProjects',
       async (stepContext) => {
         const {
-          payload: { ids, tenantId },
+          payload: { ids },
           listUsersResponse,
         } = stepContext;
 
         const clientUserIds = listUsersResponse.users.map((user) => user.id);
 
-        const response = await cmsGrpcClient.addClientsToProjects({
-          ids,
-          tenantId,
-          clientUserIds,
-        });
+        const response = await cmsGrpcClient.addClientsToProjects(
+          {
+            ids,
+            clientUserIds,
+          },
+          metadata,
+        );
 
         stepContext.listProjectsResponseAfterClientsAddition = response;
       },
       async (stepContext) => {
         const {
-          payload: { ids, tenantId },
+          payload: { ids },
           listUsersResponse,
           listProjectsResponseAfterClientsAddition,
         } = stepContext;
@@ -87,11 +95,13 @@ export async function addClientToProjectSaga(
 
         const clientUserIds = listUsersResponse.users.map((user) => user.id);
 
-        await cmsGrpcClient.removeClientsFromProjects({
-          ids,
-          tenantId,
-          clientUserIds,
-        });
+        await cmsGrpcClient.removeClientsFromProjects(
+          {
+            ids,
+            clientUserIds,
+          },
+          metadata,
+        );
       },
     ),
     new SagaStep<AddClientToProjectContext>(

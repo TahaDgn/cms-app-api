@@ -1,4 +1,4 @@
-import { $Enums, Project } from '@prisma/client';
+import { Project, ProjectStatus } from '@prisma/client';
 import { ResponseDto } from 'libs/interfaces';
 import { PagingResponseDto } from '../../../shared';
 
@@ -7,7 +7,7 @@ export class ListProjectsResponsePayload implements Project {
   tenantId: number;
   title: string;
   description: string;
-  status: $Enums.ProjectStatus;
+  status: ProjectStatus;
   clientUserIds: number[];
   createdAt: Date;
   updatedAt: Date;

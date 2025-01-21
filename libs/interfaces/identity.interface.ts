@@ -88,9 +88,9 @@ export interface CreateTenantAndUserResponse {
   user: User;
 }
 
-export type IncrementTenantProjectsCountPayload = Pick<Tenant, 'id'>;
+export type IncrementTenantProjectsCountPayload = void;
 
-export type DecrementTenantProjectsCountPayload = Pick<Tenant, 'id'>;
+export type DecrementTenantProjectsCountPayload = void;
 
 export type GetTenantResponse = Prisma.TenantGetPayload<{
   include: { users: true };

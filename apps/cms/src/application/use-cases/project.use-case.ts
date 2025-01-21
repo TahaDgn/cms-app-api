@@ -96,8 +96,8 @@ export class ProjectUseCase {
         ...clientQuery,
         tenantId,
       },
-      skip,
-      take,
+      skip: skip ? skip : undefined,
+      take: take ? take : undefined,
     });
 
     const totalItemsCount = await this.projectRepository.count({

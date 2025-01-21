@@ -91,9 +91,9 @@ export class CmsGrpcClient implements OnModuleInit, CmsGrpcServer {
   public async addClientsToProjects(
     payload: AddClientsToProjectsPayload,
     metadata: Metadata,
-  ): Promise<GetProjectResponse> {
+  ): Promise<ListProjectsResponse> {
     return lastValueFrom(
-      <Observable<GetProjectResponse>>(
+      <Observable<ListProjectsResponse>>(
         this.cmsGrpcServer.addClientsToProjects(payload, metadata)
       ),
     );
@@ -102,9 +102,9 @@ export class CmsGrpcClient implements OnModuleInit, CmsGrpcServer {
   public async removeClientsFromProjects(
     payload: RemoveClientsFromProjectsPayload,
     metadata: Metadata,
-  ): Promise<GetProjectResponse> {
+  ): Promise<ListProjectsResponse> {
     return lastValueFrom(
-      <Observable<GetProjectResponse>>(
+      <Observable<ListProjectsResponse>>(
         this.cmsGrpcServer.removeClientsFromProjects(payload, metadata)
       ),
     );

@@ -11,6 +11,7 @@ import {
 } from 'libs/interfaces';
 import { UserType } from '@prisma/client';
 import { NOTIFICATION_QUEUE } from 'libs/constants';
+import { Metadata } from '@grpc/grpc-js';
 
 interface UserDeletionContext {
   payload: UserDeletionSagaPayload;
@@ -24,6 +25,7 @@ export async function userDeletionSaga(
   cmsGrpcClient: CmsGrpcClient,
   rabbitMqAdapter: RabbitMQAdapter,
   payload: UserDeletionSagaPayload,
+  metadata: Metadata,
 ): Promise<UserDeletionSagaResult> {
   const context: UserDeletionContext = {
     payload,
@@ -36,13 +38,15 @@ export async function userDeletionSaga(
       'DeleteUser',
       async (stepContext) => {
         const {
-          payload: { id, tenantId },
+          payload: { id },
         } = stepContext;
 
-        const response = await identityGrpcClient.deleteUser({
-          id,
-          tenantId,
-        });
+        const response = await identityGrpcClient.deleteUser(
+          {
+            id,
+          },
+          metadata,
+        );
 
         stepContext.getUserResponse = response;
       },
@@ -52,31 +56,35 @@ export async function userDeletionSaga(
           return;
         }
 
-        const { email, name, tenantId, type } = deletedUserResponse;
+        const { email, name, type } = deletedUserResponse;
 
-        await identityGrpcClient.createUser({
-          email,
-          name,
-          tenantId,
-          type,
-        });
+        await identityGrpcClient.createUser(
+          {
+            email,
+            name,
+            type,
+          },
+          metadata,
+        );
       },
     ),
     new SagaStep<UserDeletionContext>(
       'ListProjects',
       async (stepContext) => {
         const {
-          payload: { id, tenantId },
+          payload: { id },
         } = stepContext;
 
-        const response = await cmsGrpcClient.listProjects({
-          where: {
-            tenantId,
-            clientUserIds: {
-              has: id,
+        const response = await cmsGrpcClient.listProjects(
+          {
+            where: {
+              clientUserIds: {
+                has: id,
+              },
             },
           },
-        });
+          metadata,
+        );
 
         stepContext.listProjectsResponse = response;
       },
@@ -88,7 +96,7 @@ export async function userDeletionSaga(
       'RemoveClientsFromAllProjects',
       async (stepContext) => {
         const {
-          getUserResponse: { id: clientId, type, tenantId },
+          getUserResponse: { id: clientId, type },
           listProjectsResponse: { projects },
         } = stepContext;
 
@@ -102,18 +110,20 @@ export async function userDeletionSaga(
 
         const projectIds = projects.map((project) => project.id);
 
-        const response = await cmsGrpcClient.removeClientsFromProjects({
-          ids: projectIds,
-          clientUserIds: [clientId],
-          tenantId,
-        });
+        const response = await cmsGrpcClient.removeClientsFromProjects(
+          {
+            ids: projectIds,
+            clientUserIds: [clientId],
+          },
+          metadata,
+        );
 
         stepContext.listProjectsResponseAfterClientsRemoval = response;
       },
       async (stepContext) => {
         const {
           listProjectsResponseAfterClientsRemoval,
-          getUserResponse: { id: clientId, tenantId },
+          getUserResponse: { id: clientId },
         } = stepContext;
 
         if (!listProjectsResponseAfterClientsRemoval) {
@@ -128,11 +138,13 @@ export async function userDeletionSaga(
 
         const ids = projects.map((project) => project.id);
 
-        await cmsGrpcClient.addClientsToProjects({
-          ids,
-          tenantId,
-          clientUserIds: [clientId],
-        });
+        await cmsGrpcClient.addClientsToProjects(
+          {
+            ids,
+            clientUserIds: [clientId],
+          },
+          metadata,
+        );
       },
     ),
     new SagaStep<UserDeletionContext>(

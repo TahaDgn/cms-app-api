@@ -157,7 +157,7 @@ export class IdentityGrpcClient implements OnModuleInit, IdentityGrpcServer {
   getUser(
     payload: GetUserPayload,
     metadata: Metadata,
-  ): Promise<GetUserResponse> {
+  ): Promise<GetUserResponse> | Observable<GetUserResponse> {
     return lastValueFrom(
       <Observable<GetUserResponse>>(
         this.identityGrpcServer.getUser(payload, metadata)

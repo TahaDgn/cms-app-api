@@ -10,6 +10,7 @@ import {
   CreateProjectPayload,
   DeleteProjectPayload,
   GetProjectResponse,
+  ListProjectsResponse,
   RemoveClientsFromProjectsPayload,
 } from './cms.interface';
 import { Observable } from 'rxjs';
@@ -73,12 +74,12 @@ export type DeleteProjectSagaResult = GetProjectResponse;
 
 export type AddClientsToProjectsSagaPayload = AddClientsToProjectsPayload;
 
-export type AddClientsToProjectsSagaResult = GetProjectResponse;
+export type AddClientsToProjectsSagaResult = ListProjectsResponse;
 
 export type RemoveClientsFromProjectsSagaPayload =
   RemoveClientsFromProjectsPayload;
 
-export type RemoveClientsFromProjectsSagaResult = GetProjectResponse;
+export type RemoveClientsFromProjectsSagaResult = ListProjectsResponse;
 
 export type UserRegistrationSagaPayload = CreateTenantAndUserPayload;
 

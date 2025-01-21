@@ -3,6 +3,6 @@ export interface TotalItemsCount {
 }
 
 export interface PaginationPayload {
-  skip: number;
-  take: number;
+  skip?: number;
+  take?: number;
 }

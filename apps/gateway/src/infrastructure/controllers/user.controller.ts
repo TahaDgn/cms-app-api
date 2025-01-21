@@ -9,7 +9,6 @@ import {
   DeleteUserQueryDto,
   CreateUserResponseDto,
   GetUserQueryDto,
-  GetUserResponseDto,
 } from '../../application';
 import { AuthGuardRequired, AuthorizedUser } from '../middlewares/auth.guard';
 import {
@@ -69,7 +68,7 @@ export class UserController {
   async get(
     @AuthorizedUser() user: AuthorizedUserPayload,
     @Query() getQuery: GetUserQueryDto,
-  ): Promise<GetUserResponseDto> {
+  ) {
     const metadata = new Metadata();
 
     metadata.add('User', JSON.stringify(user));

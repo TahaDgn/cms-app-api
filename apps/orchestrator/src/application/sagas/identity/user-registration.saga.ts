@@ -12,6 +12,7 @@ import {
   CreateTenantAndUserResponse,
   NotificationType,
 } from 'libs/interfaces';
+import { Metadata } from '@grpc/grpc-js';
 
 interface UserRegistrationContext {
   payload: UserRegistrationSagaPayload;
@@ -23,6 +24,7 @@ export async function userRegistrationSaga(
   identityGrpcClient: IdentityGrpcClient,
   rabbitMqAdapter: RabbitMQAdapter,
   payload: UserRegistrationSagaPayload,
+  metadata: Metadata,
 ): Promise<UserRegistrationSagaResult> {
   const context: UserRegistrationContext = {
     payload,
@@ -38,10 +40,13 @@ export async function userRegistrationSaga(
           payload: { tenant, user },
         } = stepContext;
 
-        const response = await identityGrpcClient.createTenantWithOwner({
-          tenant,
-          user,
-        });
+        const response = await identityGrpcClient.createTenantWithOwner(
+          {
+            tenant,
+            user,
+          },
+          metadata,
+        );
 
         stepContext.createTenantAndUserResponse = response;
       },
@@ -56,7 +61,7 @@ export async function userRegistrationSaga(
           tenant: { id },
         } = createTenantAndUserResponse;
 
-        await identityGrpcClient.deleteTenant({ id });
+        await identityGrpcClient.deleteTenant({ id }, metadata);
       },
     ),
     new SagaStep<UserRegistrationContext>(
@@ -69,10 +74,13 @@ export async function userRegistrationSaga(
           },
         } = stepContext;
 
-        const response = await identityGrpcClient.createAccessRequestLink({
-          email,
-          tenantId,
-        });
+        const response = await identityGrpcClient.createAccessRequestLink(
+          {
+            email,
+            tenantId,
+          },
+          metadata,
+        );
 
         stepContext.accessRequestResponse = response;
       },
@@ -85,7 +93,7 @@ export async function userRegistrationSaga(
 
         const { accessCode } = accessRequestResponse;
 
-        await identityGrpcClient.removeAccessCode({ accessCode });
+        await identityGrpcClient.removeAccessCode({ accessCode }, metadata);
       },
     ),
     new SagaStep<UserRegistrationContext>(
