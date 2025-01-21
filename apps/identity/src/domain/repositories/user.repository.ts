@@ -4,7 +4,7 @@ export const USER_REPOSITORY = Symbol('USER_REPOSITORY');
 
 export interface UserRepositorySign {
   create(
-    payload: Prisma.UserCreateInput,
+    payload: Prisma.UserCreateArgs,
     transactionClient?: Prisma.TransactionClient,
   ): Promise<Prisma.UserGetPayload<{ include: { tenant: true } }>>;
 

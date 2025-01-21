@@ -4,20 +4,16 @@ import { ProjectUseCase } from '../../application';
 import {
   CmsService,
   AddClientsToProjectsPayload,
-  AddOrRemoveClientFromProjectResponse,
   CreateProjectPayload,
-  CreateProjectResponse,
   DeleteProjectPayload,
-  DeleteProjectResponse,
   GetProjectPayload,
   GetProjectResponse,
-  ListClientProjectPayload,
-  ListClientProjectsResponse,
   ListProjectsPayload,
   ListProjectsResponse,
   UpdateProjectPayload,
-  UpdateProjectResponse,
+  AuthorizedUserPayload,
 } from 'libs/interfaces';
+import { Metadata } from '@grpc/grpc-js';
 
 @Controller()
 export class ProjectGrpcServer
@@ -27,11 +23,10 @@ export class ProjectGrpcServer
       | 'createProject'
       | 'getProject'
       | 'listProjects'
-      | 'deleteProject'
       | 'updateProject'
-      | 'removeClientFromProject'
-      | 'addClientToProject'
-      | 'listClientProjects'
+      | 'removeClientsFromProjects'
+      | 'addClientsToProjects'
+      | 'deleteProject'
     >
 {
   constructor(private readonly projectUseCase: ProjectUseCase) {}
@@ -39,58 +34,87 @@ export class ProjectGrpcServer
   @GrpcMethod('CmsService', 'createProject')
   async createProject(
     payload: CreateProjectPayload,
-  ): Promise<CreateProjectResponse> {
-    return this.projectUseCase.create(payload);
+    metadata: Metadata,
+  ): Promise<GetProjectResponse> {
+    const authorizedUser = <AuthorizedUserPayload>(
+      JSON.parse(metadata.get('User').toString())
+    );
+
+    return this.projectUseCase.create(payload, authorizedUser);
   }
 
   @GrpcMethod('CmsService', 'getProject')
-  async getProject(payload: GetProjectPayload): Promise<GetProjectResponse> {
-    return this.projectUseCase.getOrFail(payload);
+  async getProject(
+    payload: GetProjectPayload,
+    metadata: Metadata,
+  ): Promise<GetProjectResponse> {
+    const authorizedUser = <AuthorizedUserPayload>(
+      JSON.parse(metadata.get('User').toString())
+    );
+
+    return this.projectUseCase.getOrFail(payload, authorizedUser);
   }
 
   @GrpcMethod('CmsService', 'listProjects')
   async listProjects(
     payload: ListProjectsPayload,
+    metadata: Metadata,
   ): Promise<ListProjectsResponse> {
-    const projects = await this.projectUseCase.list(payload);
+    const authorizedUser = <AuthorizedUserPayload>(
+      JSON.parse(metadata.get('User').toString())
+    );
 
-    return { projects };
-  }
-
-  @GrpcMethod('CmsService', 'deleteProject')
-  async deleteProject(
-    payload: DeleteProjectPayload,
-  ): Promise<DeleteProjectResponse> {
-    return this.projectUseCase.delete(payload);
+    return this.projectUseCase.list(payload, authorizedUser);
   }
 
   @GrpcMethod('CmsService', 'updateProject')
   async updateProject(
     payload: UpdateProjectPayload,
-  ): Promise<UpdateProjectResponse> {
-    return this.projectUseCase.update(payload);
+    metadata: Metadata,
+  ): Promise<GetProjectResponse> {
+    const authorizedUser = <AuthorizedUserPayload>(
+      JSON.parse(metadata.get('User').toString())
+    );
+
+    return this.projectUseCase.update(payload, authorizedUser);
   }
 
   @GrpcMethod('CmsService', 'removeClientFromProject')
-  async removeClientsFromProject(
+  async removeClientsFromProjects(
     payload: AddClientsToProjectsPayload,
-  ): Promise<AddOrRemoveClientFromProjectResponse> {
-    await this.projectUseCase.removeClient(payload);
+    metadata: Metadata,
+  ): Promise<ListProjectsResponse> {
+    const authorizedUser = <AuthorizedUserPayload>(
+      JSON.parse(metadata.get('User').toString())
+    );
+
+    return this.projectUseCase.removeClientsFromProjects(
+      payload,
+      authorizedUser,
+    );
   }
 
   @GrpcMethod('CmsService', 'addClientToProject')
-  async addClientsToProject(
+  async addClientsToProjects(
     payload: AddClientsToProjectsPayload,
-  ): Promise<AddOrRemoveClientFromProjectResponse> {
-    await this.projectUseCase.addClient(payload);
+    metadata: Metadata,
+  ): Promise<ListProjectsResponse> {
+    const authorizedUser = <AuthorizedUserPayload>(
+      JSON.parse(metadata.get('User').toString())
+    );
+
+    return this.projectUseCase.addClientsToProjects(payload, authorizedUser);
   }
 
-  @GrpcMethod('CmsService', 'listClientProjects')
-  async listClientProjects(
-    payload: ListClientProjectPayload,
-  ): Promise<ListClientProjectsResponse> {
-    const projects = await this.projectUseCase.list(payload);
+  @GrpcMethod('CmsService', 'deleteProject')
+  async deleteProject(
+    payload: DeleteProjectPayload,
+    metadata: Metadata,
+  ): Promise<GetProjectResponse> {
+    const authorizedUser = <AuthorizedUserPayload>(
+      JSON.parse(metadata.get('User').toString())
+    );
 
-    return { projects };
+    return this.projectUseCase.delete(payload, authorizedUser);
   }
 }

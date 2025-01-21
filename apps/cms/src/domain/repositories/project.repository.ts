@@ -1,36 +1,34 @@
-import { Prisma, Project } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
 export const PROJECT_REPOSITORY = Symbol('PROJECT_REPOSITORY');
 
 export interface ProjectRepositorySign {
   create(
-    payload: Pick<
-      Prisma.ProjectCreateInput,
-      'title' | 'description' | 'tenantId'
-    >,
+    payload: Prisma.ProjectCreateArgs,
     transactionClient?: Prisma.TransactionClient,
-  ): Promise<Project>;
+  ): Promise<Prisma.ProjectGetPayload<{ include: { tickets: true } }>>;
 
   findFirst(
-    payload: Prisma.ProjectWhereInput,
+    payload: Prisma.ProjectFindFirstArgs,
   ): Promise<Prisma.ProjectGetPayload<{ include: { tickets: true } }>>;
 
   findUnique(
-    payload: Prisma.ProjectWhereUniqueInput,
+    payload: Prisma.ProjectFindUniqueArgs,
   ): Promise<Prisma.ProjectGetPayload<{ include: { tickets: true } }>>;
 
   findAll(
-    payload: Prisma.ProjectWhereInput,
+    payload: Prisma.ProjectFindManyArgs,
   ): Promise<Prisma.ProjectGetPayload<{ include: { tickets: true } }>[]>;
 
   update(
-    id: number,
-    payload: Prisma.ProjectUpdateInput,
+    payload: Prisma.ProjectUpdateArgs,
     transactionClient?: Prisma.TransactionClient,
   ): Promise<Prisma.ProjectGetPayload<{ include: { tickets: true } }>>;
 
+  count(payload: Prisma.ProjectCountArgs): Promise<number>;
+
   delete(
-    payload: Pick<Prisma.ProjectWhereInput, 'id' | 'tenantId'>,
+    payload: Prisma.ProjectDeleteArgs,
     transactionClient?: Prisma.TransactionClient,
   ): Promise<Prisma.ProjectGetPayload<{ include: { tickets: true } }>>;
 }

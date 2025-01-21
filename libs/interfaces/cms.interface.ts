@@ -29,12 +29,12 @@ export interface CmsService {
   addClientsToProjects(
     payload: AddClientsToProjectsPayload,
     metadata: Metadata,
-  ): Promise<GetProjectResponse> | Observable<GetProjectResponse>;
+  ): Promise<ListProjectsResponse> | Observable<ListProjectsResponse>;
 
   removeClientsFromProjects(
     payload: RemoveClientsFromProjectsPayload,
     metadata: Metadata,
-  ): Promise<GetProjectResponse> | Observable<GetProjectResponse>;
+  ): Promise<ListProjectsResponse> | Observable<ListProjectsResponse>;
 
   deleteProject(
     payload: DeleteProjectPayload,
@@ -54,9 +54,9 @@ export interface CmsService {
   ): Promise<GetTicketResponse> | Observable<GetTicketResponse>;
 
   listTickets(
-    payload: ListTicketPayload,
+    payload: ListTicketsPayload,
     metadata: Metadata,
-  ): Promise<ListTicketResponse> | Observable<ListTicketResponse>;
+  ): Promise<ListTicketsResponse> | Observable<ListTicketsResponse>;
 
   updateTicket(
     payload: UpdateTicketPayload,
@@ -85,7 +85,9 @@ export interface CmsService {
 
 export type CreateProjectPayload = Pick<Project, 'title' | 'description'>;
 
-export type GetProjectPayload = Prisma.ProjectFindFirstArgs;
+export type GetProjectPayload = {
+  where: Prisma.ProjectWhereInput;
+};
 
 export type GetProjectResponse = Prisma.ProjectGetPayload<{
   include: { tickets: true };
@@ -120,17 +122,19 @@ export type DeleteProjectPayload = Pick<Project, 'id'>;
 
 export type CreateTicketPayload = Pick<Ticket, 'description' | 'projectId'>;
 
-export type GetTicketPayload = Prisma.TicketFindFirstArgs;
+export type GetTicketPayload = {
+  where: Prisma.TicketWhereInput;
+};
 
 export type GetTicketResponse = Prisma.TicketGetPayload<{
   include: { ticketComments: true };
 }>;
 
-export interface ListTicketPayload extends PaginationPayload {
+export interface ListTicketsPayload extends PaginationPayload {
   where: Prisma.TicketWhereInput;
 }
 
-export interface ListTicketResponse extends TotalItemsCount {
+export interface ListTicketsResponse extends TotalItemsCount {
   tickets: Ticket[];
 }
 

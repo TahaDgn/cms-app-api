@@ -1,30 +1,52 @@
-import { Prisma, Ticket } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
 export const TICKET_REPOSITORY = Symbol('TICKET_REPOSITORY');
 
 export interface TicketRepositorySign {
   create(
-    payload: Pick<
-      Prisma.TicketCreateInput,
-      'description' | 'project' | 'tenantId'
-    >,
+    payload: Prisma.TicketCreateArgs,
     transactionClient?: Prisma.TransactionClient,
-  ): Promise<Ticket>;
+  ): Promise<
+    Prisma.TicketGetPayload<{
+      include: { ticketComments: true };
+    }>
+  >;
 
-  findFirst(payload: Prisma.TicketWhereInput): Promise<Ticket>;
+  findFirst(payload: Prisma.TicketFindFirstArgs): Promise<
+    Prisma.TicketGetPayload<{
+      include: { ticketComments: true };
+    }>
+  >;
 
-  findUnique(payload: Prisma.TicketWhereUniqueInput): Promise<Ticket>;
+  findUnique(payload: Prisma.TicketFindUniqueArgs): Promise<
+    Prisma.TicketGetPayload<{
+      include: { ticketComments: true };
+    }>
+  >;
 
-  findAll(payload: Prisma.TicketWhereInput): Promise<Ticket[]>;
+  findAll(payload: Prisma.TicketFindManyArgs): Promise<
+    Prisma.TicketGetPayload<{
+      include: { ticketComments: true };
+    }>[]
+  >;
 
   update(
-    id: number,
-    payload: Prisma.TicketUpdateInput,
+    payload: Prisma.TicketUpdateArgs,
     transactionClient?: Prisma.TransactionClient,
-  ): Promise<Ticket>;
+  ): Promise<
+    Prisma.TicketGetPayload<{
+      include: { ticketComments: true };
+    }>
+  >;
 
   delete(
-    payload: Pick<Prisma.TicketWhereInput, 'id' | 'tenantId'>,
+    payload: Prisma.TicketDeleteArgs,
     transactionClient?: Prisma.TransactionClient,
-  ): Promise<Ticket>;
+  ): Promise<
+    Prisma.TicketGetPayload<{
+      include: { ticketComments: true };
+    }>
+  >;
+
+  count(payload: Prisma.TicketCountArgs): Promise<number>;
 }

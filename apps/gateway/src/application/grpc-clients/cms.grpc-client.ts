@@ -17,8 +17,8 @@ import {
   GetTicketResponse,
   ListProjectsPayload,
   ListProjectsResponse,
-  ListTicketPayload,
-  ListTicketResponse,
+  ListTicketsPayload,
+  ListTicketsResponse,
   UpdateProjectPayload,
   UpdateTicketPayload,
   RemoveClientsFromProjectsPayload,
@@ -144,11 +144,11 @@ export class CmsGrpcClient implements OnModuleInit, CmsGrpcServer {
   }
 
   public async listTickets(
-    payload: ListTicketPayload,
+    payload: ListTicketsPayload,
     metadata: Metadata,
-  ): Promise<ListTicketResponse> {
+  ): Promise<ListTicketsResponse> {
     return lastValueFrom(
-      <Observable<ListTicketResponse>>(
+      <Observable<ListTicketsResponse>>(
         this.cmsGrpcServer.listTickets(payload, metadata)
       ),
     );

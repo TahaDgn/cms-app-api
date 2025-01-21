@@ -1,6 +1,6 @@
 import { Controller, Post, Body, Delete, Query } from '@nestjs/common';
 import { CmsGrpcClient } from '../../application/grpc-clients';
-import { AuthorizedUser } from '../middlewares';
+import { AuthGuardRequired, AuthorizedUser } from '../middlewares';
 import {
   DeleteTicketQueryDto,
   DeleteTicketResponseDto,
@@ -14,6 +14,7 @@ import { Metadata } from '@grpc/grpc-js';
 export class TicketCommentController {
   constructor(private readonly cmsGrpcClient: CmsGrpcClient) {}
 
+  @AuthGuardRequired('*')
   @Post()
   async create(
     @AuthorizedUser() user: AuthorizedUserPayload,
@@ -36,6 +37,7 @@ export class TicketCommentController {
     };
   }
 
+  @AuthGuardRequired('*')
   @Delete()
   async delete(
     @AuthorizedUser() user: AuthorizedUserPayload,

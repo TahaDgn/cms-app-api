@@ -27,10 +27,11 @@ import {
   DeleteProjectResponseDto,
   DeleteProjectQueryDto,
 } from '../../application';
-import { AuthorizedUser } from '../middlewares';
+import { AuthGuardRequired, AuthorizedUser } from '../middlewares';
 import {} from '../../application';
 import { AuthorizedUserPayload } from 'libs/interfaces';
 import { Metadata } from '@grpc/grpc-js';
+import { UserType } from '@prisma/client';
 
 @Controller('projects')
 export class ProjectController {
@@ -39,6 +40,7 @@ export class ProjectController {
     private readonly cmsGrpcClient: CmsGrpcClient,
   ) {}
 
+  @AuthGuardRequired(UserType.PARTICIPANT)
   @Post()
   async create(
     @AuthorizedUser() user: AuthorizedUserPayload,
@@ -61,6 +63,7 @@ export class ProjectController {
     };
   }
 
+  @AuthGuardRequired(UserType.PARTICIPANT)
   @Patch()
   async update(
     @AuthorizedUser() user: AuthorizedUserPayload,
@@ -86,6 +89,7 @@ export class ProjectController {
     };
   }
 
+  @AuthGuardRequired('*')
   @Get('retrieve')
   async get(
     @AuthorizedUser() user: AuthorizedUserPayload,
@@ -110,6 +114,7 @@ export class ProjectController {
     };
   }
 
+  @AuthGuardRequired('*')
   @Get('search')
   async list(
     @AuthorizedUser() user: AuthorizedUserPayload,
@@ -147,6 +152,7 @@ export class ProjectController {
     };
   }
 
+  @AuthGuardRequired(UserType.PARTICIPANT)
   @Post('clients')
   async addClient(
     @AuthorizedUser() user: AuthorizedUserPayload,
@@ -175,6 +181,7 @@ export class ProjectController {
     };
   }
 
+  @AuthGuardRequired(UserType.PARTICIPANT)
   @Delete('clients')
   async removeClient(
     @AuthorizedUser() user: AuthorizedUserPayload,
@@ -203,6 +210,7 @@ export class ProjectController {
     };
   }
 
+  @AuthGuardRequired(UserType.PARTICIPANT)
   @Delete()
   async delete(
     @AuthorizedUser() user: AuthorizedUserPayload,

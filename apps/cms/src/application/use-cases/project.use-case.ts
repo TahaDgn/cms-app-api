@@ -9,13 +9,18 @@ import {
 import { CacheUseCase } from './cache.use-case';
 import {
   AddClientsToProjectsPayload,
+  AuthorizedUserPayload,
   CreateProjectPayload,
   DeleteProjectPayload,
   GetProjectPayload,
-  ListClientProjectPayload,
+  GetProjectResponse,
   ListProjectsPayload,
+  ListProjectsResponse,
+  RemoveClientsFromProjectsPayload,
   UpdateProjectPayload,
 } from 'libs/interfaces';
+import { Prisma, UserType } from '@prisma/client';
+import { some, uniq } from 'lodash';
 
 @Injectable()
 export class ProjectUseCase {
@@ -27,44 +32,112 @@ export class ProjectUseCase {
     private readonly cacheUseCase: CacheUseCase,
   ) {}
 
-  public async create(payload: CreateProjectPayload) {
-    return this.projectRepository.create(payload);
+  public async create(
+    payload: CreateProjectPayload,
+    user: AuthorizedUserPayload,
+  ) {
+    const { tenantId } = user;
+
+    return this.projectRepository.create({
+      data: {
+        ...payload,
+        tenantId,
+      },
+      include: {
+        tickets: true,
+      },
+    });
   }
 
-  public async update(payload: UpdateProjectPayload) {
+  public async update(
+    payload: UpdateProjectPayload,
+    user: AuthorizedUserPayload,
+  ) {
     const { id, ...restOfUpdatePayload } = payload;
 
-    return this.projectRepository.update(id, {
-      ...restOfUpdatePayload,
-    });
-  }
+    const { tenantId } = user;
 
-  public async list(payload: ListProjectsPayload) {
-    const { tenantId } = payload;
-
-    return this.projectRepository.findAll({
-      tenantId,
-    });
-  }
-
-  public async listClient(payload: ListClientProjectPayload) {
-    const { clientId, tenantId } = payload;
-
-    return this.projectRepository.findAll({
-      clientUserIds: {
-        has: clientId,
+    return this.projectRepository.update({
+      where: {
+        id,
+        tenantId,
       },
-      tenantId,
+      data: {
+        ...restOfUpdatePayload,
+      },
+      include: {
+        tickets: true,
+      },
     });
   }
 
-  public async delete(payload: DeleteProjectPayload) {
-    return this.projectRepository.delete(payload);
+  public async list(
+    payload: ListProjectsPayload,
+    user: AuthorizedUserPayload,
+  ): Promise<ListProjectsResponse> {
+    const { where, skip, take } = payload;
+
+    const { id: possibleClientId, tenantId, type } = user;
+
+    const clientQuery: Pick<Prisma.ProjectWhereInput, 'clientUserIds'> =
+      type === UserType.CLIENT
+        ? {
+            clientUserIds: {
+              has: possibleClientId,
+            },
+          }
+        : {
+            clientUserIds: undefined,
+          };
+
+    const projects = await this.projectRepository.findAll({
+      where: {
+        ...where,
+        ...clientQuery,
+        tenantId,
+      },
+      skip,
+      take,
+    });
+
+    const totalItemsCount = await this.projectRepository.count({
+      where,
+    });
+
+    return {
+      projects,
+      totalItemsCount,
+    };
   }
 
-  public async getOrFail(payload: GetProjectPayload) {
+  public async getOrFail(
+    payload: GetProjectPayload,
+    user: AuthorizedUserPayload,
+  ): Promise<GetProjectResponse> {
+    const { where } = payload;
+
+    const { id: possibleClientId, tenantId, type } = user;
+
+    const clientQuery: Pick<Prisma.ProjectWhereInput, 'clientUserIds'> =
+      type === UserType.CLIENT
+        ? {
+            clientUserIds: {
+              has: possibleClientId,
+            },
+          }
+        : {
+            clientUserIds: undefined,
+          };
+
     const project = await this.projectRepository.findFirst({
-      ...payload,
+      where: {
+        ...where,
+        ...clientQuery,
+        tenantId,
+      },
+      include: {
+        tickets: true,
+      },
     });
 
     if (!project) throw new ProjectNotFoundException();
@@ -72,35 +145,117 @@ export class ProjectUseCase {
     return project;
   }
 
-  public async addClient(payload: AddClientsToProjectsPayload) {
-    const { clientUserId: clientId, id: projectId, tenantId } = payload;
+  public async addClientsToProjects(
+    payload: AddClientsToProjectsPayload,
+    user: AuthorizedUserPayload,
+  ): Promise<ListProjectsResponse> {
+    const { clientUserIds: clientUserIdsToAdd, ids } = payload;
 
-    const project = await this.projectRepository.findFirst({
-      id: projectId,
-      tenantId,
-    });
+    const { tenantId } = user;
 
-    project.clientUserIds.push(clientId);
+    const projectListResponse = await this.prismaService.$transaction(
+      async (transactionClient: Prisma.TransactionClient) => {
+        const projects = await Promise.all(
+          ids.map(async (id) => {
+            const { clientUserIds } = await this.projectRepository.findFirst({
+              where: {
+                id,
+                tenantId,
+              },
+            });
 
-    return this.projectRepository.update(projectId, {
-      clientUserIds: project.clientUserIds,
-    });
-  }
+            const modifiedClientUserIds = [
+              ...clientUserIds,
+              ...clientUserIdsToAdd,
+            ];
 
-  public async removeClient(payload: AddClientsToProjectsPayload) {
-    const { clientUserId: clientId, id: projectId, tenantId } = payload;
+            return this.projectRepository.update(
+              {
+                where: {
+                  id,
+                  tenantId,
+                },
+                data: {
+                  clientUserIds: uniq(modifiedClientUserIds),
+                },
+              },
+              transactionClient,
+            );
+          }),
+        );
 
-    const project = await this.projectRepository.findFirst({
-      id: projectId,
-      tenantId,
-    });
-
-    const newClientIds = project.clientUserIds.filter(
-      (clientUserId) => clientUserId !== clientId,
+        return {
+          projects,
+          totalItemsCount: projects.length,
+        };
+      },
     );
 
-    return this.projectRepository.update(projectId, {
-      clientUserIds: newClientIds,
+    return projectListResponse;
+  }
+
+  public async removeClientsFromProjects(
+    payload: RemoveClientsFromProjectsPayload,
+    user: AuthorizedUserPayload,
+  ): Promise<ListProjectsResponse> {
+    const { clientUserIds: clientUserIdsToRemove, ids } = payload;
+
+    const { tenantId } = user;
+
+    const projectListResponse = await this.prismaService.$transaction(
+      async (transactionClient: Prisma.TransactionClient) => {
+        const projects = await Promise.all(
+          ids.map(async (id) => {
+            const { clientUserIds } = await this.projectRepository.findFirst({
+              where: {
+                id,
+                tenantId,
+              },
+            });
+
+            const modifiedClientUserIds = clientUserIds.filter((clientUserId) =>
+              some(clientUserIdsToRemove, clientUserId),
+            );
+
+            return this.projectRepository.update(
+              {
+                where: {
+                  id,
+                  tenantId,
+                },
+                data: {
+                  clientUserIds: uniq(modifiedClientUserIds),
+                },
+              },
+              transactionClient,
+            );
+          }),
+        );
+
+        return {
+          projects,
+          totalItemsCount: projects.length,
+        };
+      },
+    );
+
+    return projectListResponse;
+  }
+
+  public async delete(
+    payload: DeleteProjectPayload,
+    user: AuthorizedUserPayload,
+  ): Promise<GetProjectResponse> {
+    const { tenantId } = user;
+
+    return this.projectRepository.delete({
+      where: {
+        ...payload,
+        tenantId,
+      },
+      include: {
+        tickets: true,
+      },
     });
   }
 }

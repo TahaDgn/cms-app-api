@@ -8,7 +8,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { CmsGrpcClient } from '../../application/grpc-clients';
-import { AuthorizedUser } from '../middlewares';
+import { AuthGuardRequired, AuthorizedUser } from '../middlewares';
 import {
   CreateTicketRequestDto,
   CreateTicketResponseDto,
@@ -25,11 +25,13 @@ import {
 } from '../../application';
 import { AuthorizedUserPayload } from 'libs/interfaces/gateway.interface';
 import { Metadata } from '@grpc/grpc-js';
+import { UserType } from '@prisma/client';
 
 @Controller('tickets')
 export class TicketController {
   constructor(private readonly cmsGrpcClient: CmsGrpcClient) {}
 
+  @AuthGuardRequired(UserType.CLIENT)
   @Post()
   async create(
     @AuthorizedUser() user: AuthorizedUserPayload,
@@ -49,6 +51,7 @@ export class TicketController {
     };
   }
 
+  @AuthGuardRequired('*')
   @Get('retrieve')
   async get(
     @AuthorizedUser() user: AuthorizedUserPayload,
@@ -73,6 +76,7 @@ export class TicketController {
     };
   }
 
+  @AuthGuardRequired('*')
   @Get('search')
   async list(
     @AuthorizedUser() user: AuthorizedUserPayload,
@@ -110,6 +114,7 @@ export class TicketController {
     };
   }
 
+  @AuthGuardRequired(UserType.PARTICIPANT)
   @Patch()
   async update(
     @AuthorizedUser() user: AuthorizedUserPayload,
@@ -135,6 +140,7 @@ export class TicketController {
     };
   }
 
+  @AuthGuardRequired(UserType.PARTICIPANT)
   @Delete()
   async delete(
     @AuthorizedUser() user: AuthorizedUserPayload,
