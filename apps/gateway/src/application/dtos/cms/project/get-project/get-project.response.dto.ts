@@ -1,5 +1,5 @@
 import { Prisma, ProjectStatus } from '@prisma/client';
-import { ListTicketsResponsePayload } from '../../ticket/list-tickets/get-ticket-list.response.dto';
+import { ListTicketsResponsePayload } from '../../ticket';
 import { ResponseDto } from 'libs/interfaces';
 
 export class GetProjectResponsePayload

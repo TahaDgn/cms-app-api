@@ -4,6 +4,7 @@ import { RedisModule } from 'libs/adapters/redis';
 import {
   ProjectGrpcServer,
   ProjectRepository,
+  TicketCommentGrpcServer,
   TicketCommentRepository,
   TicketGrpcServer,
   TicketRepository,
@@ -14,13 +15,20 @@ import {
   TICKET_COMMENT_REPOSITORY,
   TICKET_REPOSITORY,
 } from './domain';
-import { CacheUseCase, ProjectUseCase, TicketUseCase } from './application';
+import {
+  CacheUseCase,
+  ProjectUseCase,
+  TicketCommentUseCase,
+  TicketUseCase,
+} from './application';
 
 @Module({
   imports: [RedisModule],
   providers: [
-    ProjectGrpcServer,
-    TicketGrpcServer,
+    CacheUseCase,
+    ProjectUseCase,
+    TicketUseCase,
+    TicketCommentUseCase,
     {
       provide: TICKET_COMMENT_REPOSITORY,
       useClass: TicketCommentRepository,
@@ -37,9 +45,8 @@ import { CacheUseCase, ProjectUseCase, TicketUseCase } from './application';
       provide: PRISMA_SERVICE,
       useClass: PrismaService,
     },
-    CacheUseCase,
-    ProjectUseCase,
-    TicketUseCase,
   ],
+  controllers: [ProjectGrpcServer, TicketGrpcServer, TicketCommentGrpcServer],
+  exports: [CacheUseCase, ProjectUseCase, TicketUseCase, TicketCommentUseCase],
 })
 export class CmsModule {}

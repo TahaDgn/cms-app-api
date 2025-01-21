@@ -8,13 +8,11 @@ export class UserRepository implements UserRepositorySign {
   constructor(@Inject(PRISMA_SERVICE) private prismaService: PrismaService) {}
 
   async create(
-    payload: Pick<Prisma.UserCreateInput, 'email' | 'name' | 'type' | 'tenant'>,
+    payload: Prisma.UserCreateArgs,
     transactionClient = this.prismaService,
   ): Promise<Prisma.UserGetPayload<{ include: { tenant: true } }>> {
     return transactionClient.user.create({
-      data: {
-        ...payload,
-      },
+      ...payload,
       include: {
         tenant: true,
       },

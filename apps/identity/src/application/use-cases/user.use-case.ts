@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import {
+  AuthorizedUserPayload,
   CreateUserPayload,
   DeleteUserPayload,
   GetUserPayload,
@@ -31,8 +32,10 @@ export class UserUseCase {
     private readonly cacheUseCase: CacheUseCase,
   ) {}
 
-  public async create(payload: CreateUserPayload) {
-    const { tenantId, type, name, email } = payload;
+  public async create(payload: CreateUserPayload, user: AuthorizedUserPayload) {
+    const { tenantId } = user;
+
+    const { type, name, email } = payload;
 
     const existingUser = await this.userRepository.findFirst({
       where: {
@@ -52,11 +55,16 @@ export class UserUseCase {
       async (transactionClient: Prisma.TransactionClient) => {
         const user = await this.userRepository.create(
           {
-            email,
-            name,
-            type,
-            tenant: {
-              connect: { id: tenantId },
+            data: {
+              email,
+              name,
+              type,
+              tenant: {
+                connect: { id: tenantId },
+              },
+            },
+            include: {
+              tenant: true,
             },
           },
           transactionClient,
@@ -83,10 +91,21 @@ export class UserUseCase {
     return createdUser;
   }
 
-  public async list(payload: ListUserPayload): Promise<ListUsersResponse> {
-    const users = await this.userRepository.findAll(payload);
+  public async list(
+    payload: ListUserPayload,
+    user: AuthorizedUserPayload,
+  ): Promise<ListUsersResponse> {
+    const { where, skip, take } = payload;
+    const { tenantId } = user;
 
-    const { where } = payload;
+    const users = await this.userRepository.findAll({
+      where: {
+        ...where,
+        tenantId,
+      },
+      skip,
+      take,
+    });
 
     const totalItemsCount = await this.userRepository.count({
       where,
@@ -98,22 +117,48 @@ export class UserUseCase {
     };
   }
 
-  public async get(payload: GetUserPayload): Promise<GetUserResponse> {
-    const user = await this.userRepository.findFirst(payload);
+  public async get(
+    payload: GetUserPayload,
+    user: AuthorizedUserPayload,
+  ): Promise<GetUserResponse> {
+    const { tenantId } = user;
 
-    return user;
+    const { where } = payload;
+
+    const result = await this.userRepository.findFirst({
+      where: {
+        ...where,
+        tenantId,
+      },
+    });
+
+    return result;
   }
 
-  public async getOrFail(payload: GetUserPayload): Promise<GetUserResponse> {
-    const user = await this.userRepository.findFirst(payload);
+  public async getOrFail(
+    payload: GetUserPayload,
+    user: AuthorizedUserPayload,
+  ): Promise<GetUserResponse> {
+    const { tenantId } = user;
 
-    if (!user) throw new UserNotFoundException();
+    const { where } = payload;
 
-    return user;
+    const result = await this.userRepository.findFirst({
+      where: {
+        ...where,
+        tenantId,
+      },
+    });
+
+    if (!result) throw new UserNotFoundException();
+
+    return result;
   }
 
-  public async delete(payload: DeleteUserPayload) {
-    const { id, tenantId } = payload;
+  public async delete(payload: DeleteUserPayload, user: AuthorizedUserPayload) {
+    const { id } = payload;
+
+    const { tenantId } = user;
 
     const deletedUser = await this.prismaService.$transaction(
       async (transactionClient: Prisma.TransactionClient) => {

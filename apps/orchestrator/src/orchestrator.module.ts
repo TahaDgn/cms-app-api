@@ -10,7 +10,8 @@ import { OrchestratorGrpcServer } from './infrastructure';
 
 @Module({
   imports: [RabbitMQModule, RedisModule],
-  providers: [IdentityGrpcClient, OrchestratorUseCase, CmsGrpcClient],
+  providers: [IdentityGrpcClient, CmsGrpcClient, OrchestratorUseCase],
   controllers: [OrchestratorGrpcServer],
+  exports: [IdentityGrpcClient, CmsGrpcClient, OrchestratorUseCase],
 })
 export class OrchestratorModule {}

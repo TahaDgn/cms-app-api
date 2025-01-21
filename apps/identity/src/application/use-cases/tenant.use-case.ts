@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import {
+  AuthorizedUserPayload,
   CreateTenantAndUserPayload,
   CreateTenantAndUserResponse,
   DecrementTenantProjectsCountPayload,
@@ -47,17 +48,19 @@ export class TenantUseCase {
 
         const createdUser = await this.userRepository.create(
           {
-            ...user,
-            tenant: {
-              connect: {
-                id: createdTenant.id,
+            data: {
+              ...user,
+              tenant: {
+                connect: {
+                  id: createdTenant.id,
+                },
               },
             },
           },
           transactionClient,
         );
 
-        await this.tenantRepository.setOwner(
+        const updatedTenant = await this.tenantRepository.setOwner(
           {
             id: createdTenant.id,
             ownerId: createdUser.id,
@@ -66,7 +69,7 @@ export class TenantUseCase {
         );
 
         return {
-          tenant: createdTenant,
+          tenant: updatedTenant,
           user: createdUser,
         };
       },
@@ -75,14 +78,18 @@ export class TenantUseCase {
     return createdTenantAndUser;
   }
 
-  public async update(payload: UpdateTenantPayload) {
-    const { id, ...updatePayload } = payload;
+  public async update(
+    payload: UpdateTenantPayload,
+    user: AuthorizedUserPayload,
+  ) {
+    const { tenantId } = user;
+    const { ...updatePayload } = payload;
     const updatedTenant = await this.prismaService.$transaction(
       async (transactionClient: Prisma.TransactionClient) => {
         const tenant = await this.tenantRepository.update(
           {
             where: {
-              id,
+              id: tenantId,
             },
             data: {
               ...updatePayload,
@@ -95,7 +102,7 @@ export class TenantUseCase {
         );
 
         const users = await this.userRepository.findAll({
-          where: { tenantId: id },
+          where: { tenantId },
           include: {
             tenant: true,
           },
@@ -114,35 +121,38 @@ export class TenantUseCase {
 
   public async incrementProjectsCount(
     payload: IncrementTenantProjectsCountPayload,
+    user: AuthorizedUserPayload,
   ) {
-    const { id } = payload;
+    const { tenantId } = user;
 
     return this.tenantRepository.incrementProjectCount({
-      id,
+      id: tenantId,
     });
   }
 
   public async decrementProjectsCount(
     payload: DecrementTenantProjectsCountPayload,
+    user: AuthorizedUserPayload,
   ) {
-    const { id } = payload;
+    const { tenantId } = user;
 
     return this.tenantRepository.decrementProjectCount({
-      id,
+      id: tenantId,
     });
   }
 
   public async delete(
     payload: DeleteTenantPayload,
+    user: AuthorizedUserPayload,
   ): Promise<GetTenantResponse> {
-    const { id } = payload;
+    const { tenantId } = user;
 
     const deletedTenant = await this.prismaService.$transaction(
       async (transactionClient: Prisma.TransactionClient) => {
         const tenant = await this.tenantRepository.delete(
           {
             where: {
-              id,
+              id: tenantId,
             },
             include: {
               users: true,

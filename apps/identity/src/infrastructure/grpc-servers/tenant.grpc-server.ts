@@ -3,6 +3,7 @@ import { Controller } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
 import { TenantUseCase } from '../../application';
 import {
+  AuthorizedUserPayload,
   CreateTenantAndUserPayload,
   CreateTenantAndUserResponse,
   DecrementTenantProjectsCountPayload,
@@ -12,6 +13,7 @@ import {
   IncrementTenantProjectsCountPayload,
   UpdateTenantPayload,
 } from 'libs/interfaces';
+import { Metadata } from '@grpc/grpc-js';
 
 @Controller()
 export class TenantGrpcServer
@@ -35,26 +37,50 @@ export class TenantGrpcServer
   }
 
   @GrpcMethod('IdentityService', 'updateTenant')
-  updateTenant(payload: UpdateTenantPayload): Promise<GetTenantResponse> {
-    return this.tenantUseCase.update(payload);
+  updateTenant(
+    payload: UpdateTenantPayload,
+    metadata: Metadata,
+  ): Promise<GetTenantResponse> {
+    const authorizedUser = <AuthorizedUserPayload>(
+      JSON.parse(metadata.get('User').toString())
+    );
+
+    return this.tenantUseCase.update(payload, authorizedUser);
   }
 
   @GrpcMethod('IdentityService', 'incrementTenantProjectsCount')
   incrementTenantProjectsCount(
     payload: IncrementTenantProjectsCountPayload,
+    metadata: Metadata,
   ): Promise<GetTenantResponse> {
-    return this.tenantUseCase.incrementProjectsCount(payload);
+    const authorizedUser = <AuthorizedUserPayload>(
+      JSON.parse(metadata.get('User').toString())
+    );
+
+    return this.tenantUseCase.incrementProjectsCount(payload, authorizedUser);
   }
 
   @GrpcMethod('IdentityService', 'decrementTenantProjectsCount')
   decrementTenantProjectsCount(
     payload: DecrementTenantProjectsCountPayload,
+    metadata: Metadata,
   ): Promise<GetTenantResponse> {
-    return this.tenantUseCase.decrementProjectsCount(payload);
+    const authorizedUser = <AuthorizedUserPayload>(
+      JSON.parse(metadata.get('User').toString())
+    );
+
+    return this.tenantUseCase.decrementProjectsCount(payload, authorizedUser);
   }
 
   @GrpcMethod('IdentityService', 'deleteTenant')
-  deleteTenant(payload: DeleteTenantPayload): Promise<GetTenantResponse> {
-    return this.tenantUseCase.delete(payload);
+  deleteTenant(
+    payload: DeleteTenantPayload,
+    metadata: Metadata,
+  ): Promise<GetTenantResponse> {
+    const authorizedUser = <AuthorizedUserPayload>(
+      JSON.parse(metadata.get('User').toString())
+    );
+
+    return this.tenantUseCase.delete(payload, authorizedUser);
   }
 }

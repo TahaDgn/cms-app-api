@@ -9,7 +9,9 @@ import {
   ListUserPayload,
   ListUsersResponse,
   GetUserPayload,
+  AuthorizedUserPayload,
 } from 'libs/interfaces';
+import { Metadata } from '@grpc/grpc-js';
 @Controller()
 export class UserGrpcServer
   implements
@@ -21,27 +23,62 @@ export class UserGrpcServer
   constructor(private readonly userUseCase: UserUseCase) {}
 
   @GrpcMethod('IdentityService', 'createUser')
-  createUser(payload: CreateUserPayload): Promise<GetUserResponse> {
-    return this.userUseCase.create(payload);
+  createUser(
+    payload: CreateUserPayload,
+    metadata: Metadata,
+  ): Promise<GetUserResponse> {
+    const authorizedUser = <AuthorizedUserPayload>(
+      JSON.parse(metadata.get('User').toString())
+    );
+
+    return this.userUseCase.create(payload, authorizedUser);
   }
 
   @GrpcMethod('IdentityService', 'listUsers')
-  listUsers(payload: ListUserPayload): Promise<ListUsersResponse> {
-    return this.userUseCase.list(payload);
+  listUsers(
+    payload: ListUserPayload,
+    metadata: Metadata,
+  ): Promise<ListUsersResponse> {
+    const authorizedUser = <AuthorizedUserPayload>(
+      JSON.parse(metadata.get('User').toString())
+    );
+
+    return this.userUseCase.list(payload, authorizedUser);
   }
 
   @GrpcMethod('IdentityService', 'getUser')
-  getUser(payload: GetUserPayload): Promise<GetUserResponse> {
-    return this.userUseCase.get(payload);
+  getUser(
+    payload: GetUserPayload,
+    metadata: Metadata,
+  ): Promise<GetUserResponse> {
+    const authorizedUser = <AuthorizedUserPayload>(
+      JSON.parse(metadata.get('User').toString())
+    );
+
+    return this.userUseCase.get(payload, authorizedUser);
   }
 
   @GrpcMethod('IdentityService', 'getUserOrFail')
-  getUserOrFail(payload: GetUserPayload): Promise<GetUserResponse> {
-    return this.userUseCase.getOrFail(payload);
+  getUserOrFail(
+    payload: GetUserPayload,
+    metadata: Metadata,
+  ): Promise<GetUserResponse> {
+    const authorizedUser = <AuthorizedUserPayload>(
+      JSON.parse(metadata.get('User').toString())
+    );
+
+    return this.userUseCase.getOrFail(payload, authorizedUser);
   }
 
   @GrpcMethod('IdentityService', 'deleteUser')
-  deleteUser(payload: DeleteUserPayload): Promise<GetUserResponse> {
-    return this.userUseCase.delete(payload);
+  deleteUser(
+    payload: DeleteUserPayload,
+    metadata: Metadata,
+  ): Promise<GetUserResponse> {
+    const authorizedUser = <AuthorizedUserPayload>(
+      JSON.parse(metadata.get('User').toString())
+    );
+
+    return this.userUseCase.delete(payload, authorizedUser);
   }
 }
