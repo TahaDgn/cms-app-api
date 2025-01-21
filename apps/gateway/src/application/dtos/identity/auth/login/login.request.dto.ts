@@ -1,18 +1,35 @@
 import { Tenant } from '@prisma/client';
-import { IsNotEmpty, IsEmail } from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  IsNotEmpty,
+  IsEmail,
+  ValidateNested,
+  MaxLength,
+  IsString,
+} from 'class-validator';
 
-class TenantJoinTable implements Pick<Tenant, 'identifier'> {
+class TenantPayload implements Pick<Tenant, 'identifier'> {
+  @MaxLength(80)
+  @IsString()
+  @IsNotEmpty()
   identifier: string;
 }
 
-class Payload {
+class UserPayload {
+  @MaxLength(256)
   @IsEmail()
   @IsNotEmpty()
   email: string;
 
-  tenant: TenantJoinTable;
+  @ValidateNested()
+  @IsNotEmpty()
+  @Type(() => TenantPayload)
+  tenant: TenantPayload;
 }
 
 export class LoginRequestDto {
-  createPayload: Payload;
+  @ValidateNested()
+  @IsNotEmpty()
+  @Type(() => UserPayload)
+  createPayload: UserPayload;
 }

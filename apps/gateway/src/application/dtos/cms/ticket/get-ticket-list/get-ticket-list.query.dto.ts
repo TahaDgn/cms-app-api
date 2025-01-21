@@ -1,6 +1,6 @@
 import { Ticket, TicketStatus } from '@prisma/client';
 
-export class GetTicketListRequestPayload
+class Payload
   implements Partial<Pick<Ticket, 'projectId' | 'status' | 'createdBy'>>
 {
   projectId?: number;
@@ -10,6 +10,6 @@ export class GetTicketListRequestPayload
   createdBy?: number;
 }
 
-export class GetTicketListRequestDto {
-  query: GetTicketListRequestPayload;
+export class GetTicketQueryRequestDto {
+  query: Payload;
 }

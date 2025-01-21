@@ -1,3 +1,5 @@
+import { Prisma } from '@prisma/client';
+
 export interface ResponseDto<Context = null> {
   success: boolean;
 
@@ -5,3 +7,7 @@ export interface ResponseDto<Context = null> {
 
   data?: Context;
 }
+
+export type AuthorizedUserPayload = Prisma.UserGetPayload<{
+  include: { tenant: true };
+}>;

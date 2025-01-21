@@ -1,22 +1,17 @@
 import { Prisma, ProjectStatus } from '@prisma/client';
 import { GetTicketListResponsePayload } from '../../ticket/get-ticket-list/get-ticket-list.response.dto';
 import { ResponseDto } from 'libs/interfaces';
-import { ListUserItemResponsePayload } from '../../../identity';
 
 export class GetProjectResponsePayload
-  implements
-    Omit<
-      Prisma.ProjectGetPayload<{ include: { tickets: true } }>,
-      'clientUserIds'
-    >
+  implements Prisma.ProjectGetPayload<{ include: { tickets: true } }>
 {
-  tickets: GetTicketListResponsePayload[];
   id: number;
   tenantId: number;
   title: string;
   description: string;
   status: ProjectStatus;
-  clients: Partial<ListUserItemResponsePayload>[];
+  clientUserIds: number[];
+  tickets: GetTicketListResponsePayload[];
   createdAt: Date;
   updatedAt: Date;
 }

@@ -12,7 +12,7 @@ import { Prisma, UserType } from '@prisma/client';
 
 export const AUTH_REQUIRED = 'auth_required';
 
-export const AuthGuard = (userTypes: UserType[] = []) =>
+export const AuthGuard = (...userTypes: (UserType | '*')[]) =>
   SetMetadata(AUTH_REQUIRED, userTypes);
 
 @Injectable()

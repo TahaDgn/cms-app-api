@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsNumber } from 'class-validator';
 
-export class DeleteProjectRequestDto {
+export class DeleteProjectQueryDto {
   @IsNumber()
   @IsNotEmpty()
   id: number;

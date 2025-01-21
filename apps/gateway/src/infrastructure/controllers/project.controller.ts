@@ -7,11 +7,15 @@ import {
   Delete,
   Query,
 } from '@nestjs/common';
-import { CmsGrpcClient, OrchestratorGrpcClient, PagingRequestDto } from '../../application';
-import { User } from '@prisma/client';
+import {
+  CmsGrpcClient,
+  OrchestratorGrpcClient,
+  PagingRequestDto,
+} from '../../application';
+import { User, UserType } from '@prisma/client';
 import { AuthorizedUser } from '../middlewares';
 import {
-  AddClientToProjectRequestDto,
+  AddClientsToProjectRequestDto,
   AddClientToProjectResponseDto,
   DeleteProjectRequestDto,
   DeleteProjectResponseDto,
@@ -24,6 +28,7 @@ import {
   UpdateProjectRequestDto,
   UpdateProjectResponseDto,
 } from '../../application';
+import { AuthorizedUserPayload } from 'libs/interfaces';
 
 @Controller('projects')
 export class ProjectController {
@@ -34,13 +39,13 @@ export class ProjectController {
 
   @Post()
   async create(
-    @AuthorizedUser() user: User,
+    @AuthorizedUser() user: AuthorizedUserPayload,
     @Body() dto: ProjectCreateRequestDto,
   ) {}
 
   @Patch()
   async update(
-    @AuthorizedUser() user: User,
+    @AuthorizedUser() user: AuthorizedUserPayload,
     @Body() dto: UpdateProjectRequestDto,
   ): Promise<UpdateProjectResponseDto> {
     return;
@@ -48,32 +53,36 @@ export class ProjectController {
 
   @Get('/retrieve')
   async get(
-    @AuthorizedUser() user: User,
+    @AuthorizedUser() user: AuthorizedUserPayload,
     @Query() dto: GetProjectRequestDto,
   ): Promise<GetProjectResponseDto> {
     return;
   }
 
-  @Get()
+  @Get('/search')
   async getList(
-    @AuthorizedUser() user: User,
-    @Query() dto: ListProjectRequestDto,
-    @Query() paging: PagingRequestDto,
+    @AuthorizedUser() user: AuthorizedUserPayload,
+    @Query() listQuery: ListProjectRequestDto,
+    @Query() pagingQuery: PagingRequestDto,
   ): Promise<ListProjectResponseDto> {
-    return;
+    const { id, type, tenantId } = user;
+
+    if (type === UserType.CLIENT) {
+      Object.assign(listQuery.query, { clientUserIds: { has: id } });
+    }
   }
 
   @Post('clients')
   async addClient(
-    @AuthorizedUser() user: User,
-    @Body() dto: AddClientToProjectRequestDto,
+    @AuthorizedUser() user: AuthorizedUserPayload,
+    @Body() dto: AddClientsToProjectRequestDto,
   ): Promise<AddClientToProjectResponseDto> {
     return;
   }
 
   @Delete('clients')
   async removeClient(
-    @AuthorizedUser() user: User,
+    @AuthorizedUser() user: AuthorizedUserPayload,
     @Body() dto: RemoveClientToProjectRequestDto,
   ): Promise<RemoveClientToProjectResponseDto> {
     return;
@@ -81,7 +90,7 @@ export class ProjectController {
 
   @Delete()
   async delete(
-    @AuthorizedUser() user: User,
+    @AuthorizedUser() user: AuthorizedUserPayload,
     @Query() dto: DeleteProjectRequestDto,
   ): Promise<DeleteProjectResponseDto> {
     return;

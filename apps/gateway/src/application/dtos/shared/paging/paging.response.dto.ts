@@ -1,6 +1,4 @@
-import { TotalItemsCount } from 'libs/interfaces';
-
-export class PagingResponseDto implements TotalItemsCount {
+export class PaginationResponsePayload {
   currentPage: number; // Taken from Query object
 
   prevPage: number; // currentPage - 1 === 0 ? 1 : currentPage -1
@@ -16,4 +14,8 @@ export class PagingResponseDto implements TotalItemsCount {
   totalItemsCount: number; // Returned from service
 
   limit: number; // Taken from Query object
+}
+
+export class PagingResponseDto {
+  pagination: PaginationResponsePayload;
 }

@@ -90,12 +90,12 @@ export class CacheUseCase {
     const accessRequestCodeKey = `accessRequestCode:${accessCode}`;
 
     await Promise.all([
-      await this.redisAdapter.lRem(
+      this.redisAdapter.lRem(
         `tenant:${tenantId}:user:${id}:accessTokenCacheKeys`,
         0,
         accessCode,
       ),
-      await this.redisAdapter.delKey(accessRequestCodeKey),
+      this.redisAdapter.delKey(accessRequestCodeKey),
     ]);
   }
 

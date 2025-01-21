@@ -1,5 +1,6 @@
 import { User, UserIssue, UserType } from '@prisma/client';
 import { ResponseDto } from 'libs/interfaces';
+import { PagingResponseDto } from '../../../shared';
 
 export class ListUserItemResponsePayload implements User {
   id: number;
@@ -20,6 +21,7 @@ export class ListUserItemResponsePayload implements User {
 }
 
 export class ListUsersResponseDto
+  extends PagingResponseDto
   implements ResponseDto<ListUserItemResponsePayload[]>
 {
   success: boolean;

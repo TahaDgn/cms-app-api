@@ -8,10 +8,10 @@ import {
   UserDeletionSagaPayload,
   UserDeletionSagaResult,
   UserCreationSagaResult,
-  AddClientToProjectSagaPayload,
-  AddClientToProjectSagaResult,
-  RemoveClientFromProjectSagaPayload,
-  RemoveClientFromProjectSagaResult,
+  AddClientsToProjectsSagaPayload,
+  AddClientsToProjectsSagaResult,
+  RemoveClientsFromProjectsSagaPayload,
+  RemoveClientsFromProjectsSagaResult,
   CreateProjectSagaPayload,
   CreateProjectSagaResult,
   DeleteProjectSagaPayload,
@@ -76,8 +76,8 @@ export class OrchestratorUseCase {
   }
 
   async runAddClientToProjectSaga(
-    payload: AddClientToProjectSagaPayload,
-  ): Promise<AddClientToProjectSagaResult> {
+    payload: AddClientsToProjectsSagaPayload,
+  ): Promise<AddClientsToProjectsSagaResult> {
     return addClientToProjectSaga(
       this.cmsGrpcClient,
       this.identityGrpcClient,
@@ -87,8 +87,8 @@ export class OrchestratorUseCase {
   }
 
   async runRemoveClientFromProjectSaga(
-    payload: RemoveClientFromProjectSagaPayload,
-  ): Promise<RemoveClientFromProjectSagaResult> {
+    payload: RemoveClientsFromProjectsSagaPayload,
+  ): Promise<RemoveClientsFromProjectsSagaResult> {
     return removeClientFromProjectSaga(
       this.cmsGrpcClient,
       this.identityGrpcClient,

@@ -7,10 +7,10 @@ import {
   UserCreationSagaPayload,
   UserDeletionSagaPayload,
   OrchestratorService,
-  AddClientToProjectSagaPayload,
-  AddClientToProjectSagaResult,
-  RemoveClientFromProjectSagaPayload,
-  RemoveClientFromProjectSagaResult,
+  AddClientsToProjectsSagaPayload,
+  AddClientsToProjectsSagaResult,
+  RemoveClientsFromProjectsSagaPayload,
+  RemoveClientsFromProjectsSagaResult,
   CreateProjectSagaPayload,
   CreateProjectSagaResult,
   DeleteProjectSagaPayload,
@@ -43,16 +43,16 @@ export class OrchestratorGrpcServer implements OrchestratorService {
   }
 
   @GrpcMethod('OrchestratorService', 'addClientToProjectSaga')
-  addClientToProjectSaga(
-    payload: AddClientToProjectSagaPayload,
-  ): Promise<AddClientToProjectSagaResult> {
+  addClientsToProjectsSaga(
+    payload: AddClientsToProjectsSagaPayload,
+  ): Promise<AddClientsToProjectsSagaResult> {
     return this.orchestratorUseCase.runAddClientToProjectSaga(payload);
   }
 
   @GrpcMethod('OrchestratorService', 'removeClientFromProjectSaga')
-  removeClientFromProjectSaga(
-    payload: RemoveClientFromProjectSagaPayload,
-  ): Promise<RemoveClientFromProjectSagaResult> {
+  removeClientsFromProjectsSaga(
+    payload: RemoveClientsFromProjectsSagaPayload,
+  ): Promise<RemoveClientsFromProjectsSagaResult> {
     return this.orchestratorUseCase.runRemoveClientFromProjectSaga(payload);
   }
 

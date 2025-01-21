@@ -5,13 +5,13 @@ import { SagaStep } from '../../saga-step';
 import {
   ListProjectsResponse,
   ListUsersResponse,
-  RemoveClientFromProjectSagaPayload,
-  RemoveClientFromProjectSagaResult,
+  RemoveClientsFromProjectsSagaPayload,
+  RemoveClientsFromProjectsSagaResult,
 } from 'libs/interfaces';
 import { UserType } from '@prisma/client';
 
 interface RemoveClientFromProjectContext {
-  payload: RemoveClientFromProjectSagaPayload;
+  payload: RemoveClientsFromProjectsSagaPayload;
   listProjectsResponseAfterClientsRemoval?: ListProjectsResponse;
   listUsersResponse?: ListUsersResponse;
 }
@@ -20,8 +20,8 @@ export async function removeClientFromProjectSaga(
   cmsGrpcClient: CmsGrpcClient,
   identityGrpcClient: IdentityGrpcClient,
   rabbitMqAdapter: RabbitMQAdapter,
-  payload: RemoveClientFromProjectSagaPayload,
-): Promise<RemoveClientFromProjectSagaResult> {
+  payload: RemoveClientsFromProjectsSagaPayload,
+): Promise<RemoveClientsFromProjectsSagaResult> {
   const context: RemoveClientFromProjectContext = {
     payload,
     listProjectsResponseAfterClientsRemoval: undefined,

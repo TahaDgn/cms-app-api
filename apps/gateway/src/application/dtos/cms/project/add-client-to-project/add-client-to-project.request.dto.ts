@@ -1,14 +1,11 @@
-import { Project, User } from '@prisma/client';
+import { Project } from '@prisma/client';
 
-class UserJoinPayload implements Pick<User, 'id'> {
-  id: number;
+class Payload implements Pick<Project, 'clientUserIds'> {
+  clientUserIds: number[];
 }
 
-class Payload {
-  user: UserJoinPayload;
-}
-
-export class AddClientToProjectRequestDto implements Pick<Project, 'id'> {
+export class AddClientsToProjectRequestDto implements Pick<Project, 'id'> {
   id: number;
+
   updatePayload: Payload;
 }

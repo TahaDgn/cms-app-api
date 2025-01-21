@@ -29,17 +29,17 @@ export interface OrchestratorService {
     payload: UserDeletionSagaPayload,
   ): Promise<UserDeletionSagaResult> | Observable<UserDeletionSagaResult>;
 
-  addClientToProjectSaga(
-    payload: AddClientToProjectSagaPayload,
+  addClientsToProjectsSaga(
+    payload: AddClientsToProjectsSagaPayload,
   ):
-    | Promise<AddClientToProjectSagaResult>
-    | Observable<AddClientToProjectSagaResult>;
+    | Promise<AddClientsToProjectsSagaResult>
+    | Observable<AddClientsToProjectsSagaResult>;
 
-  removeClientFromProjectSaga(
-    payload: RemoveClientFromProjectSagaPayload,
+  removeClientsFromProjectsSaga(
+    payload: RemoveClientsFromProjectsSagaPayload,
   ):
-    | Promise<RemoveClientFromProjectSagaResult>
-    | Observable<RemoveClientFromProjectSagaResult>;
+    | Promise<RemoveClientsFromProjectsSagaResult>
+    | Observable<RemoveClientsFromProjectsSagaResult>;
 
   createProjectSaga(
     payload: CreateProjectSagaPayload,
@@ -58,14 +58,14 @@ export type DeleteProjectSagaPayload = DeleteProjectPayload;
 
 export type DeleteProjectSagaResult = GetProjectResponse;
 
-export type AddClientToProjectSagaPayload = AddClientsToProjectsPayload;
+export type AddClientsToProjectsSagaPayload = AddClientsToProjectsPayload;
 
-export type AddClientToProjectSagaResult = ListProjectsResponse;
+export type AddClientsToProjectsSagaResult = ListProjectsResponse;
 
-export type RemoveClientFromProjectSagaPayload =
+export type RemoveClientsFromProjectsSagaPayload =
   RemoveClientsFromProjectsPayload;
 
-export type RemoveClientFromProjectSagaResult = ListProjectsResponse;
+export type RemoveClientsFromProjectsSagaResult = ListProjectsResponse;
 
 export interface UserRegistrationSagaPayload {
   tenant: Pick<Tenant, 'name' | 'identifier'>;

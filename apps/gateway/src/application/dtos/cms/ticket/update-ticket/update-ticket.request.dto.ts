@@ -7,5 +7,6 @@ class Payload implements Pick<Ticket, 'description' | 'status'> {
 
 export class UpdateTicketRequestDto implements Pick<Ticket, 'id'> {
   id: number;
+
   updatePayload: Payload;
 }

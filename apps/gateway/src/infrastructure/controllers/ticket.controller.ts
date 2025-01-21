@@ -8,11 +8,11 @@ export class TicketController {
   constructor(private readonly cmsGrpcClient: CmsGrpcClient) {}
 
   @Post()
-  async create(@AuthorizedUser() user: User, @Body() dto) {}
+  async create(@AuthorizedUser() user: AuthorizedUserPayload, @Body() dto) {}
 
   @Patch(':id')
-  async update(@AuthorizedUser() user: User, @Body() dto) {}
+  async update(@AuthorizedUser() user: AuthorizedUserPayload, @Body() dto) {}
 
   @Delete(':id')
-  async delete(@AuthorizedUser() user: User, @Body() dto) {}
+  async delete(@AuthorizedUser() user: AuthorizedUserPayload, @Body() dto) {}
 }

@@ -1,22 +1,22 @@
+import { Controller, Post, Body, Get, Delete, Query } from '@nestjs/common';
 import {
-  Controller,
-  Post,
-  Body,
-  Get,
-  Delete,
-  Param,
-  UnprocessableEntityException,
-} from '@nestjs/common';
-import { OrchestratorGrpcClient, IdentityGrpcClient } from '../../application';
+  OrchestratorGrpcClient,
+  IdentityGrpcClient,
+  ListUsersRequestDto,
+  ListUsersResponseDto,
+  PagingRequestDto,
+  createPagingResponse,
+  DeleteUserQueryDto,
+  CreateUserResponseDto,
+} from '../../application';
 import { AuthGuard, AuthorizedUser } from '../middlewares/auth.guard';
 import {
   CreateUserRequestDto,
-  CreateParticipantResponseDto,
   DeleteUserResponseDto,
-  GetUserResponsePayload,
   MeResponseDto,
 } from '../../application';
-import { Prisma, User, UserType } from '@prisma/client';
+import { UserType } from '@prisma/client';
+import { AuthorizedUserPayload } from 'libs/interfaces';
 
 @Controller('users')
 export class UserController {
@@ -25,77 +25,89 @@ export class UserController {
     private readonly identityClient: IdentityGrpcClient,
   ) {}
 
-  @AuthGuard([UserType.PARTICIPANT])
+  @AuthGuard(UserType.PARTICIPANT)
   @Post()
-  async createParticipant(
-    @Body() dto: CreateUserRequestDto,
-    @AuthorizedUser() user: User,
-  ): Promise<CreateParticipantResponseDto> {
+  async create(
+    @Body() createDto: CreateUserRequestDto,
+    @AuthorizedUser() user: AuthorizedUserPayload,
+  ): Promise<CreateUserResponseDto> {
     const {
-      createPayload: { email, name },
-    } = dto;
+      createPayload: { email, name, type },
+    } = createDto;
     const { tenantId } = user;
 
-    const createdParticipant = await this.orchestratorClient.userCreationSaga({
+    const data = await this.orchestratorClient.userCreationSaga({
       email,
       name,
       tenantId,
-      type: UserType.PARTICIPANT,
+      type,
     });
 
     return {
       success: true,
-      data: createdParticipant,
+      data,
     };
   }
 
-  @AuthGuard([UserType.PARTICIPANT, UserType.CLIENT])
+  @AuthGuard('*')
   @Get('me')
   async me(
-    @AuthorizedUser() dto: Prisma.UserGetPayload<{ include: { tenant: true } }>,
+    @AuthorizedUser() user: AuthorizedUserPayload,
   ): Promise<MeResponseDto> {
+    const data = user;
+
     return {
       success: true,
-      data: dto,
+      data,
     };
   }
 
-  @AuthGuard([UserType.PARTICIPANT])
-  @Get()
+  @AuthGuard('*')
+  @Get('search')
   async listUsers(
-    @AuthorizedUser()
-    user: Prisma.UserGetPayload<{ include: { tenant: true } }>,
-  ) {
+    @AuthorizedUser() user: AuthorizedUserPayload,
+    @Query() listQuery: ListUsersRequestDto,
+    @Query() pagingQuery: PagingRequestDto,
+  ): Promise<ListUsersResponseDto> {
     const { tenantId } = user;
 
-    const { users } = await this.identityClient.listTenantUsers({
-      tenantId,
-    });
+    const { totalItemsCount, users: data } =
+      await this.identityClient.listUsers({
+        where: {
+          tenantId,
+          ...listQuery,
+        },
+      });
 
-    return users;
+    const pagination = createPagingResponse(
+      pagingQuery,
+      totalItemsCount,
+      data.length,
+    );
+
+    return {
+      success: true,
+      data,
+      pagination,
+    };
   }
 
-  @AuthGuard([UserType.PARTICIPANT])
+  @AuthGuard(UserType.PARTICIPANT)
   @Delete()
   async deleteUser(
-    @AuthorizedUser()
-    user: Prisma.UserGetPayload<{ include: { tenant: true } }>,
-
+    @AuthorizedUser() user: AuthorizedUserPayload,
+    @Query() deleteQuery: DeleteUserQueryDto,
   ): Promise<DeleteUserResponseDto> {
     const { tenantId } = user;
 
-    if (!id) {
-      throw new UnprocessableEntityException('Id not be empty');
-    }
-
-    const deletedUser = await this.orchestratorClient.userDeletionSaga({
-      id: parseInt(id, 10),
+    const data = await this.orchestratorClient.userDeletionSaga({
       tenantId,
+      ...deleteQuery,
     });
 
     return {
       success: true,
-      data: deletedUser,
+      data,
     };
   }
 }

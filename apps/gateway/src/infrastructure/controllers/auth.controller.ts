@@ -11,7 +11,6 @@ import {
 import { Response } from 'express';
 import { IdentityGrpcClient, OrchestratorGrpcClient } from '../../application';
 import { RegisterRequestDto, LoginRequestDto } from '../../application';
-import slugify from 'slugify';
 import { UserType } from '@prisma/client';
 import { AuthGuard } from '../middlewares';
 
@@ -36,9 +35,9 @@ export class AuthController {
       },
       tenant: {
         ...tenant,
-        identifier: slugify(tenant.name, { trim: true, lower: true }),
       },
     });
+
     return {
       message: 'Registration initiated. Check your email for the access link.',
     };
@@ -81,7 +80,7 @@ export class AuthController {
     }
   }
 
-  @AuthGuard([UserType.CLIENT, UserType.PARTICIPANT])
+  @AuthGuard('*')
   @Post('logout')
   async logout(@Headers('Authorization') accessToken: string) {
     await this.identityClient.removeAccessToken({

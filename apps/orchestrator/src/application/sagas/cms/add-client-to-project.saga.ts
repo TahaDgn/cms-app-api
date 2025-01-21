@@ -3,15 +3,15 @@ import { RabbitMQAdapter } from 'libs/adapters';
 import { runSaga } from '../../saga-runner';
 import { SagaStep } from '../../saga-step';
 import {
-  AddClientToProjectSagaPayload,
-  AddClientToProjectSagaResult,
+  AddClientsToProjectsSagaPayload,
+  AddClientsToProjectsSagaResult,
   ListProjectsResponse,
   ListUsersResponse,
 } from 'libs/interfaces';
 import { UserType } from '@prisma/client';
 
 interface AddClientToProjectContext {
-  payload: AddClientToProjectSagaPayload;
+  payload: AddClientsToProjectsSagaPayload;
   listUsersResponse?: ListUsersResponse;
   listProjectsResponseAfterClientsAddition?: ListProjectsResponse;
 }
@@ -20,8 +20,8 @@ export async function addClientToProjectSaga(
   cmsGrpcClient: CmsGrpcClient,
   identityGrpcClient: IdentityGrpcClient,
   rabbitMqAdapter: RabbitMQAdapter,
-  payload: AddClientToProjectSagaPayload,
-): Promise<AddClientToProjectSagaResult> {
+  payload: AddClientsToProjectsSagaPayload,
+): Promise<AddClientsToProjectsSagaResult> {
   const context: AddClientToProjectContext = {
     payload,
     listProjectsResponseAfterClientsAddition: undefined,
