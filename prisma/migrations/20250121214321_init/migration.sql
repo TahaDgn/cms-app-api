@@ -5,7 +5,7 @@ CREATE SCHEMA IF NOT EXISTS "cms";
 CREATE SCHEMA IF NOT EXISTS "identity";
 
 -- CreateEnum
-CREATE TYPE "identity"."tenantIssueEnumType" AS ENUM ('NO_PROJECT_FOUND', 'NO_CLIENT_FOUND');
+CREATE TYPE "identity"."tenantIssueEnumType" AS ENUM ('NO_PROJECT_FOUND', 'NO_CLIENT_FOUND', 'NO_PARTICIPANT_FOUND');
 
 -- CreateEnum
 CREATE TYPE "identity"."userTypeEnumType" AS ENUM ('PARTICIPANT', 'CLIENT');
@@ -25,7 +25,8 @@ CREATE TABLE "identity"."tenants" (
     "name" VARCHAR(80) NOT NULL,
     "identifier" VARCHAR(80) NOT NULL,
     "ownerId" INTEGER,
-    "issues" "identity"."tenantIssueEnumType"[] DEFAULT ARRAY['NO_CLIENT_FOUND', 'NO_PROJECT_FOUND']::"identity"."tenantIssueEnumType"[],
+    "issues" "identity"."tenantIssueEnumType"[] DEFAULT ARRAY['NO_CLIENT_FOUND', 'NO_PROJECT_FOUND', 'NO_PARTICIPANT_FOUND']::"identity"."tenantIssueEnumType"[],
+    "projectsCount" SMALLINT NOT NULL DEFAULT 0,
     "clientsCount" SMALLINT NOT NULL DEFAULT 0,
     "participantsCount" SMALLINT NOT NULL DEFAULT 1,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -66,6 +67,7 @@ CREATE TABLE "cms"."projects" (
 CREATE TABLE "cms"."tickets" (
     "id" SERIAL NOT NULL,
     "tenantId" INTEGER NOT NULL,
+    "createdBy" INTEGER NOT NULL,
     "projectId" INTEGER NOT NULL,
     "description" VARCHAR(1000) NOT NULL,
     "status" "cms"."ticketStatusEnumType" NOT NULL DEFAULT 'OPEN',
@@ -73,6 +75,18 @@ CREATE TABLE "cms"."tickets" (
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "tickets_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "cms"."ticketComments" (
+    "id" SERIAL NOT NULL,
+    "tenantId" INTEGER NOT NULL,
+    "content" VARCHAR(1000) NOT NULL,
+    "ticketId" INTEGER NOT NULL,
+    "createdBy" INTEGER NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "ticketComments_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -105,8 +119,14 @@ CREATE INDEX "projects_clientUserIds_idx" ON "cms"."projects" USING GIN ("client
 -- CreateIndex
 CREATE INDEX "tickets_tenantId_createdAt_idx" ON "cms"."tickets"("tenantId", "createdAt" DESC);
 
+-- CreateIndex
+CREATE INDEX "ticketComments_createdBy_createdAt_idx" ON "cms"."ticketComments"("createdBy", "createdAt" DESC);
+
 -- AddForeignKey
 ALTER TABLE "identity"."users" ADD CONSTRAINT "users_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "identity"."tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "cms"."tickets" ADD CONSTRAINT "tickets_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "cms"."projects"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "cms"."ticketComments" ADD CONSTRAINT "ticketComments_ticketId_fkey" FOREIGN KEY ("ticketId") REFERENCES "cms"."tickets"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

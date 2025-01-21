@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Prisma, Ticket } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { PRISMA_SERVICE, TicketRepositorySign } from '../../domain';
 
 @Injectable()
@@ -8,65 +8,93 @@ export class TicketRepository implements TicketRepositorySign {
   constructor(@Inject(PRISMA_SERVICE) private prismaService: PrismaService) {}
 
   async create(
-    payload: Pick<
-      Prisma.TicketCreateInput,
-      'description' | 'project' | 'tenantId'
-    >,
+    payload: Prisma.TicketCreateArgs,
     transactionClient = this.prismaService,
-  ): Promise<Ticket> {
-    return transactionClient.ticket.create({
-      data: {
-        ...payload,
-      },
-    });
+  ): Promise<
+    Prisma.TicketGetPayload<{
+      include: { ticketComments: true };
+    }>
+  > {
+    return <
+      Prisma.TicketGetPayload<{
+        include: { ticketComments: true };
+      }>
+    >(<unknown>transactionClient.ticket.create(payload));
   }
 
-  async findFirst(payload: Prisma.TicketWhereInput): Promise<Ticket> {
-    return this.prismaService.ticket.findFirst({
-      where: {
-        ...payload,
-      },
-    });
+  async findFirst(payload: Prisma.TicketFindFirstArgs): Promise<
+    Prisma.TicketGetPayload<{
+      include: { ticketComments: true };
+    }>
+  > {
+    return <
+      Prisma.TicketGetPayload<{
+        include: { ticketComments: true };
+      }>
+    >(<unknown>this.prismaService.ticket.findFirst(payload));
   }
 
-  async findUnique(payload: Prisma.TicketWhereUniqueInput): Promise<Ticket> {
-    return this.prismaService.ticket.findUnique({
-      where: {
-        ...payload,
-      },
-    });
+  async findUnique(payload: Prisma.TicketFindUniqueArgs): Promise<
+    Prisma.TicketGetPayload<{
+      include: { ticketComments: true };
+    }>
+  > {
+    return <
+      Prisma.TicketGetPayload<{
+        include: { ticketComments: true };
+      }>
+    >(<unknown>this.prismaService.ticket.findUnique(payload));
   }
 
-  async findAll(payload: Prisma.TicketWhereInput): Promise<Ticket[]> {
-    return this.prismaService.ticket.findMany({
-      where: {
-        ...payload,
-      },
-    });
+  async findAll(payload: Prisma.TicketFindManyArgs): Promise<
+    Prisma.TicketGetPayload<{
+      include: { ticketComments: true };
+    }>[]
+  > {
+    return <
+      Prisma.TicketGetPayload<{
+        include: { ticketComments: true };
+      }>[]
+    >(<unknown>this.prismaService.ticket.findMany(payload));
   }
 
   async update(
-    id: number,
-    payload: Prisma.TicketUpdateInput,
+    payload: Prisma.TicketUpdateArgs,
     transactionClient = this.prismaService,
-  ): Promise<Ticket> {
-    return transactionClient.ticket.update({
-      where: {
-        id,
-      },
-      data: {
-        ...payload,
-      },
-    });
+  ): Promise<
+    Prisma.TicketGetPayload<{
+      include: { ticketComments: true };
+    }>
+  > {
+    return <
+      Prisma.TicketGetPayload<{
+        include: { ticketComments: true };
+      }>
+    >(<unknown>transactionClient.ticket.update(payload));
+  }
+
+  async count(payload: Prisma.TicketCountArgs): Promise<number> {
+    return this.prismaService.ticket.count(payload);
   }
 
   async delete(
-    payload: Pick<Prisma.TicketWhereInput, 'id' | 'tenantId'>,
+    payload: Prisma.TicketDeleteArgs,
     transactionClient = this.prismaService,
-  ): Promise<Ticket> {
-    const ticket = await transactionClient.ticket.findFirst({
-      where: {
-        ...payload,
+  ): Promise<
+    Prisma.TicketGetPayload<{
+      include: { ticketComments: true };
+    }>
+  > {
+    const { where } = payload;
+
+    const ticket = <
+      Prisma.TicketGetPayload<{
+        include: { ticketComments: true };
+      }>
+    >await transactionClient.ticket.findFirst({
+      where,
+      include: {
+        ticketComments: true,
       },
     });
 
