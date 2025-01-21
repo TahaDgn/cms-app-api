@@ -1,4 +1,3 @@
-// apps/identity/src/identity.module.ts
 import { Module } from '@nestjs/common';
 import { PrismaService } from './infrastructure/prisma/prisma.service';
 import {
