@@ -1,7 +1,8 @@
 import { Ticket, TicketStatus } from '@prisma/client';
 import { ResponseDto } from 'libs/interfaces';
+import { PagingResponseDto } from '../../../shared';
 
-export class GetTicketListResponsePayload implements Ticket {
+export class ListTicketsResponsePayload implements Ticket {
   id: number;
 
   description: string;
@@ -19,10 +20,11 @@ export class GetTicketListResponsePayload implements Ticket {
   updatedAt: Date;
 }
 
-export class GetTicketListResponseDto
-  implements ResponseDto<GetTicketListResponsePayload[]>
+export class ListTicketsResponseDto
+  extends PagingResponseDto
+  implements ResponseDto<ListTicketsResponsePayload[]>
 {
   success: boolean;
   message?: string;
-  data?: GetTicketListResponsePayload[];
+  data?: ListTicketsResponsePayload[];
 }

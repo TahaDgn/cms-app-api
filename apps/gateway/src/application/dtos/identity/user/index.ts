@@ -2,7 +2,7 @@ export * from './create-user/create-user.request.dto';
 export * from './create-user/create-user.response.dto';
 export * from './delete-user/delete-user.query.dto';
 export * from './delete-user/delete-user.response.dto';
-export * from './list-users/list-users.request.dto';
+export * from './list-users/list-users.query.dto';
 export * from './list-users/list-users.response.dto';
 export * from './get-user/get-user.query.dto';
 export * from './get-user/get-user.response.dto';

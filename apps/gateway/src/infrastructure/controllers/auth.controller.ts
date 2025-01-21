@@ -12,7 +12,9 @@ import { Response } from 'express';
 import { IdentityGrpcClient, OrchestratorGrpcClient } from '../../application';
 import { RegisterRequestDto, LoginRequestDto } from '../../application';
 import { UserType } from '@prisma/client';
-import { AuthGuard } from '../middlewares';
+import { AuthGuardRequired, AuthorizedUser } from '../middlewares';
+import { Metadata } from '@grpc/grpc-js';
+import { AuthorizedUserPayload } from 'libs/interfaces';
 
 @Controller('auth')
 export class AuthController {
@@ -27,16 +29,21 @@ export class AuthController {
       createPayload: { email, name, tenant },
     } = dto;
 
-    await this.orchestratorClient.userRegistrationSaga({
-      user: {
-        email,
-        name,
-        type: UserType.PARTICIPANT,
+    const metadata = new Metadata();
+
+    await this.orchestratorClient.userRegistrationSaga(
+      {
+        user: {
+          email,
+          name,
+          type: UserType.PARTICIPANT,
+        },
+        tenant: {
+          ...tenant,
+        },
       },
-      tenant: {
-        ...tenant,
-      },
-    });
+      metadata,
+    );
 
     return {
       message: 'Registration initiated. Check your email for the access link.',
@@ -49,7 +56,9 @@ export class AuthController {
       createPayload: { email, tenant },
     } = dto;
 
-    await this.orchestratorClient.userLoginSaga({ email, tenant });
+    const metadata = new Metadata();
+
+    await this.orchestratorClient.userLoginSaga({ email, tenant }, metadata);
 
     return {
       message: 'Login initiated. Check your email for the access link.',
@@ -64,11 +73,16 @@ export class AuthController {
         .json({ error: 'No code provided' });
     }
 
+    const metadata = new Metadata();
+
     try {
       const verifyAccessCodeResponse =
-        await this.identityClient.verifyAccessCode({
-          accessCode,
-        });
+        await this.identityClient.verifyAccessCode(
+          {
+            accessCode,
+          },
+          metadata,
+        );
 
       const redirectUrl = `http://cms-app/auth/login?accessToken=${verifyAccessCodeResponse.accessToken}`;
 
@@ -80,12 +94,22 @@ export class AuthController {
     }
   }
 
-  @AuthGuard('*')
+  @AuthGuardRequired('*')
   @Post('logout')
-  async logout(@Headers('Authorization') accessToken: string) {
-    await this.identityClient.removeAccessToken({
-      accessToken,
-    });
+  async logout(
+    @AuthorizedUser() user: AuthorizedUserPayload,
+    @Headers('Authorization') accessToken: string,
+  ) {
+    const metadata = new Metadata();
+
+    metadata.add('User', JSON.stringify(user));
+
+    await this.identityClient.removeAccessToken(
+      {
+        accessToken,
+      },
+      metadata,
+    );
 
     return {
       message: 'Login initiated. Check your email for the access link.',

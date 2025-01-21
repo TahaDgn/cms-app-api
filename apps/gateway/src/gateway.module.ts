@@ -6,6 +6,7 @@ import {
   IdentityGrpcClient,
   OrchestratorGrpcClient,
   ProjectController,
+  TicketCommentController,
   TicketController,
   UserController,
 } from './infrastructure';
@@ -19,6 +20,7 @@ import { RabbitMQModule, RedisModule } from 'libs/adapters';
     UserController,
     ProjectController,
     TicketController,
+    TicketCommentController,
   ],
   providers: [
     OrchestratorGrpcClient,

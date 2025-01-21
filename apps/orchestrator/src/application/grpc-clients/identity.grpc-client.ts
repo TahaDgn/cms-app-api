@@ -26,6 +26,7 @@ import {
 } from 'libs/interfaces';
 import { IDENTITY_SERVICE_GRPC_URL } from 'libs/constants';
 import { lastValueFrom, Observable } from 'rxjs';
+import { Metadata } from '@grpc/grpc-js';
 
 @Injectable()
 export class IdentityGrpcClient implements OnModuleInit, IdentityGrpcServer {
@@ -48,122 +49,151 @@ export class IdentityGrpcClient implements OnModuleInit, IdentityGrpcServer {
 
   public async createUser(
     payload: CreateUserPayload,
+    metadata: Metadata,
   ): Promise<GetUserResponse> {
     return lastValueFrom(
-      <Observable<GetUserResponse>>this.identityGrpcServer.createUser(payload),
+      <Observable<GetUserResponse>>(
+        this.identityGrpcServer.createUser(payload, metadata)
+      ),
     );
   }
 
-  public async createTenantWithOwner(payload: CreateTenantAndUserPayload) {
+  public async createTenantWithOwner(
+    payload: CreateTenantAndUserPayload,
+    metadata: Metadata,
+  ) {
     return lastValueFrom(
       <Observable<CreateTenantAndUserResponse>>(
-        this.identityGrpcServer.createTenantWithOwner(payload)
+        this.identityGrpcServer.createTenantWithOwner(payload, metadata)
       ),
     );
   }
 
-  public async createAccessRequestLink(payload: AccessRequestPayload) {
+  public async createAccessRequestLink(
+    payload: AccessRequestPayload,
+    metadata: Metadata,
+  ) {
     return lastValueFrom(
       <Observable<AccessRequestResponse>>(
-        this.identityGrpcServer.createAccessRequestLink(payload)
+        this.identityGrpcServer.createAccessRequestLink(payload, metadata)
       ),
     );
   }
 
-  public async deleteUser(payload: DeleteUserPayload) {
+  public async deleteUser(payload: DeleteUserPayload, metadata: Metadata) {
     return lastValueFrom(
-      <Observable<GetUserResponse>>this.identityGrpcServer.deleteUser(payload),
+      <Observable<GetUserResponse>>(
+        this.identityGrpcServer.deleteUser(payload, metadata)
+      ),
     );
   }
 
   public async updateTenant(
     payload: UpdateTenantPayload,
+    metadata: Metadata,
   ): Promise<GetTenantResponse> {
     return lastValueFrom(
       <Observable<GetTenantResponse>>(
-        this.identityGrpcServer.updateTenant(payload)
+        this.identityGrpcServer.updateTenant(payload, metadata)
       ),
     );
   }
 
   public async incrementTenantProjectsCount(
     payload: IncrementTenantProjectsCountPayload,
+    metadata: Metadata,
   ): Promise<GetTenantResponse> {
     return lastValueFrom(
       <Observable<GetTenantResponse>>(
-        this.identityGrpcServer.incrementTenantProjectsCount(payload)
+        this.identityGrpcServer.incrementTenantProjectsCount(payload, metadata)
       ),
     );
   }
 
   public async decrementTenantProjectsCount(
     payload: DecrementTenantProjectsCountPayload,
+    metadata: Metadata,
   ): Promise<GetTenantResponse> {
     return lastValueFrom(
       <Observable<GetTenantResponse>>(
-        this.identityGrpcServer.decrementTenantProjectsCount(payload)
+        this.identityGrpcServer.decrementTenantProjectsCount(payload, metadata)
       ),
     );
   }
 
   public async deleteTenant(
     payload: DeleteTenantPayload,
+    metadata: Metadata,
   ): Promise<GetTenantResponse> {
     return lastValueFrom(
       <Observable<GetTenantResponse>>(
-        this.identityGrpcServer.deleteTenant(payload)
+        this.identityGrpcServer.deleteTenant(payload, metadata)
       ),
     );
   }
 
-  public async removeAccessCode(payload: RemoveAccessCodePayload) {
+  public async removeAccessCode(
+    payload: RemoveAccessCodePayload,
+    metadata: Metadata,
+  ) {
     return lastValueFrom(
       <Observable<RemoveAccessTokenResponse>>(
-        this.identityGrpcServer.removeAccessCode(payload)
+        this.identityGrpcServer.removeAccessCode(payload, metadata)
       ),
     );
   }
 
   public async removeAccessToken(
     payload: RemoveAccessTokenPayload,
+    metadata: Metadata,
   ): Promise<RemoveAccessTokenResponse> {
     return lastValueFrom(
       <Observable<RemoveAccessTokenResponse>>(
-        this.identityGrpcServer.removeAccessToken(payload)
+        this.identityGrpcServer.removeAccessToken(payload, metadata)
       ),
     );
   }
 
   getUser(
     payload: GetUserPayload,
+    metadata: Metadata,
   ): Promise<GetUserResponse> | Observable<GetUserResponse> {
     return lastValueFrom(
-      <Observable<GetUserResponse>>this.identityGrpcServer.getUser(payload),
+      <Observable<GetUserResponse>>(
+        this.identityGrpcServer.getUser(payload, metadata)
+      ),
     );
   }
 
   public async getUserOrFail(
     payload: GetUserPayload,
+    metadata: Metadata,
   ): Promise<GetUserResponse> {
     return lastValueFrom(
       <Observable<GetUserResponse>>(
-        this.identityGrpcServer.getUserOrFail(payload)
+        this.identityGrpcServer.getUserOrFail(payload, metadata)
       ),
     );
   }
 
-  public async listUsers(payload: ListUserPayload): Promise<ListUsersResponse> {
+  public async listUsers(
+    payload: ListUserPayload,
+    metadata: Metadata,
+  ): Promise<ListUsersResponse> {
     return lastValueFrom(
-      <Observable<ListUsersResponse>>this.identityGrpcServer.listUsers(payload),
+      <Observable<ListUsersResponse>>(
+        this.identityGrpcServer.listUsers(payload, metadata)
+      ),
     );
   }
 
   public async verifyAccessCode(
     payload: VerifyAccessPayload,
+    metadata: Metadata,
   ): Promise<VerifyAccessResponse> {
     return lastValueFrom(
       <Observable<VerifyAccessResponse>>(
-        this.identityGrpcServer.verifyAccessCode(payload)
+        this.identityGrpcServer.verifyAccessCode(payload, metadata)
       ),
     );
   }

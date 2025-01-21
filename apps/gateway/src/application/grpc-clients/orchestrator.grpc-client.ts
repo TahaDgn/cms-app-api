@@ -22,6 +22,7 @@ import {
 } from 'libs/interfaces';
 import { ORCHESTRATOR_SERVICE_GRPC_URL } from 'libs/constants';
 import { lastValueFrom, Observable } from 'rxjs';
+import { Metadata } from '@grpc/grpc-js';
 
 @Injectable()
 export class OrchestratorGrpcClient
@@ -46,78 +47,90 @@ export class OrchestratorGrpcClient
 
   async userRegistrationSaga(
     payload: UserRegistrationSagaPayload,
+    metadata: Metadata,
   ): Promise<UserRegistrationSagaResult> {
     return lastValueFrom(
       <Observable<UserRegistrationSagaResult>>(
-        this.orchestratorGrpcService.userRegistrationSaga(payload)
+        this.orchestratorGrpcService.userRegistrationSaga(payload, metadata)
       ),
     );
   }
   async userLoginSaga(
     payload: UserLoginSagaPayload,
+    metadata: Metadata,
   ): Promise<UserLoginSagaResult> {
     return lastValueFrom(
       <Observable<UserLoginSagaResult>>(
-        this.orchestratorGrpcService.userLoginSaga(payload)
+        this.orchestratorGrpcService.userLoginSaga(payload, metadata)
       ),
     );
   }
 
   async userCreationSaga(
     payload: UserCreationSagaPayload,
+    metadata: Metadata,
   ): Promise<UserCreationSagaResult> {
     return lastValueFrom(
       <Observable<UserCreationSagaResult>>(
-        this.orchestratorGrpcService.userCreationSaga(payload)
+        this.orchestratorGrpcService.userCreationSaga(payload, metadata)
       ),
     );
   }
+
   async userDeletionSaga(
     payload: UserDeletionSagaPayload,
+    metadata: Metadata,
   ): Promise<UserDeletionSagaResult> {
     return lastValueFrom(
       <Observable<UserDeletionSagaResult>>(
-        this.orchestratorGrpcService.userDeletionSaga(payload)
+        this.orchestratorGrpcService.userDeletionSaga(payload, metadata)
       ),
     );
   }
 
   async addClientsToProjectsSaga(
     payload: AddClientsToProjectsSagaPayload,
+    metadata: Metadata,
   ): Promise<AddClientsToProjectsSagaResult> {
     return lastValueFrom(
       <Observable<AddClientsToProjectsSagaResult>>(
-        this.orchestratorGrpcService.addClientsToProjectsSaga(payload)
+        this.orchestratorGrpcService.addClientsToProjectsSaga(payload, metadata)
       ),
     );
   }
 
   async removeClientsFromProjectsSaga(
     payload: RemoveClientsFromProjectsSagaPayload,
+    metadata: Metadata,
   ): Promise<RemoveClientsFromProjectsSagaResult> {
     return lastValueFrom(
       <Observable<RemoveClientsFromProjectsSagaResult>>(
-        this.orchestratorGrpcService.removeClientsFromProjectsSaga(payload)
+        this.orchestratorGrpcService.removeClientsFromProjectsSaga(
+          payload,
+          metadata,
+        )
       ),
     );
   }
 
   async createProjectSaga(
     payload: CreateProjectSagaPayload,
+    metadata: Metadata,
   ): Promise<CreateProjectSagaResult> {
     return lastValueFrom(
       <Observable<CreateProjectSagaResult>>(
-        this.orchestratorGrpcService.createProjectSaga(payload)
+        this.orchestratorGrpcService.createProjectSaga(payload, metadata)
       ),
     );
   }
 
   async deleteProjectSaga(
     payload: DeleteProjectSagaPayload,
+    metadata: Metadata,
   ): Promise<DeleteProjectSagaResult> {
     return lastValueFrom(
       <Observable<DeleteProjectSagaResult>>(
-        this.orchestratorGrpcService.deleteProjectSaga(payload)
+        this.orchestratorGrpcService.deleteProjectSaga(payload, metadata)
       ),
     );
   }

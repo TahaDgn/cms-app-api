@@ -1,7 +1,7 @@
 import { ResponseDto } from 'libs/interfaces';
 import { GetProjectResponsePayload } from '../get-project/get-project.response.dto';
 
-export class RemoveClientToProjectResponseDto
+export class RemoveClientsFromProjectResponseDto
   implements ResponseDto<GetProjectResponsePayload>
 {
   success: boolean;

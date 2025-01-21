@@ -1,3 +1,4 @@
+import { Metadata } from '@grpc/grpc-js';
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { Client, ClientGrpc, Transport } from '@nestjs/microservices';
 import { CMS_SERVICE_GRPC_URL } from 'libs/constants';
@@ -45,122 +46,154 @@ export class CmsGrpcClient implements OnModuleInit, CmsGrpcServer {
 
   public async createProject(
     payload: CreateProjectPayload,
+    metadata: Metadata,
   ): Promise<GetProjectResponse> {
     return lastValueFrom(
-      <Observable<GetProjectResponse>>this.cmsGrpcServer.createProject(payload),
+      <Observable<GetProjectResponse>>(
+        this.cmsGrpcServer.createProject(payload, metadata)
+      ),
     );
   }
 
   public async getProject(
     payload: GetProjectPayload,
+    metadata: Metadata,
   ): Promise<GetProjectResponse> {
     return lastValueFrom(
-      <Observable<GetProjectResponse>>this.cmsGrpcServer.getProject(payload),
+      <Observable<GetProjectResponse>>(
+        this.cmsGrpcServer.getProject(payload, metadata)
+      ),
     );
   }
 
   public async listProjects(
     payload: ListProjectsPayload,
+    metadata: Metadata,
   ): Promise<ListProjectsResponse> {
     return lastValueFrom(
       <Observable<ListProjectsResponse>>(
-        this.cmsGrpcServer.listProjects(payload)
+        this.cmsGrpcServer.listProjects(payload, metadata)
       ),
     );
   }
 
   public async updateProject(
     payload: UpdateProjectPayload,
+    metadata: Metadata,
   ): Promise<GetProjectResponse> {
     return lastValueFrom(
-      <Observable<GetProjectResponse>>this.cmsGrpcServer.updateProject(payload),
+      <Observable<GetProjectResponse>>(
+        this.cmsGrpcServer.updateProject(payload, metadata)
+      ),
     );
   }
 
   public async addClientsToProjects(
     payload: AddClientsToProjectsPayload,
+    metadata: Metadata,
   ): Promise<ListProjectsResponse> {
     return lastValueFrom(
       <Observable<ListProjectsResponse>>(
-        this.cmsGrpcServer.addClientsToProjects(payload)
+        this.cmsGrpcServer.addClientsToProjects(payload, metadata)
       ),
     );
   }
 
   public async removeClientsFromProjects(
     payload: RemoveClientsFromProjectsPayload,
+    metadata: Metadata,
   ): Promise<ListProjectsResponse> {
     return lastValueFrom(
       <Observable<ListProjectsResponse>>(
-        this.cmsGrpcServer.removeClientsFromProjects(payload)
+        this.cmsGrpcServer.removeClientsFromProjects(payload, metadata)
       ),
     );
   }
 
   public async deleteProject(
     payload: DeleteProjectPayload,
+    metadata: Metadata,
   ): Promise<GetProjectResponse> {
     return lastValueFrom(
-      <Observable<GetProjectResponse>>this.cmsGrpcServer.deleteProject(payload),
+      <Observable<GetProjectResponse>>(
+        this.cmsGrpcServer.deleteProject(payload, metadata)
+      ),
     );
   }
 
   public async createTicket(
     payload: CreateTicketPayload,
+    metadata: Metadata,
   ): Promise<GetTicketResponse> {
     return lastValueFrom(
-      <Observable<GetTicketResponse>>this.cmsGrpcServer.createTicket(payload),
+      <Observable<GetTicketResponse>>(
+        this.cmsGrpcServer.createTicket(payload, metadata)
+      ),
     );
   }
 
   public async getTicket(
     payload: GetTicketPayload,
+    metadata: Metadata,
   ): Promise<GetTicketResponse> {
     return lastValueFrom(
-      <Observable<GetTicketResponse>>this.cmsGrpcServer.getTicket(payload),
+      <Observable<GetTicketResponse>>(
+        this.cmsGrpcServer.getTicket(payload, metadata)
+      ),
     );
   }
 
   public async listTickets(
     payload: ListTicketPayload,
+    metadata: Metadata,
   ): Promise<ListTicketResponse> {
     return lastValueFrom(
-      <Observable<ListTicketResponse>>this.cmsGrpcServer.listTickets(payload),
+      <Observable<ListTicketResponse>>(
+        this.cmsGrpcServer.listTickets(payload, metadata)
+      ),
     );
   }
 
   public async updateTicket(
     payload: UpdateTicketPayload,
+    metadata: Metadata,
   ): Promise<GetTicketResponse> {
     return lastValueFrom(
-      <Observable<GetTicketResponse>>this.cmsGrpcServer.updateTicket(payload),
+      <Observable<GetTicketResponse>>(
+        this.cmsGrpcServer.updateTicket(payload, metadata)
+      ),
     );
   }
 
   public async deleteTicket(
     payload: DeleteTicketPayload,
+    metadata: Metadata,
   ): Promise<GetTicketResponse> {
     return lastValueFrom(
-      <Observable<GetTicketResponse>>this.cmsGrpcServer.deleteTicket(payload),
+      <Observable<GetTicketResponse>>(
+        this.cmsGrpcServer.deleteTicket(payload, metadata)
+      ),
     );
   }
 
   public async createTicketComment(
     payload: CreateTicketCommentPayload,
+    metadata: Metadata,
   ): Promise<GetTicketResponse> {
     return lastValueFrom(
       <Observable<GetTicketResponse>>(
-        this.cmsGrpcServer.createTicketComment(payload)
+        this.cmsGrpcServer.createTicketComment(payload, metadata)
       ),
     );
   }
 
   public async deleteTicketComment(
     payload: DeleteTicketCommentPayload,
+    metadata: Metadata,
   ): Promise<GetTicketResponse> {
     return lastValueFrom(
       <Observable<GetTicketResponse>>(
-        this.cmsGrpcServer.deleteTicketComment(payload)
+        this.cmsGrpcServer.deleteTicketComment(payload, metadata)
       ),
     );
   }

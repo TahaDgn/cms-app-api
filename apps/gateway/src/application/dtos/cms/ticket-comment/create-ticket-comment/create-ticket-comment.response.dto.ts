@@ -1,12 +1,12 @@
 import { ResponseDto } from 'libs/interfaces';
-import { GetTicketCommentResponsePayload } from '../get-ticket-comment/get-ticket-comment.response.dto';
+import { GetTicketResponsePayload } from '../../ticket';
 
 export class CreateTicketCommentResponseDto
-  implements ResponseDto<GetTicketCommentResponsePayload>
+  implements ResponseDto<GetTicketResponsePayload>
 {
   success: boolean;
 
   message?: string;
 
-  data?: GetTicketCommentResponsePayload;
+  data?: GetTicketResponsePayload;
 }

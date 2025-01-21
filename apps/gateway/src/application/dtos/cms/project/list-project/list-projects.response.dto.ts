@@ -1,7 +1,8 @@
 import { $Enums, Project } from '@prisma/client';
 import { ResponseDto } from 'libs/interfaces';
+import { PagingResponseDto } from '../../../shared';
 
-export class ListProjectResponsePayload implements Project {
+export class ListProjectsResponsePayload implements Project {
   id: number;
   tenantId: number;
   title: string;
@@ -12,12 +13,13 @@ export class ListProjectResponsePayload implements Project {
   updatedAt: Date;
 }
 
-export class ListProjectResponseDto
-  implements ResponseDto<ListProjectResponsePayload[]>
+export class ListProjectsResponseDto
+  extends PagingResponseDto
+  implements ResponseDto<ListProjectsResponsePayload[]>
 {
   success: boolean;
 
   message?: string;
 
-  data?: ListProjectResponsePayload[];
+  data?: ListProjectsResponsePayload[];
 }

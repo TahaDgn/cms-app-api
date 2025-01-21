@@ -2,14 +2,16 @@ import { Controller, Post, Body, Get, Delete, Query } from '@nestjs/common';
 import {
   OrchestratorGrpcClient,
   IdentityGrpcClient,
-  ListUsersRequestDto,
+  ListUsersQueryDto,
   ListUsersResponseDto,
   PagingRequestDto,
   createPagingResponse,
   DeleteUserQueryDto,
   CreateUserResponseDto,
+  GetUserQueryDto,
+  GetUserResponseDto,
 } from '../../application';
-import { AuthGuard, AuthorizedUser } from '../middlewares/auth.guard';
+import { AuthGuardRequired, AuthorizedUser } from '../middlewares/auth.guard';
 import {
   CreateUserRequestDto,
   DeleteUserResponseDto,
@@ -17,6 +19,7 @@ import {
 } from '../../application';
 import { UserType } from '@prisma/client';
 import { AuthorizedUserPayload } from 'libs/interfaces';
+import { Metadata } from '@grpc/grpc-js';
 
 @Controller('users')
 export class UserController {
@@ -25,23 +28,22 @@ export class UserController {
     private readonly identityClient: IdentityGrpcClient,
   ) {}
 
-  @AuthGuard(UserType.PARTICIPANT)
+  @AuthGuardRequired(UserType.PARTICIPANT)
   @Post()
   async create(
     @Body() createDto: CreateUserRequestDto,
     @AuthorizedUser() user: AuthorizedUserPayload,
   ): Promise<CreateUserResponseDto> {
-    const {
-      createPayload: { email, name, type },
-    } = createDto;
-    const { tenantId } = user;
+    const { createPayload } = createDto;
 
-    const data = await this.orchestratorClient.userCreationSaga({
-      email,
-      name,
-      tenantId,
-      type,
-    });
+    const metadata = new Metadata();
+
+    metadata.add('User', JSON.stringify(user));
+
+    const data = await this.orchestratorClient.userCreationSaga(
+      createPayload,
+      metadata,
+    );
 
     return {
       success: true,
@@ -49,7 +51,7 @@ export class UserController {
     };
   }
 
-  @AuthGuard('*')
+  @AuthGuardRequired('*')
   @Get('me')
   async me(
     @AuthorizedUser() user: AuthorizedUserPayload,
@@ -62,22 +64,50 @@ export class UserController {
     };
   }
 
-  @AuthGuard('*')
-  @Get('search')
-  async listUsers(
+  @AuthGuardRequired('*')
+  @Get('retrieve')
+  async get(
     @AuthorizedUser() user: AuthorizedUserPayload,
-    @Query() listQuery: ListUsersRequestDto,
+    @Query() getQuery: GetUserQueryDto,
+  ): Promise<GetUserResponseDto> {
+    const metadata = new Metadata();
+
+    metadata.add('User', JSON.stringify(user));
+
+    const { query } = getQuery;
+
+    const data = await this.identityClient.getUser({ where: query }, metadata);
+
+    return {
+      success: true,
+      data,
+    };
+  }
+
+  @AuthGuardRequired('*')
+  @Get('search')
+  async list(
+    @AuthorizedUser() user: AuthorizedUserPayload,
+    @Query() listQuery: ListUsersQueryDto,
     @Query() pagingQuery: PagingRequestDto,
   ): Promise<ListUsersResponseDto> {
-    const { tenantId } = user;
+    const { limit, page } = pagingQuery;
+
+    const metadata = new Metadata();
+
+    metadata.add('User', JSON.stringify(user));
+
+    const { query } = listQuery;
 
     const { totalItemsCount, users: data } =
-      await this.identityClient.listUsers({
-        where: {
-          tenantId,
-          ...listQuery,
+      await this.identityClient.listUsers(
+        {
+          where: query,
+          skip: (page - 1) * limit,
+          take: limit,
         },
-      });
+        metadata,
+      );
 
     const pagination = createPagingResponse(
       pagingQuery,
@@ -92,18 +122,20 @@ export class UserController {
     };
   }
 
-  @AuthGuard(UserType.PARTICIPANT)
+  @AuthGuardRequired(UserType.PARTICIPANT)
   @Delete()
   async deleteUser(
     @AuthorizedUser() user: AuthorizedUserPayload,
     @Query() deleteQuery: DeleteUserQueryDto,
   ): Promise<DeleteUserResponseDto> {
-    const { tenantId } = user;
+    const metadata = new Metadata();
 
-    const data = await this.orchestratorClient.userDeletionSaga({
-      tenantId,
-      ...deleteQuery,
-    });
+    metadata.add('User', JSON.stringify(user));
+
+    const data = await this.orchestratorClient.userDeletionSaga(
+      deleteQuery,
+      metadata,
+    );
 
     return {
       success: true,

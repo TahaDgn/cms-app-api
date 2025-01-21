@@ -10,6 +10,6 @@ class Payload
   createdBy?: number;
 }
 
-export class GetTicketQueryRequestDto {
+export class GetTicketListQueryDto {
   query: Payload;
 }

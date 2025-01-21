@@ -9,26 +9,28 @@ import {
 } from '@nestjs/common';
 import {
   CmsGrpcClient,
+  CreateProjectRequestDto,
+  CreateProjectResponseDto,
+  GetProjectQueryDto,
+  GetProjectResponseDto,
+  ListProjectsResponseDto,
+  ListProjectsQueryDto,
   OrchestratorGrpcClient,
   PagingRequestDto,
-} from '../../application';
-import { User, UserType } from '@prisma/client';
-import { AuthorizedUser } from '../middlewares';
-import {
-  AddClientsToProjectRequestDto,
-  AddClientToProjectResponseDto,
-  DeleteProjectRequestDto,
-  DeleteProjectResponseDto,
-  GetProjectRequestDto,
-  GetProjectResponseDto,
-  ListProjectRequestDto,
-  ListProjectResponseDto,
-  RemoveClientToProjectRequestDto,
-  RemoveClientToProjectResponseDto,
   UpdateProjectRequestDto,
   UpdateProjectResponseDto,
+  createPagingResponse,
+  AddClientsToProjectRequestDto,
+  AddClientToProjectResponseDto,
+  RemoveClientsFromProjectResponseDto,
+  RemoveClientsFromProjectRequestDto,
+  DeleteProjectResponseDto,
+  DeleteProjectQueryDto,
 } from '../../application';
+import { AuthorizedUser } from '../middlewares';
+import {} from '../../application';
 import { AuthorizedUserPayload } from 'libs/interfaces';
+import { Metadata } from '@grpc/grpc-js';
 
 @Controller('projects')
 export class ProjectController {
@@ -40,59 +42,188 @@ export class ProjectController {
   @Post()
   async create(
     @AuthorizedUser() user: AuthorizedUserPayload,
-    @Body() dto: ProjectCreateRequestDto,
-  ) {}
+    @Body() createDto: CreateProjectRequestDto,
+  ): Promise<CreateProjectResponseDto> {
+    const metadata = new Metadata();
+
+    metadata.add('User', JSON.stringify(user));
+
+    const { createPayload } = createDto;
+
+    const data = await this.orchestratorClient.createProjectSaga(
+      createPayload,
+      metadata,
+    );
+
+    return {
+      success: true,
+      data,
+    };
+  }
 
   @Patch()
   async update(
     @AuthorizedUser() user: AuthorizedUserPayload,
-    @Body() dto: UpdateProjectRequestDto,
+    @Body() updateDto: UpdateProjectRequestDto,
   ): Promise<UpdateProjectResponseDto> {
-    return;
+    const metadata = new Metadata();
+
+    metadata.add('User', JSON.stringify(user));
+
+    const { id, updatePayload } = updateDto;
+
+    const data = await this.cmsGrpcClient.updateProject(
+      {
+        id,
+        ...updatePayload,
+      },
+      metadata,
+    );
+
+    return {
+      success: true,
+      data,
+    };
   }
 
-  @Get('/retrieve')
+  @Get('retrieve')
   async get(
     @AuthorizedUser() user: AuthorizedUserPayload,
-    @Query() dto: GetProjectRequestDto,
+    @Query() queryDto: GetProjectQueryDto,
   ): Promise<GetProjectResponseDto> {
-    return;
+    const metadata = new Metadata();
+
+    metadata.add('User', JSON.stringify(user));
+
+    const { query } = queryDto;
+
+    const data = await this.cmsGrpcClient.getProject(
+      {
+        where: query,
+      },
+      metadata,
+    );
+
+    return {
+      success: true,
+      data,
+    };
   }
 
-  @Get('/search')
-  async getList(
+  @Get('search')
+  async list(
     @AuthorizedUser() user: AuthorizedUserPayload,
-    @Query() listQuery: ListProjectRequestDto,
+    @Query() listQuery: ListProjectsQueryDto,
     @Query() pagingQuery: PagingRequestDto,
-  ): Promise<ListProjectResponseDto> {
-    const { id, type, tenantId } = user;
+  ): Promise<ListProjectsResponseDto> {
+    const { limit, page } = pagingQuery;
 
-    if (type === UserType.CLIENT) {
-      Object.assign(listQuery.query, { clientUserIds: { has: id } });
-    }
+    const metadata = new Metadata();
+
+    metadata.add('User', JSON.stringify(user));
+
+    const { query } = listQuery;
+
+    const { totalItemsCount, projects: data } =
+      await this.cmsGrpcClient.listProjects(
+        {
+          where: query,
+          skip: (page - 1) * limit,
+          take: limit,
+        },
+        metadata,
+      );
+
+    const pagination = createPagingResponse(
+      pagingQuery,
+      totalItemsCount,
+      data.length,
+    );
+
+    return {
+      success: true,
+      data,
+      pagination,
+    };
   }
 
   @Post('clients')
   async addClient(
     @AuthorizedUser() user: AuthorizedUserPayload,
-    @Body() dto: AddClientsToProjectRequestDto,
+    @Body() updateDto: AddClientsToProjectRequestDto,
   ): Promise<AddClientToProjectResponseDto> {
-    return;
+    const metadata = new Metadata();
+
+    metadata.add('User', JSON.stringify(user));
+
+    const {
+      id,
+      updatePayload: { clientUserIds },
+    } = updateDto;
+
+    const data = await this.orchestratorClient.addClientsToProjectsSaga(
+      {
+        ids: [id],
+        clientUserIds,
+      },
+      metadata,
+    );
+
+    return {
+      success: true,
+      data,
+    };
   }
 
   @Delete('clients')
   async removeClient(
     @AuthorizedUser() user: AuthorizedUserPayload,
-    @Body() dto: RemoveClientToProjectRequestDto,
-  ): Promise<RemoveClientToProjectResponseDto> {
-    return;
+    @Body() updateDto: RemoveClientsFromProjectRequestDto,
+  ): Promise<RemoveClientsFromProjectResponseDto> {
+    const metadata = new Metadata();
+
+    metadata.add('User', JSON.stringify(user));
+
+    const {
+      id,
+      updatePayload: { clientUserIds },
+    } = updateDto;
+
+    const data = await this.orchestratorClient.removeClientsFromProjectsSaga(
+      {
+        ids: [id],
+        clientUserIds,
+      },
+      metadata,
+    );
+
+    return {
+      success: true,
+      data,
+    };
   }
 
   @Delete()
   async delete(
     @AuthorizedUser() user: AuthorizedUserPayload,
-    @Query() dto: DeleteProjectRequestDto,
+    @Query() deleteDto: DeleteProjectQueryDto,
   ): Promise<DeleteProjectResponseDto> {
-    return;
+    const metadata = new Metadata();
+
+    metadata.add('User', JSON.stringify(user));
+
+    const { id } = deleteDto;
+
+    const data = await this.orchestratorClient.deleteProjectSaga(
+      {
+        id,
+      },
+      metadata,
+    );
+
+    return {
+      success: true,
+      data,
+    };
   }
 }
