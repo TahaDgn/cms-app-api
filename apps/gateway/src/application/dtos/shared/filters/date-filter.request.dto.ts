@@ -1,9 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Prisma } from '@prisma/client';
 import { Expose, Type } from 'class-transformer';
-import { ArrayMaxSize, ArrayMinSize, IsArray, IsDate, IsOptional } from 'class-validator';
+import {
+  ArrayMaxSize,
+  ArrayMinSize,
+  IsArray,
+  IsDate,
+  IsOptional,
+} from 'class-validator';
 
-export class DateFilterRequest implements Prisma.DateTimeFilter {
+export class DateFilterRequestDto implements Prisma.DateTimeFilter {
   @ApiProperty({ type: Date, required: false })
   @IsDate()
   @IsOptional()

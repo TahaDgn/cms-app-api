@@ -1,12 +1,28 @@
-import { TicketComment } from '@prisma/client';
+import { Prisma } from '@prisma/client';
+import { IntegerFilterRequestDto } from '../../../shared';
+import { Type, Expose } from 'class-transformer';
+import { ValidateNested, IsOptional } from 'class-validator';
 
 class Payload
-  implements Partial<Pick<TicketComment, 'ticketId' | 'createdBy'>>
+  implements Pick<Prisma.TicketCommentWhereInput, 'ticketId' | 'createdBy'>
 {
-  ticketId?: number;
-  createdBy?: number;
+  @ValidateNested()
+  @IsOptional()
+  @Type(() => IntegerFilterRequestDto)
+  @Expose()
+  ticketId?: IntegerFilterRequestDto;
+
+  @ValidateNested()
+  @IsOptional()
+  @Type(() => IntegerFilterRequestDto)
+  @Expose()
+  createdBy?: IntegerFilterRequestDto;
 }
 
-export class GetTicketCommentListQueryDto {
-  query: Payload;
+export class ListTicketCommentsQueryDto {
+  @ValidateNested()
+  @IsOptional()
+  @Type(() => Payload)
+  @Expose()
+  query: Payload = {};
 }

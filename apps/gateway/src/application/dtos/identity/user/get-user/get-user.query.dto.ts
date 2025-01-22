@@ -1,10 +1,20 @@
 import { Prisma } from '@prisma/client';
-import { IntegerFilterRequest } from '../../../shared';
+import { IntegerFilterRequestDto } from '../../../shared';
+import { Expose, Type } from 'class-transformer';
+import { IsOptional, ValidateNested } from 'class-validator';
 
-class GetUserQueryPayload implements Pick<Prisma.UserWhereInput, 'id'> {
-  id?: IntegerFilterRequest;
+class Payload implements Pick<Prisma.UserWhereInput, 'id'> {
+  @ValidateNested()
+  @IsOptional()
+  @Type(() => IntegerFilterRequestDto)
+  @Expose()
+  id?: IntegerFilterRequestDto;
 }
 
 export class GetUserQueryDto {
-  query: GetUserQueryPayload = {};
+  @ValidateNested()
+  @IsOptional()
+  @Type(() => Payload)
+  @Expose()
+  query: Payload = {};
 }

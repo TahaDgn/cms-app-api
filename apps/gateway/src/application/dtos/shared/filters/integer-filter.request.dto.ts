@@ -11,7 +11,7 @@ import {
   Min,
 } from 'class-validator';
 
-export class IntegerFilterRequest implements Prisma.IntFilter {
+export class IntegerFilterRequestDto implements Prisma.IntFilter {
   @ApiProperty({ type: Number, required: false })
   @Max(Number.MAX_SAFE_INTEGER)
   @Min(Number.MIN_SAFE_INTEGER)

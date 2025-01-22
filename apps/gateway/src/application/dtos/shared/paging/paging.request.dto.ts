@@ -1,4 +1,4 @@
-import { Type } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
 import { IsInt, IsNumber, IsOptional, Max, Min } from 'class-validator';
 
 export class PagingRequestDto {
@@ -7,6 +7,7 @@ export class PagingRequestDto {
   @IsNumber()
   @IsOptional()
   @Type(() => Number)
+  @Expose()
   page = 1;
 
   @Max(100)
@@ -15,5 +16,6 @@ export class PagingRequestDto {
   @IsNumber()
   @IsOptional()
   @Type(() => Number)
+  @Expose()
   limit = 10;
 }

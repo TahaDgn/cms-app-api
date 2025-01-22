@@ -11,7 +11,7 @@ import {
   MinLength,
 } from 'class-validator';
 
-export class StringFilterRequest<T extends string = string>
+export class StringFilterRequestDto<T extends string = string>
   implements Prisma.StringFilter
 {
   @ApiProperty({ type: String, required: false })
