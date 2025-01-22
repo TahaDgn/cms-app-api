@@ -1,13 +1,36 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>Your CMS Access Removed</title>
-</head>
-<body>
-  <h2>Hello {{name}},</h2>
-  <p>
-    We wanted to inform you that your user account (type: {{userType}}) has been removed from our system.
-  </p>
-  <p>If this is unexpected, please contact our support team.</p>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <title>{{tenantName}} | Account Deletion</title>
+  </head>
+  <body style="font-family: Arial, sans-serif; margin:0; padding:0;">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" 
+           style="max-width:600px; margin:auto; padding:20px;">
+      <tr>
+        <td>
+          <h2 style="margin-bottom: 0.5rem;">Account Deletion Notification</h2>
+          <p style="margin-top: 0;">
+            Hello <strong>{{userName}}</strong>,
+          </p>
+          <p>
+            This is to notify you that your 
+            <strong>{{userType}}</strong> account 
+            on <strong>{{tenantName}}</strong> 
+            (Identifier: <strong>{{tenantIdentifier}}</strong>) 
+            has been <em>deleted</em>.
+          </p>
+          <p>
+            If this was unexpected or you have questions, 
+            please feel free to contact our support team.
+          </p>
+          <hr />
+          <p style="color:#666; font-size:14px;">
+            Best Regards,<br />
+            The {{tenantName}} Team
+          </p>
+        </td>
+      </tr>
+    </table>
+  </body>
 </html>

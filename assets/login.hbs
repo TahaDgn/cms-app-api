@@ -1,14 +1,76 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>Login to CMS App</title>
-</head>
-<body>
-  <h2>Hello {{name}},</h2>
-  <p>
-    You requested a login link. Click
-    <a href="{{accessUrl}}">here</a> to access your CMS dashboard.
-  </p>
-  <p>Ignore this email if you did not request a login link.</p>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <title>{{tenantName}} | Login</title>
+    <style>
+      /* Basit, Medium benzeri sade bir stil için */
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        background-color: #f8f9fa;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background: #ffffff;
+      }
+      h2 {
+        margin-bottom: 0.5rem;
+        color: #333;
+      }
+      p {
+        color: #555;
+        line-height: 1.4;
+      }
+      .login-btn {
+        display: inline-block;
+        margin: 1rem 0;
+        padding: 10px 20px;
+        background-color: #2d9cdb;
+        color: #ffffff;
+        text-decoration: none;
+        border-radius: 4px;
+        font-weight: bold;
+      }
+      .footer {
+        color: #999;
+        font-size: 14px;
+        margin-top: 2rem;
+        text-align: center;
+      }
+      .footer hr {
+        margin: 1.5rem 0;
+        border: none;
+        border-top: 1px solid #eaeaea;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Welcome Back, {{userName}}!</h2>
+      <p>
+        You’re receiving this email because you requested to log in to your 
+        <strong>{{userType}}</strong> account on <strong>{{tenantName}}</strong> 
+        (Identifier: <strong>{{tenantIdentifier}}</strong>).
+      </p>
+      <p>
+        Please click the link below to access your account:
+      </p>
+      <p>
+        <a class="login-btn" href="{{accessUrl}}">
+          Log in to {{tenantName}}
+        </a>
+      </p>
+      <p>
+        This link will expire after a certain period, so please log in soon.
+      </p>
+      <div class="footer">
+        <hr />
+        <p>Best Regards,<br />The {{tenantName}} Team</p>
+      </div>
+    </div>
+  </body>
 </html>

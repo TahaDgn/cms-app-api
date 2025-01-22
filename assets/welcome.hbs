@@ -1,14 +1,44 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Welcome to CMS App</title>
+    <meta charset="UTF-8" />
+    <title>{{tenantName}} | Welcome</title>
   </head>
-  <body>
-    <h2>Hi {{name}}, welcome to the CMS App!</h2>
-    <p>
-      We created an account for you. Please click
-      <a href="{{accessUrl}}">here</a> to access your dashboard.
-    </p>
-    <p>Thank you!</p>
+  <body style="font-family: Arial, sans-serif; margin: 0; padding: 0;">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" 
+           style="max-width:600px; margin:auto; padding:20px;">
+      <tr>
+        <td>
+          <h2 style="margin-bottom: 0.5rem;">Welcome to {{tenantName}}!</h2>
+          <p style="margin-top: 0;">
+            Hello <strong>{{userName}}</strong>,
+          </p>
+          <p>
+            We’re excited to have you here as a 
+            <strong>{{userType}}</strong> account 
+            on <strong>{{tenantName}}</strong> 
+            (Identifier: <strong>{{tenantIdentifier}}</strong>).
+          </p>
+          <p>
+            To get started, please visit the link below to access your dashboard:
+          </p>
+          <p>
+            <a href="{{accessUrl}}" 
+               style="color: #007bff; text-decoration: underline;">
+               {{accessUrl}}
+            </a>
+          </p>
+          <p>
+            If you have any questions or need assistance, 
+            feel free to reach out to our support team at any time.
+          </p>
+          <hr />
+          <p style="color:#666; font-size:14px;">
+            Best Regards,<br />
+            The {{tenantName}} Team
+          </p>
+        </td>
+      </tr>
+    </table>
   </body>
 </html>
