@@ -13,6 +13,10 @@ async function bootstrap() {
         package: 'cms',
         protoPath: join(process.cwd(), '/protos/cms.proto'),
         url: CMS_SERVICE_GRPC_URL,
+        loader: {
+          enums: String,
+          defaults: false,
+        },
       },
     },
   );

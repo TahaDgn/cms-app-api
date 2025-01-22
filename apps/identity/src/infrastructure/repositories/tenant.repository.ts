@@ -184,7 +184,7 @@ export class TenantRepository implements TenantRepositorySign {
 
     const { participantsCount } = updatedTenant;
 
-    if (participantsCount > 0) return updatedTenant;
+    if (participantsCount > 1) return updatedTenant;
 
     return transactionClient.tenant.update({
       where: {

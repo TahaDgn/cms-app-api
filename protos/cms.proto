@@ -3,28 +3,128 @@ syntax = "proto3";
 package cms;
 
 import "google/protobuf/timestamp.proto";
-import "google/protobuf/empty.proto";
+
+service CmsService {
+  rpc createProject(CreateProjectRequest) returns (GetProjectResponse);
+  rpc getProject(GetProjectRequest) returns (GetProjectResponse);
+  rpc listProjects(ListProjectsRequest) returns (ListProjectsResponse);
+  rpc updateProject(UpdateProjectRequest) returns (GetProjectResponse);
+  rpc addClientsToProjects(AddClientsToProjectsRequest) returns (ListProjectsResponse);
+  rpc removeClientsFromProjects(RemoveClientsFromProjectsRequest) returns (ListProjectsResponse);
+  rpc deleteProject(DeleteProjectRequest) returns (GetProjectResponse);
+
+  rpc createTicket(CreateTicketRequest) returns (GetTicketResponse);
+  rpc getTicket(GetTicketRequest) returns (GetTicketResponse);
+  rpc listTickets(ListTicketsRequest) returns (ListTicketsResponse);
+  rpc updateTicket(UpdateTicketRequest) returns (GetTicketResponse);
+  rpc deleteTicket(DeleteTicketRequest) returns (GetTicketResponse);
+
+  rpc createTicketComment(CreateTicketCommentRequest) returns (GetTicketResponse);
+  rpc deleteTicketComment(DeleteTicketCommentRequest) returns (GetTicketResponse);
+}
 
 enum ProjectStatus {
-  OPEN = 0;
-  IN_PROGRESS = 1;
-  DONE = 2;
+  PROJECT_STATUS_UNSPECIFIED = 0;
+  OPEN = 1;
+  IN_PROGRESS = 2;
+  DONE = 3;
 }
 
 enum TicketStatus {
-  OPEN = 0;
-  IN_PROGRESS = 1;
-  DONE = 2;
+  TICKET_STATUS_UNSPECIFIED = 0;
+  OPEN = 1;
+  IN_PROGRESS = 2;
+  DONE = 3;
 }
 
-message Ticket {
+message CreateProjectRequest {
+  string title = 1;
+  string description = 2;
+}
+
+message GetProjectRequest {
+  ProjectWhereInput where = 1;
+}
+
+message ListProjectsRequest {
+  int32 skip = 1;
+  int32 take = 2;
+  ProjectWhereInput where = 3;
+}
+
+message UpdateProjectRequest {
   int32 id = 1;
-  int32 tenantId = 2;
-  int32 projectId = 3;
-  string description = 4;
-  TicketStatus status = 5;
-  google.protobuf.Timestamp createdAt = 6;
-  google.protobuf.Timestamp updatedAt = 7;
+  string description = 2;
+  ProjectStatus status = 3;
+  string title = 4;
+}
+
+message AddClientsToProjectsRequest {
+  repeated int32 ids = 1;
+
+  repeated int32 clientUserIds = 2;
+}
+
+message RemoveClientsFromProjectsRequest {
+  repeated int32 ids = 1;
+
+  repeated int32 clientUserIds = 2;
+}
+
+message DeleteProjectRequest {
+  int32 id = 1;
+}
+
+message CreateTicketRequest {
+  string description = 1;
+  int32 projectId = 2;
+}
+
+message GetTicketRequest {
+  TicketWhereInput where = 1;
+}
+
+message ListTicketsRequest {
+  int32 skip = 1;
+  int32 take = 2;
+  TicketWhereInput where = 3;
+}
+
+message UpdateTicketRequest {
+  int32 id = 1;
+  string description = 2;
+  TicketStatus status = 3;
+}
+
+message DeleteTicketRequest {
+  int32 id = 1;
+}
+
+message CreateTicketCommentRequest {
+  int32 ticketId = 1;
+  string content = 2;
+}
+
+message DeleteTicketCommentRequest {
+  int32 id = 1;
+}
+
+message GetProjectResponse {
+  Project project = 1;
+}
+
+message ListProjectsResponse {
+  int32 totalItemsCount = 1;
+  repeated Project projects = 2;
+}
+
+message GetTicketResponse {
+  Ticket ticket = 1;
+}
+
+message ListTicketsResponse {
+  int32 totalItemsCount = 1;
+  repeated Ticket tickets = 2;
 }
 
 message Project {
@@ -36,123 +136,115 @@ message Project {
   repeated int32 clientUserIds = 6;
   google.protobuf.Timestamp createdAt = 7;
   google.protobuf.Timestamp updatedAt = 8;
-}
 
-message ProjectWithTickets {
-  int32 id = 1;
-  int32 tenantId = 2;
-  string title = 3;
-  string description = 4;
-  ProjectStatus status = 5;
-  repeated int32 clientUserIds = 6;
-  google.protobuf.Timestamp createdAt = 7;
-  google.protobuf.Timestamp updatedAt = 8;
   repeated Ticket tickets = 9;
 }
 
-message CreateProjectRequest {
-  string title = 1;
-  string description = 2;
-  int32 tenantId = 3;
-}
-
-message CreateProjectResponse {
-  Project project = 1;
-}
-
-message GetProjectRequest {
+message Ticket {
   int32 id = 1;
   int32 tenantId = 2;
+  int32 createdBy = 3;
+  int32 projectId = 4;
+  string description = 5;
+  TicketStatus status = 6;
+  google.protobuf.Timestamp createdAt = 7;
+  google.protobuf.Timestamp updatedAt = 8;
+
+  repeated TicketComment ticketComments = 9;
 }
 
-message GetProjectResponse {
-  ProjectWithTickets project = 1;
-}
-
-message ListProjectsRequest {
-  int32 tenantId = 1;
-}
-
-message ListProjectsResponse {
-  repeated ProjectWithTickets projects = 1;
-}
-
-message ListClientProjectsRequest {
-  int32 tenantId = 1;
-  int32 clientId = 2;
-}
-
-message ListClientProjectsResponse {
-  repeated ProjectWithTickets projects = 1;
-}
-
-message DeleteProjectRequest {
+message TicketComment {
   int32 id = 1;
   int32 tenantId = 2;
+  string content = 3;
+  int32 ticketId = 4;
+  int32 createdBy = 5;
+  google.protobuf.Timestamp createdAt = 6;
 }
 
-message DeleteProjectResponse {
-  ProjectWithTickets project = 1;
+message ProjectWhereInput {
+  repeated ProjectWhereInput AND = 1;
+  repeated ProjectWhereInput OR = 2;
+  repeated ProjectWhereInput NOT = 3;
+
+  IntFilter id = 4;
+  IntFilter tenantId = 5;
+  StringFilter title = 6;
+  StringFilter description = 7;
+  EnumProjectStatusFilter status = 8;
+  DateTimeFilter createdAt = 9;
+  DateTimeFilter updatedAt = 10;
+
+  IntListFilter clientUserIds = 11;
 }
 
-message UpdateProjectRequest {
-  int32 id = 1;
-  int32 tenantId = 2;
-  string description = 3;
-  string title = 4;
-  ProjectStatus status = 5;
+message TicketWhereInput {
+  repeated TicketWhereInput AND = 1;
+  repeated TicketWhereInput OR = 2;
+  repeated TicketWhereInput NOT = 3;
+
+  IntFilter id = 4;
+  IntFilter tenantId = 5;
+  IntFilter createdBy = 6;
+  IntFilter projectId = 7;
+  StringFilter description = 8;
+  EnumTicketStatusFilter status = 9;
+  DateTimeFilter createdAt = 10;
+  DateTimeFilter updatedAt = 11;
 }
 
-message UpdateProjectResponse {
-  ProjectWithTickets project = 1;
+message IntFilter {
+  int32 equals = 1;
+  repeated int32 in = 2;
+  repeated int32 notIn = 3;
+  int32 lt = 4;
+  int32 lte = 5;
+  int32 gt = 6;
+  int32 gte = 7;
+  IntFilter not = 8;
 }
 
-message AddOrRemoveClientFromProjectRequest {
-  int32 projectId = 1;
-  int32 tenantId = 2;
-  int32 clientId = 3;
+message IntListFilter {
+  repeated int32 equals = 1;
+  int32 has = 2;
+  repeated int32 hasSome = 3;
 }
 
-message CreateTicketRequest {
-  string description = 1;
-  int32 projectId = 2;
-  int32 tenantId = 3;
+message StringFilter {
+  string equals = 1;
+  repeated string in = 2;
+  repeated string notIn = 3;
+  string lt = 4;
+  string lte = 5;
+  string gt = 6;
+  string gte = 7;
+  string contains = 8;
+  string startsWith = 9;
+  string endsWith = 10;
+  StringFilter not = 11;
 }
 
-message CreateTicketResponse {
-  Ticket ticket = 1;
+message DateTimeFilter {
+  google.protobuf.Timestamp equals = 1;
+  repeated google.protobuf.Timestamp in = 2;
+  repeated google.protobuf.Timestamp notIn = 3;
+  google.protobuf.Timestamp lt = 4;
+  google.protobuf.Timestamp lte = 5;
+  google.protobuf.Timestamp gt = 6;
+  google.protobuf.Timestamp gte = 7;
+  DateTimeFilter not = 8;
 }
 
-message DeleteTicketRequest {
-  int32 id = 1;
-  int32 tenantId = 2;
+message EnumProjectStatusFilter {
+  ProjectStatus equals = 1;
+  repeated ProjectStatus in = 2;
+  repeated ProjectStatus notIn = 3;
+  EnumProjectStatusFilter not = 4;
 }
 
-message DeleteTicketResponse {
-  Ticket ticket = 1;
-}
-
-message UpdateTicketRequest {
-  int32 id = 1;
-  int32 tenantId = 2;
-  string description = 3;
-  TicketStatus status = 4;
-}
-
-message UpdateTicketResponse {
-  Ticket ticket = 1;
-}
-
-service CmsService {
-  rpc CreateProject(CreateProjectRequest) returns (CreateProjectResponse);
-  rpc GetProject(GetProjectRequest) returns (GetProjectResponse);
-  rpc ListProjects(ListProjectsRequest) returns (ListProjectsResponse);
-  rpc ListClientProjects(ListClientProjectsRequest) returns (ListClientProjectsResponse);
-  rpc DeleteProject(DeleteProjectRequest) returns (DeleteProjectResponse);
-  rpc UpdateProject(UpdateProjectRequest) returns (UpdateProjectResponse);
-  rpc AddClientToProject(AddOrRemoveClientFromProjectRequest) returns (google.protobuf.Empty);
-  rpc RemoveClientFromProject(AddOrRemoveClientFromProjectRequest) returns (google.protobuf.Empty);
-  rpc CreateTicket(CreateTicketRequest) returns (CreateTicketResponse);
-  rpc DeleteTicket(DeleteTicketRequest) returns (DeleteTicketResponse);
-  rpc UpdateTicket(UpdateTicketRequest) returns (UpdateTicketResponse);
+message EnumTicketStatusFilter {
+  TicketStatus equals = 1;
+  repeated TicketStatus in = 2;
+  repeated TicketStatus notIn = 3;
+  EnumTicketStatusFilter not = 4;
 }

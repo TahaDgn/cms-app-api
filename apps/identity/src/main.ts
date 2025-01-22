@@ -13,6 +13,10 @@ async function bootstrap() {
         package: 'identity',
         protoPath: join(process.cwd(), '/protos/identity.proto'),
         url: IDENTITY_SERVICE_GRPC_URL,
+        loader: {
+          enums: String,
+          defaults: false,
+        },
       },
     },
   );

@@ -28,10 +28,7 @@ export async function userLoginSaga(
       'CreateAccessLink',
       async (stepContext) => {
         const {
-          payload: {
-            email,
-            tenant: { identifier: tenantIdentifier },
-          },
+          payload: { email, identifier: tenantIdentifier },
         } = stepContext;
 
         const response = await identityGrpcClient.createAccessRequestLink(

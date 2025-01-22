@@ -85,9 +85,9 @@ export type UserRegistrationSagaPayload = CreateTenantAndUserPayload;
 
 export type UserRegistrationSagaResult = void;
 
-export interface UserLoginSagaPayload extends Pick<User, 'email'> {
-  tenant: Pick<Tenant, 'identifier'>;
-}
+export interface UserLoginSagaPayload
+  extends Pick<User, 'email'>,
+    Pick<Tenant, 'identifier'> {}
 
 export type UserLoginSagaResult = void;
 

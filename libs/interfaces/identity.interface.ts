@@ -108,11 +108,13 @@ export type GetUserPayload = {
   where: Prisma.UserWhereInput;
 };
 
-export type GetUserResponse = Prisma.UserGetPayload<{
-  include: {
-    tenant: true;
-  };
-}>;
+export type GetUserResponse = {
+  user: Prisma.UserGetPayload<{
+    include: {
+      tenant: true;
+    };
+  }>;
+};
 
 export interface ListUserPayload extends PaginationPayload {
   where: Prisma.UserWhereInput;

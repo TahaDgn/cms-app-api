@@ -53,12 +53,18 @@ export class AuthController {
   @Post('login')
   async login(@Body() dto: LoginRequestDto) {
     const {
-      createPayload: { email, tenant },
+      createPayload: {
+        email,
+        tenant: { identifier },
+      },
     } = dto;
 
     const metadata = new Metadata();
 
-    await this.orchestratorClient.userLoginSaga({ email, tenant }, metadata);
+    await this.orchestratorClient.userLoginSaga(
+      { email, identifier },
+      metadata,
+    );
 
     return {
       message: 'Login initiated. Check your email for the access link.',

@@ -39,7 +39,7 @@ export class UserController {
 
     metadata.add('User', JSON.stringify(user));
 
-    const data = await this.orchestratorClient.userCreationSaga(
+    const { user: data } = await this.orchestratorClient.userCreationSaga(
       createPayload,
       metadata,
     );
@@ -75,7 +75,14 @@ export class UserController {
 
     const { query } = getQuery;
 
-    const data = await this.identityClient.getUser({ where: query }, metadata);
+    const data = await this.identityClient.getUser(
+      {
+        where: {
+          ...query,
+        },
+      },
+      metadata,
+    );
 
     return {
       success: true,
@@ -101,7 +108,9 @@ export class UserController {
     const { totalItemsCount, users: data } =
       await this.identityClient.listUsers(
         {
-          where: query,
+          where: {
+            ...query,
+          },
           skip: (page - 1) * limit,
           take: limit,
         },
@@ -131,7 +140,7 @@ export class UserController {
 
     metadata.add('User', JSON.stringify(user));
 
-    const data = await this.orchestratorClient.userDeletionSaga(
+    const { user: data } = await this.orchestratorClient.userDeletionSaga(
       deleteQuery,
       metadata,
     );

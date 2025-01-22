@@ -23,7 +23,7 @@ export class UserGrpcServer
   constructor(private readonly userUseCase: UserUseCase) {}
 
   @GrpcMethod('IdentityService', 'createUser')
-  createUser(
+  async createUser(
     payload: CreateUserPayload,
     metadata: Metadata,
   ): Promise<GetUserResponse> {
@@ -31,7 +31,11 @@ export class UserGrpcServer
       JSON.parse(metadata.get('User').toString())
     );
 
-    return this.userUseCase.create(payload, authorizedUser);
+    const user = await this.userUseCase.create(payload, authorizedUser);
+
+    return {
+      user,
+    };
   }
 
   @GrpcMethod('IdentityService', 'listUsers')
@@ -59,7 +63,7 @@ export class UserGrpcServer
   }
 
   @GrpcMethod('IdentityService', 'getUserOrFail')
-  getUserOrFail(
+  async getUserOrFail(
     payload: GetUserPayload,
     metadata: Metadata,
   ): Promise<GetUserResponse> {
@@ -71,7 +75,7 @@ export class UserGrpcServer
   }
 
   @GrpcMethod('IdentityService', 'deleteUser')
-  deleteUser(
+  async deleteUser(
     payload: DeleteUserPayload,
     metadata: Metadata,
   ): Promise<GetUserResponse> {
@@ -79,6 +83,10 @@ export class UserGrpcServer
       JSON.parse(metadata.get('User').toString())
     );
 
-    return this.userUseCase.delete(payload, authorizedUser);
+    const user = await this.userUseCase.delete(payload, authorizedUser);
+
+    return {
+      user,
+    };
   }
 }

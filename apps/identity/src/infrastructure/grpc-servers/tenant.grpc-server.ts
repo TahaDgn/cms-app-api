@@ -29,7 +29,7 @@ export class TenantGrpcServer
 {
   constructor(private readonly tenantUseCase: TenantUseCase) {}
 
-  @GrpcMethod('IdentityService', 'createTenantAndUser')
+  @GrpcMethod('IdentityService', 'createTenantWithOwner')
   createTenantWithOwner(
     payload: CreateTenantAndUserPayload,
   ): Promise<CreateTenantAndUserResponse> {

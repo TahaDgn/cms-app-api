@@ -97,11 +97,15 @@ export class ProjectController {
 
     metadata.add('User', JSON.stringify(user));
 
-    const { query } = queryDto;
+    const {
+      query: { id },
+    } = queryDto;
 
     const data = await this.cmsGrpcClient.getProject(
       {
-        where: query,
+        where: {
+          id: { equals: id },
+        },
       },
       metadata,
     );
@@ -125,12 +129,14 @@ export class ProjectController {
 
     metadata.add('User', JSON.stringify(user));
 
-    const { query } = listQuery;
+    const {
+      query: { status },
+    } = listQuery;
 
     const { totalItemsCount, projects: data } =
       await this.cmsGrpcClient.listProjects(
         {
-          where: query,
+          where: { status: { equals: status } },
           skip: (page - 1) * limit,
           take: limit,
         },

@@ -61,11 +61,17 @@ export class TicketController {
 
     metadata.add('User', JSON.stringify(user));
 
-    const { query } = queryDto;
+    const {
+      query: { id },
+    } = queryDto;
 
     const data = await this.cmsGrpcClient.getTicket(
       {
-        where: query,
+        where: {
+          id: {
+            equals: id,
+          },
+        },
       },
       metadata,
     );
@@ -89,12 +95,24 @@ export class TicketController {
 
     metadata.add('User', JSON.stringify(user));
 
-    const { query } = listQuery;
+    const {
+      query: { createdBy, projectId, status },
+    } = listQuery;
 
     const { totalItemsCount, tickets: data } =
       await this.cmsGrpcClient.listTickets(
         {
-          where: query,
+          where: {
+            createdBy: {
+              equals: createdBy,
+            },
+            projectId: {
+              equals: projectId,
+            },
+            status: {
+              equals: status,
+            },
+          },
           skip: (page - 1) * limit,
           take: limit,
         },

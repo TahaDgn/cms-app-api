@@ -1,9 +1,10 @@
-import { User, UserType } from '@prisma/client';
+import { Prisma, UserType } from '@prisma/client';
+import { StringFilterRequest } from '../../../shared';
 
-class Payload implements Partial<Pick<User, 'type'>> {
-  type: UserType;
+class Payload implements Pick<Prisma.UserWhereInput, 'type'> {
+  type?: StringFilterRequest<UserType>;
 }
 
 export class ListUsersQueryDto {
-  query: Payload;
+  query: Payload = {};
 }

@@ -2,107 +2,27 @@ syntax = "proto3";
 
 package orchestrator;
 
-import "google/protobuf/timestamp.proto";
-import "google/protobuf/empty.proto";
+import "identity.proto";
+import "cms.proto";
 
-enum UserType {
-  PARTICIPANT = 0;
-  CLIENT = 1;
+service OrchestratorService {
+  rpc userRegistrationSaga(identity.CreateTenantAndUserRequest) returns (UserRegistrationSagaResponse);
+  rpc userLoginSaga(UserLoginSagaRequest) returns (UserLoginSagaResponse);
+  rpc userCreationSaga(identity.CreateUserRequest) returns (identity.GetUserResponse);
+  rpc userDeletionSaga(identity.DeleteUserRequest) returns (identity.GetUserResponse);
+
+  rpc addClientsToProjectsSaga(cms.AddClientsToProjectsRequest) returns (cms.ListProjectsResponse);
+  rpc removeClientsFromProjectsSaga(cms.RemoveClientsFromProjectsRequest) returns (cms.ListProjectsResponse);
+
+  rpc createProjectSaga(cms.CreateProjectRequest) returns (cms.GetProjectResponse);
+  rpc deleteProjectSaga(cms.DeleteProjectRequest) returns (cms.GetProjectResponse);
 }
 
-message Tenant {
-  int32 id = 1;
-  string name = 2;
-  string identifier = 3;
-  int32 ownerId = 4;
-  int32 clientsCount = 5;
-  int32 participantsCount = 6;
-  google.protobuf.Timestamp createdAt = 7;
-  google.protobuf.Timestamp updatedAt = 8;
-}
-
-message User {
-  int32 id = 1;
-  int32 tenantId = 2;
-  string name = 3;
-  string email = 4;
-  UserType type = 5;
-  google.protobuf.Timestamp createdAt = 6;
-  google.protobuf.Timestamp updatedAt = 7;
-}
-
-message Project {
-  int32 id = 1;
-  int32 tenantId = 2;
-  string title = 3;
-  string description = 4;
-  int32 status = 5;
-  repeated int32 clientUserIds = 6;
-  google.protobuf.Timestamp createdAt = 7;
-  google.protobuf.Timestamp updatedAt = 8;
-}
-
-message UserWithTenant {
-  User user = 1;
-  Tenant tenant = 2;
-}
-
-
-message UserRegistrationSagaRequest {
-  string tenantName = 1;
-  string tenantIdentifier = 2;
-  string userName = 3;
-  string userEmail = 4;
-  UserType userType = 5;
-}
+message UserRegistrationSagaResponse {}
 
 message UserLoginSagaRequest {
   string email = 1;
-  string tenantIdentifier = 2;
+  string identifier = 2;
 }
 
-message UserCreationSagaRequest {
-  int32 tenantId = 1;
-  string name = 2;
-  string email = 3;
-  UserType type = 4;
-}
-
-message UserDeletionSagaRequest {
-  int32 id = 1;
-  int32 tenantId = 2;
-}
-
-message AddClientToProjectSagaRequest {
-  int32 projectId = 1;
-  int32 tenantId = 2;
-  string email = 3;
-  string name = 4;
-  UserType userType = 5;
-}
-
-message RemoveClientFromProjectSagaRequest {
-  int32 projectId = 1;
-  int32 tenantId = 2;
-  int32 userId = 3;
-}
-
-service OrchestratorService {
-  rpc userRegistrationSaga(UserRegistrationSagaRequest)
-    returns (google.protobuf.Empty);
-
-  rpc userLoginSaga(UserLoginSagaRequest)
-    returns (google.protobuf.Empty);
-
-  rpc userCreationSaga(UserCreationSagaRequest)
-    returns (UserWithTenant);
-
-  rpc userDeletionSaga(UserDeletionSagaRequest)
-    returns (UserWithTenant);
-
-  rpc addClientToProjectSaga(AddClientToProjectSagaRequest)
-    returns (google.protobuf.Empty);
-
-  rpc removeClientFromProjectSaga(RemoveClientFromProjectSagaRequest)
-    returns (google.protobuf.Empty);
-}
+message UserLoginSagaResponse {}

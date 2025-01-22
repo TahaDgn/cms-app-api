@@ -56,7 +56,9 @@ export async function userDeletionSaga(
           return;
         }
 
-        const { email, name, type } = deletedUserResponse;
+        const {
+          user: { email, name, type },
+        } = deletedUserResponse;
 
         await identityGrpcClient.createUser(
           {
@@ -96,7 +98,9 @@ export async function userDeletionSaga(
       'RemoveClientsFromAllProjects',
       async (stepContext) => {
         const {
-          getUserResponse: { id: clientId, type },
+          getUserResponse: {
+            user: { id: clientId, type },
+          },
           listProjectsResponse: { projects },
         } = stepContext;
 
@@ -123,7 +127,9 @@ export async function userDeletionSaga(
       async (stepContext) => {
         const {
           listProjectsResponseAfterClientsRemoval,
-          getUserResponse: { id: clientId },
+          getUserResponse: {
+            user: { id: clientId },
+          },
         } = stepContext;
 
         if (!listProjectsResponseAfterClientsRemoval) {
@@ -152,10 +158,12 @@ export async function userDeletionSaga(
       async (stepContext) => {
         const {
           getUserResponse: {
-            name: userName,
-            type: userType,
-            email,
-            tenant: { name: tenantName, identifier: tenantIdentifier },
+            user: {
+              name: userName,
+              type: userType,
+              email,
+              tenant: { name: tenantName, identifier: tenantIdentifier },
+            },
           },
         } = stepContext;
 

@@ -24,7 +24,7 @@ export class AuthGuardInternal implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const userTypeRequired = this.reflector.get<UserType[]>(
+    const userTypeRequired = this.reflector.get<(UserType | '*')[]>(
       AUTH_REQUIRED,
       context.getHandler(),
     );
@@ -34,6 +34,7 @@ export class AuthGuardInternal implements CanActivate {
     }
 
     const authHeader = request.headers['authorization'];
+
     if (!authHeader) {
       throw new UnauthorizedException('No Authorization header found');
     }
@@ -44,11 +45,14 @@ export class AuthGuardInternal implements CanActivate {
     if (!userDataStr) {
       throw new UnauthorizedException('Invalid or expired token');
     }
+
     const userData = <Prisma.UserGetPayload<{ include: { tenant: true } }>>(
       JSON.parse(userDataStr)
     );
 
-    if (userTypeRequired.length === 0) {
+    if (userTypeRequired.includes('*')) {
+      request.authorizedUser = userData;
+
       return true;
     }
 
@@ -57,6 +61,7 @@ export class AuthGuardInternal implements CanActivate {
     }
 
     request.authorizedUser = userData;
+
     return true;
   }
 }

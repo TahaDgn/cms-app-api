@@ -3,22 +3,43 @@ syntax = "proto3";
 package identity;
 
 import "google/protobuf/timestamp.proto";
-import "google/protobuf/empty.proto";
+
+service IdentityService {
+  rpc createTenantWithOwner(CreateTenantAndUserRequest) returns (CreateTenantAndUserResponse);
+  rpc updateTenant(UpdateTenantRequest) returns (GetTenantResponse);
+  rpc incrementTenantProjectsCount(IncrementTenantProjectsCountRequest) returns (GetTenantResponse);
+  rpc decrementTenantProjectsCount(DecrementTenantProjectsCountRequest) returns (GetTenantResponse);
+  rpc deleteTenant(DeleteTenantRequest) returns (GetTenantResponse);
+
+  rpc createUser(CreateUserRequest) returns (GetUserResponse);
+  rpc listUsers(ListUsersRequest) returns (ListUsersResponse);
+  rpc getUserOrFail(GetUserRequest) returns (GetUserResponse);
+  rpc getUser(GetUserRequest) returns (GetUserResponse);
+  rpc deleteUser(DeleteUserRequest) returns (GetUserResponse);
+
+  rpc createAccessRequestLink(AccessRequestRequest) returns (AccessRequestResponse);
+  rpc verifyAccessCode(VerifyAccessRequest) returns (VerifyAccessResponse);
+  rpc removeAccessCode(RemoveAccessCodeRequest) returns (RemoveAccessCodeResponse);
+  rpc removeAccessToken(RemoveAccessTokenRequest) returns (RemoveAccessTokenResponse);
+}
 
 enum TenantIssue {
-  NO_PROJECT_FOUND = 0;
-  NO_CLIENT_FOUND = 1;
+  TENANT_ISSUE_UNSPECIFIED = 0;
+  NO_PROJECT_FOUND = 1;
+  NO_CLIENT_FOUND = 2;
+  NO_PARTICIPANT_FOUND = 3;
 }
 
 enum UserType {
-  PARTICIPANT = 0;
-  CLIENT = 1;
+  USER_TYPE_UNSPECIFIED = 0;
+  PARTICIPANT = 1;
+  CLIENT = 2;
 }
 
 enum UserIssue {
-  FIRST_LOGIN_WAS_NOT_MADE = 0;
+  USER_ISSUE_UNSPECIFIED = 0;
+  FIRST_LOGIN_WAS_NOT_MADE = 1;
 }
-
 
 message Tenant {
   int32 id = 1;
@@ -26,10 +47,12 @@ message Tenant {
   string identifier = 3;
   int32 ownerId = 4;
   repeated TenantIssue issues = 5;
-  int32 clientsCount = 6;
-  int32 participantsCount = 7;
-  google.protobuf.Timestamp createdAt = 8;
-  google.protobuf.Timestamp updatedAt = 9;
+  int32 projectsCount = 6;
+  int32 clientsCount = 7;
+  int32 participantsCount = 8;
+  google.protobuf.Timestamp createdAt = 9;
+  google.protobuf.Timestamp updatedAt = 10;
+  repeated User users = 11;
 }
 
 message User {
@@ -41,53 +64,81 @@ message User {
   repeated UserIssue issues = 6;
   google.protobuf.Timestamp createdAt = 7;
   google.protobuf.Timestamp updatedAt = 8;
-}
 
-message TenantWithUsers {
-  int32 id = 1;
-  string name = 2;
-  string identifier = 3;
-  int32 ownerId = 4;
-  repeated TenantIssue issues = 5;
-  int32 clientsCount = 6;
-  int32 participantsCount = 7;
-  google.protobuf.Timestamp createdAt = 8;
-  google.protobuf.Timestamp updatedAt = 9;
-  repeated User users = 10;
-}
-
-message UserWithTenant {
-  int32 id = 1;
-  int32 tenantId = 2;
-  string name = 3;
-  string email = 4;
-  UserType type = 5;
-  repeated UserIssue issues = 6;
-  google.protobuf.Timestamp createdAt = 7;
-  google.protobuf.Timestamp updatedAt = 8;
   Tenant tenant = 9;
 }
 
-
-message CreateTenantWithOwnerRequest {
-  string tenantName = 1;
-  string tenantIdentifier = 2;
-  string userName = 3;
-  string userEmail = 4;
-  UserType userType = 5;
+message CreateTenantAndUserRequest {
+  TenantInfo tenant = 1;
+  UserInfo user = 2;
 }
 
-message CreateTenantWithOwnerResponse {
+message TenantInfo {
+  string name = 1;
+  string identifier = 2;
+}
+
+message UserInfo {
+  string name = 1;
+  string email = 2;
+  UserType type = 3;
+}
+
+message CreateTenantAndUserResponse {
   Tenant tenant = 1;
   User user = 2;
 }
 
-message AccessRequestPayload {
+message UpdateTenantRequest {
+  int32 id = 1;
+  string name = 2;
+  string identifier = 3;
+}
+
+message IncrementTenantProjectsCountRequest {}
+message DecrementTenantProjectsCountRequest {}
+
+message DeleteTenantRequest {
+  int32 id = 1;
+}
+
+message GetTenantResponse {
+  Tenant tenant = 1;
+}
+
+message CreateUserRequest {
+  string name = 1;
+  string email = 2;
+  UserType type = 3;
+}
+
+message ListUsersRequest {
+  int32 skip = 1;
+  int32 take = 2;
+  UserWhereInput where = 3;
+}
+
+message GetUserRequest {
+  UserWhereInput where = 1;
+}
+
+message DeleteUserRequest {
+  int32 id = 1;
+}
+
+message GetUserResponse {
+  User user = 1;
+}
+
+message ListUsersResponse {
+  int32 totalItemsCount = 1;
+  repeated User users = 2;
+}
+
+message AccessRequestRequest {
   string email = 1;
-  oneof tenantInfo {
-    int32 tenantId = 2;
-    string tenantIdentifier = 3;
-  }
+  optional int32 tenantId = 2;
+  optional string tenantIdentifier = 3;
 }
 
 message AccessRequestResponse {
@@ -107,71 +158,87 @@ message VerifyAccessResponse {
   string accessToken = 1;
 }
 
-message CreateUserRequest {
-  int32 tenantId = 1;
-  string name = 2;
-  string email = 3;
-  UserType type = 4;
-}
-
-message ListUsersRequest {
-  int32 tenantId = 1;
-}
-
-message ListUsersResponse {
-  repeated User users = 1;
-}
-
-message GetUserRequest {
-  int32 id = 1;
-  int32 tenantId = 2;
-}
-
-message DeleteUserRequest {
-  int32 id = 1;
-  int32 tenantId = 2;
-}
-
-message DeleteTenantRequest {
-  int32 id = 1;
-}
-
 message RemoveAccessCodeRequest {
   string accessCode = 1;
 }
+
+message RemoveAccessCodeResponse {}
 
 message RemoveAccessTokenRequest {
   string accessToken = 1;
 }
 
-service IdentityService {
-  rpc createTenantWithOwner(CreateTenantWithOwnerRequest)
-    returns (CreateTenantWithOwnerResponse);
+message RemoveAccessTokenResponse {}
 
-  rpc createAccessRequestLink(AccessRequestPayload)
-    returns (AccessRequestResponse);
+message TenantWhereInput {
+  repeated TenantWhereInput AND = 1;
+  repeated TenantWhereInput OR = 2;
+  repeated TenantWhereInput NOT = 3;
 
-  rpc verifyAccessCode(VerifyAccessRequest)
-    returns (VerifyAccessResponse);
+  IntFilter id = 4;
+  StringFilter name = 5;
+  StringFilter identifier = 6;
+  IntFilter ownerId = 7;
+  IntFilter projectsCount = 8;
+  IntFilter clientsCount = 9;
+  IntFilter participantsCount = 10;
+  DateTimeFilter createdAt = 11;
+  DateTimeFilter updatedAt = 12;
+}
 
-  rpc createUserIfNotExists(CreateUserRequest)
-    returns (UserWithTenant);
+message UserWhereInput {
+  repeated UserWhereInput AND = 1;
+  repeated UserWhereInput OR = 2;
+  repeated UserWhereInput NOT = 3;
 
-  rpc listUsers(ListUsersRequest)
-    returns (ListUsersResponse);
+  IntFilter id = 4;
+  IntFilter tenantId = 5;
+  StringFilter name = 6;
+  StringFilter email = 7;
+  EnumUserTypeFilter type = 8;
+  DateTimeFilter createdAt = 9;
+  DateTimeFilter updatedAt = 10;
+}
 
-  rpc getUser(GetUserRequest)
-    returns (UserWithTenant);
+message IntFilter {
+  int32 equals = 1;
+  repeated int32 in = 2;
+  repeated int32 notIn = 3;
+  int32 lt = 4;
+  int32 lte = 5;
+  int32 gt = 6;
+  int32 gte = 7;
+  IntFilter not = 8;
+}
 
-  rpc deleteUser(DeleteUserRequest)
-    returns (UserWithTenant);
+message StringFilter {
+  string equals = 1;
+  repeated string in = 2;
+  repeated string notIn = 3;
+  string lt = 4;
+  string lte = 5;
+  string gt = 6;
+  string gte = 7;
+  string contains = 8;
+  string startsWith = 9;
+  string endsWith = 10;
+  StringFilter not = 11;
+}
 
-  rpc deleteTenant(DeleteTenantRequest)
-    returns (TenantWithUsers);
+message DateTimeFilter {
+  google.protobuf.Timestamp equals = 1;
+  repeated google.protobuf.Timestamp in = 2;
+  repeated google.protobuf.Timestamp notIn = 3;
+  google.protobuf.Timestamp lt = 4;
+  google.protobuf.Timestamp lte = 5;
+  google.protobuf.Timestamp gt = 6;
+  google.protobuf.Timestamp gte = 7;
+  DateTimeFilter not = 8;
+}
 
-  rpc removeAccessCode(RemoveAccessCodeRequest)
-    returns (google.protobuf.Empty);
-
-  rpc removeAccessToken(RemoveAccessTokenRequest)
-    returns (google.protobuf.Empty);
+message EnumUserTypeFilter {
+  UserType equals = 1;
+  repeated UserType in = 2;
+  repeated UserType notIn = 3;
+  EnumUserTypeFilter not = 4;
 }

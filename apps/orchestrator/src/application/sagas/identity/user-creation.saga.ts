@@ -56,7 +56,9 @@ export async function userCreationSaga(
           return;
         }
 
-        const { id } = userWithTenantResponse;
+        const {
+          user: { id },
+        } = userWithTenantResponse;
 
         await identityGrpcClient.deleteUser(
           {
@@ -70,7 +72,9 @@ export async function userCreationSaga(
       'CreateAccessLink',
       async (stepContext) => {
         const {
-          getUserResponse: { email, tenantId },
+          getUserResponse: {
+            user: { email, tenantId },
+          },
         } = stepContext;
 
         const response = await identityGrpcClient.createAccessRequestLink(
@@ -106,7 +110,9 @@ export async function userCreationSaga(
             tenantIdentifier,
             tenantName,
           },
-          getUserResponse: { email },
+          getUserResponse: {
+            user: { email },
+          },
         } = stepContext;
 
         await rabbitMqAdapter.publish(NOTIFICATION_QUEUE, {

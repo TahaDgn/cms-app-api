@@ -132,7 +132,9 @@ export class UserUseCase {
       },
     });
 
-    return result;
+    return {
+      user: result,
+    };
   }
 
   public async getOrFail(
@@ -152,13 +154,18 @@ export class UserUseCase {
 
     if (!result) throw new UserNotFoundException();
 
-    return result;
+    return {
+      user: result,
+    };
   }
 
-  public async delete(payload: DeleteUserPayload, user: AuthorizedUserPayload) {
+  public async delete(
+    payload: DeleteUserPayload,
+    authorizedUser: AuthorizedUserPayload,
+  ) {
     const { id } = payload;
 
-    const { tenantId } = user;
+    const { tenantId } = authorizedUser;
 
     const deletedUser = await this.prismaService.$transaction(
       async (transactionClient: Prisma.TransactionClient) => {
@@ -166,6 +173,9 @@ export class UserUseCase {
           where: {
             id,
             tenantId,
+          },
+          include: {
+            tenant: true,
           },
         });
 
@@ -175,7 +185,10 @@ export class UserUseCase {
 
         await this.userRepository.delete(
           {
-            where: { id, tenantId },
+            where: { id: user.id, tenantId: user.tenantId },
+            include: {
+              tenant: true,
+            },
           },
           transactionClient,
         );
@@ -192,7 +205,7 @@ export class UserUseCase {
         if (type === UserType.PARTICIPANT) {
           await this.tenantRepository.decrementParticipantCount(
             {
-              id,
+              id: user.tenantId,
             },
             transactionClient,
           );

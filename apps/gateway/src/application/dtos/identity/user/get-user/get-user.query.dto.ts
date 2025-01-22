@@ -1,9 +1,10 @@
-import { User } from '@prisma/client';
+import { Prisma } from '@prisma/client';
+import { IntegerFilterRequest } from '../../../shared';
 
-class GetUserQueryPayload implements Partial<Pick<User, 'id'>> {
-  id?: number;
+class GetUserQueryPayload implements Pick<Prisma.UserWhereInput, 'id'> {
+  id?: IntegerFilterRequest;
 }
 
 export class GetUserQueryDto {
-  query: GetUserQueryPayload;
+  query: GetUserQueryPayload = {};
 }

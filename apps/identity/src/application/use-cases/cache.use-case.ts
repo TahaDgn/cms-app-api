@@ -75,7 +75,17 @@ export class CacheUseCase {
   ): Promise<RemoveAccessCodeResponse> {
     const { accessCode } = payload;
 
-    const userJsonString = await this.redisAdapter.getKey(accessCode);
+    const accessRequestCodeKey = `accessRequestCode:${accessCode}`;
+
+    await this.redisAdapter.delKey(accessRequestCodeKey);
+  }
+
+  public async removeAccessToken(
+    payload: RemoveAccessTokenPayload,
+  ): Promise<RemoveAccessTokenResponse> {
+    const { accessToken } = payload;
+
+    const userJsonString = await this.redisAdapter.getKey(accessToken);
 
     if (!userJsonString) {
       throw new AccessCodeInvalidException();
@@ -87,26 +97,16 @@ export class CacheUseCase {
 
     const { id, tenantId } = user;
 
-    const accessRequestCodeKey = `accessRequestCode:${accessCode}`;
+    const accessTokenKey = `accessToken:${accessToken}`;
 
     await Promise.all([
       this.redisAdapter.lRem(
         `tenant:${tenantId}:user:${id}:accessTokenCacheKeys`,
         0,
-        accessCode,
+        accessToken,
       ),
-      this.redisAdapter.delKey(accessRequestCodeKey),
+      this.redisAdapter.delKey(accessTokenKey),
     ]);
-  }
-
-  public async removeAccessToken(
-    payload: RemoveAccessTokenPayload,
-  ): Promise<RemoveAccessTokenResponse> {
-    const { accessToken } = payload;
-
-    const accessTokenKey = `accessToken:${accessToken}`;
-
-    await this.redisAdapter.delKey(accessTokenKey);
   }
 
   public async dropUserAccessTokens(user: Pick<User, 'id' | 'tenantId'>) {
