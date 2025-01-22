@@ -118,7 +118,7 @@ export class AuthController {
     );
 
     return {
-      message: 'Login initiated. Check your email for the access link.',
+      success: true,
     };
   }
 }

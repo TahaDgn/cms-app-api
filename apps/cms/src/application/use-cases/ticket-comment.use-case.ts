@@ -63,7 +63,7 @@ export class TicketCommentUseCase {
       },
     });
 
-    return this.ticketRepository.findFirst({
+    const fetchedTicket = await this.ticketRepository.findFirst({
       where: {
         id: ticketId,
         tenantId,
@@ -72,6 +72,10 @@ export class TicketCommentUseCase {
         ticketComments: true,
       },
     });
+
+    return {
+      ticket: fetchedTicket,
+    };
   }
 
   public async delete(
@@ -107,7 +111,7 @@ export class TicketCommentUseCase {
       },
     });
 
-    return this.ticketRepository.findFirst({
+    const fetchedTicket = await this.ticketRepository.findFirst({
       where: {
         id,
         tenantId,
@@ -116,5 +120,9 @@ export class TicketCommentUseCase {
         ticketComments: true,
       },
     });
+
+    return {
+      ticket: fetchedTicket,
+    };
   }
 }

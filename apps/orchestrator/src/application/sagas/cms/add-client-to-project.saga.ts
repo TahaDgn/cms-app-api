@@ -42,7 +42,7 @@ export async function addClientToProjectSaga(
           {
             where: {
               id: { in: clientUserIds },
-              type: UserType.CLIENT,
+              type: { equals: UserType.CLIENT },
             },
             skip: 0,
             take: clientUserIds.length,

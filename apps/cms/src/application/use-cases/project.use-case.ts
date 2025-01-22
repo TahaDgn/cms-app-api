@@ -38,7 +38,7 @@ export class ProjectUseCase {
   ) {
     const { tenantId } = user;
 
-    return this.projectRepository.create({
+    const project = await this.projectRepository.create({
       data: {
         ...payload,
         tenantId,
@@ -47,6 +47,10 @@ export class ProjectUseCase {
         tickets: true,
       },
     });
+
+    return {
+      project,
+    };
   }
 
   public async update(
@@ -57,7 +61,7 @@ export class ProjectUseCase {
 
     const { tenantId } = user;
 
-    return this.projectRepository.update({
+    const project = await this.projectRepository.update({
       where: {
         id,
         tenantId,
@@ -69,6 +73,10 @@ export class ProjectUseCase {
         tickets: true,
       },
     });
+
+    return {
+      project,
+    };
   }
 
   public async list(
@@ -87,7 +95,7 @@ export class ProjectUseCase {
             },
           }
         : {
-            clientUserIds: undefined,
+            clientUserIds: where.clientUserIds || undefined,
           };
 
     const projects = await this.projectRepository.findAll({
@@ -126,7 +134,7 @@ export class ProjectUseCase {
             },
           }
         : {
-            clientUserIds: undefined,
+            clientUserIds: where.clientUserIds || undefined,
           };
 
     const project = await this.projectRepository.findFirst({
@@ -142,7 +150,9 @@ export class ProjectUseCase {
 
     if (!project) throw new ProjectNotFoundException();
 
-    return project;
+    return {
+      project,
+    };
   }
 
   public async addClientsToProjects(
@@ -213,8 +223,8 @@ export class ProjectUseCase {
               },
             });
 
-            const modifiedClientUserIds = clientUserIds.filter((clientUserId) =>
-              some(clientUserIdsToRemove, clientUserId),
+            const modifiedClientUserIds = clientUserIds.filter(
+              (clientUserId) => !clientUserIdsToRemove?.includes(clientUserId),
             );
 
             return this.projectRepository.update(
@@ -248,7 +258,7 @@ export class ProjectUseCase {
   ): Promise<GetProjectResponse> {
     const { tenantId } = user;
 
-    return this.projectRepository.delete({
+    const project = await this.projectRepository.delete({
       where: {
         ...payload,
         tenantId,
@@ -257,5 +267,9 @@ export class ProjectUseCase {
         tickets: true,
       },
     });
+
+    return {
+      project,
+    };
   }
 }

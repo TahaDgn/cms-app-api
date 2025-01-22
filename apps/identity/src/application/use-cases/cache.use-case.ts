@@ -85,7 +85,9 @@ export class CacheUseCase {
   ): Promise<RemoveAccessTokenResponse> {
     const { accessToken } = payload;
 
-    const userJsonString = await this.redisAdapter.getKey(accessToken);
+    const accessTokenKey = `accessToken:${accessToken}`;
+
+    const userJsonString = await this.redisAdapter.getKey(accessTokenKey);
 
     if (!userJsonString) {
       throw new AccessCodeInvalidException();
@@ -97,13 +99,11 @@ export class CacheUseCase {
 
     const { id, tenantId } = user;
 
-    const accessTokenKey = `accessToken:${accessToken}`;
-
     await Promise.all([
       this.redisAdapter.lRem(
         `tenant:${tenantId}:user:${id}:accessTokenCacheKeys`,
         0,
-        accessToken,
+        accessTokenKey,
       ),
       this.redisAdapter.delKey(accessTokenKey),
     ]);

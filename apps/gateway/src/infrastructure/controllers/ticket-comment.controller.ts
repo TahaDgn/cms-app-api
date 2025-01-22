@@ -9,6 +9,7 @@ import {
 } from '../../application';
 import { AuthorizedUserPayload } from 'libs/interfaces/gateway.interface';
 import { Metadata } from '@grpc/grpc-js';
+import { UserType } from '@prisma/client';
 
 @Controller('ticket-comments')
 export class TicketCommentController {
@@ -33,11 +34,11 @@ export class TicketCommentController {
 
     return {
       success: true,
-      data,
+      data: data.ticket,
     };
   }
 
-  @AuthGuardRequired('*')
+  @AuthGuardRequired(UserType.PARTICIPANT)
   @Delete()
   async delete(
     @AuthorizedUser() user: AuthorizedUserPayload,
@@ -49,7 +50,7 @@ export class TicketCommentController {
 
     const { id } = deleteDto;
 
-    const data = await this.cmsGrpcClient.deleteTicket(
+    const data = await this.cmsGrpcClient.deleteTicketComment(
       {
         id,
       },
@@ -58,7 +59,7 @@ export class TicketCommentController {
 
     return {
       success: true,
-      data,
+      data: data.ticket,
     };
   }
 }

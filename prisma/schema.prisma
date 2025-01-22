@@ -143,7 +143,7 @@ model TicketComment {
   createdBy Int @db.Integer @map("createdBy")
   createdAt DateTime @default(now()) @map("createdAt")
 
-  ticket Ticket @relation(fields: [ticketId], references: [id])
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@index([createdBy, createdAt(sort: Desc)])
 

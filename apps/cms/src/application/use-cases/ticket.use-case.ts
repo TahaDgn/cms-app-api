@@ -46,7 +46,7 @@ export class TicketUseCase {
 
     if (!project) throw new ProjectNotFoundException();
 
-    return this.ticketRepository.create({
+    const ticket = await this.ticketRepository.create({
       data: {
         tenantId,
         createdBy,
@@ -57,6 +57,10 @@ export class TicketUseCase {
         ticketComments: true,
       },
     });
+
+    return {
+      ticket,
+    };
   }
 
   public async update(
@@ -67,7 +71,7 @@ export class TicketUseCase {
 
     const { tenantId } = user;
 
-    return this.ticketRepository.update({
+    const ticket = await this.ticketRepository.update({
       where: {
         id,
         tenantId,
@@ -79,6 +83,10 @@ export class TicketUseCase {
         ticketComments: true,
       },
     });
+
+    return {
+      ticket,
+    };
   }
 
   public async list(
@@ -143,7 +151,7 @@ export class TicketUseCase {
             project: undefined,
           };
 
-    const project = await this.ticketRepository.findFirst({
+    const ticket = await this.ticketRepository.findFirst({
       where: {
         ...where,
         ...clientQuery,
@@ -154,9 +162,11 @@ export class TicketUseCase {
       },
     });
 
-    if (!project) throw new ProjectNotFoundException();
+    if (!ticket) throw new ProjectNotFoundException();
 
-    return project;
+    return {
+      ticket,
+    };
   }
 
   public async delete(
@@ -165,7 +175,7 @@ export class TicketUseCase {
   ): Promise<GetTicketResponse> {
     const { tenantId } = user;
 
-    return this.ticketRepository.delete({
+    const ticket = await this.ticketRepository.delete({
       where: {
         ...payload,
         tenantId,
@@ -174,5 +184,9 @@ export class TicketUseCase {
         ticketComments: true,
       },
     });
+
+    return {
+      ticket,
+    };
   }
 }

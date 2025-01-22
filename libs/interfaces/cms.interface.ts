@@ -89,9 +89,11 @@ export type GetProjectPayload = {
   where: Prisma.ProjectWhereInput;
 };
 
-export type GetProjectResponse = Prisma.ProjectGetPayload<{
-  include: { tickets: true };
-}>;
+export type GetProjectResponse = {
+  project: Prisma.ProjectGetPayload<{
+    include: { tickets: true };
+  }>;
+};
 
 export interface ListProjectsPayload extends PaginationPayload {
   where: Prisma.ProjectWhereInput;
@@ -126,9 +128,11 @@ export type GetTicketPayload = {
   where: Prisma.TicketWhereInput;
 };
 
-export type GetTicketResponse = Prisma.TicketGetPayload<{
-  include: { ticketComments: true };
-}>;
+export type GetTicketResponse = {
+  ticket: Prisma.TicketGetPayload<{
+    include: { ticketComments: true };
+  }>;
+};
 
 export interface ListTicketsPayload extends PaginationPayload {
   where: Prisma.TicketWhereInput;

@@ -34,6 +34,11 @@ export class CmsGrpcClient implements OnModuleInit, CmsGrpcServer {
       package: 'cms',
       protoPath: join(process.cwd(), '/protos/cms.proto'),
       url: CMS_SERVICE_GRPC_URL,
+      loader: {
+        enums: String,
+        defaults: false,
+        arrays: true,
+      },
     },
   })
   private client: ClientGrpc;

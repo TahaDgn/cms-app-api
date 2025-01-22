@@ -134,8 +134,8 @@ message Project {
   string description = 4;
   ProjectStatus status = 5;
   repeated int32 clientUserIds = 6;
-  google.protobuf.Timestamp createdAt = 7;
-  google.protobuf.Timestamp updatedAt = 8;
+  string createdAt = 7;
+  string updatedAt = 8;
 
   repeated Ticket tickets = 9;
 }
@@ -147,8 +147,8 @@ message Ticket {
   int32 projectId = 4;
   string description = 5;
   TicketStatus status = 6;
-  google.protobuf.Timestamp createdAt = 7;
-  google.protobuf.Timestamp updatedAt = 8;
+  string createdAt = 7;
+  string updatedAt = 8;
 
   repeated TicketComment ticketComments = 9;
 }
@@ -159,7 +159,7 @@ message TicketComment {
   string content = 3;
   int32 ticketId = 4;
   int32 createdBy = 5;
-  google.protobuf.Timestamp createdAt = 6;
+  string createdAt = 6;
 }
 
 message ProjectWhereInput {

@@ -16,6 +16,7 @@ async function bootstrap() {
         loader: {
           enums: String,
           defaults: false,
+          // arrays: true,
         },
       },
     },

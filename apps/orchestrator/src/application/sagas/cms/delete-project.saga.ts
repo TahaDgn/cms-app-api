@@ -45,7 +45,7 @@ export async function deleteProjectSaga(
 
         await cmsGrpcClient.createProject(
           {
-            ...getProjectResponse,
+            ...getProjectResponse.project,
           },
           metadata,
         );

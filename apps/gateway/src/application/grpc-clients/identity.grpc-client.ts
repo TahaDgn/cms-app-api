@@ -36,6 +36,11 @@ export class IdentityGrpcClient implements OnModuleInit, IdentityGrpcServer {
       package: 'identity',
       protoPath: join(process.cwd(), '/protos/identity.proto'),
       url: IDENTITY_SERVICE_GRPC_URL,
+      loader: {
+        enums: String,
+        defaults: false,
+        arrays: true,
+      },
     },
   })
   private client: ClientGrpc;

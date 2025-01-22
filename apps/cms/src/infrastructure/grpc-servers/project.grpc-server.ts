@@ -79,7 +79,7 @@ export class ProjectGrpcServer
     return this.projectUseCase.update(payload, authorizedUser);
   }
 
-  @GrpcMethod('CmsService', 'removeClientFromProject')
+  @GrpcMethod('CmsService', 'removeClientsFromProjects')
   async removeClientsFromProjects(
     payload: AddClientsToProjectsPayload,
     metadata: Metadata,
@@ -94,7 +94,7 @@ export class ProjectGrpcServer
     );
   }
 
-  @GrpcMethod('CmsService', 'addClientToProject')
+  @GrpcMethod('CmsService', 'addClientsToProjects')
   async addClientsToProjects(
     payload: AddClientsToProjectsPayload,
     metadata: Metadata,

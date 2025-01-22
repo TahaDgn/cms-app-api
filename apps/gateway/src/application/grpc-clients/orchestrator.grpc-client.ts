@@ -34,6 +34,11 @@ export class OrchestratorGrpcClient
       package: 'orchestrator',
       protoPath: join(process.cwd(), '/protos/orchestrator.proto'),
       url: ORCHESTRATOR_SERVICE_GRPC_URL,
+      loader: {
+        enums: String,
+        defaults: false,
+        arrays: true,
+      },
     },
   })
   private client: ClientGrpc;

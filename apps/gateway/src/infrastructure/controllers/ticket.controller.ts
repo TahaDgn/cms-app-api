@@ -47,7 +47,7 @@ export class TicketController {
 
     return {
       success: true,
-      data,
+      data: data.ticket,
     };
   }
 
@@ -61,16 +61,12 @@ export class TicketController {
 
     metadata.add('User', JSON.stringify(user));
 
-    const {
-      query: { id },
-    } = queryDto;
+    const { query } = queryDto;
 
     const data = await this.cmsGrpcClient.getTicket(
       {
         where: {
-          id: {
-            equals: id,
-          },
+          ...query,
         },
       },
       metadata,
@@ -78,7 +74,7 @@ export class TicketController {
 
     return {
       success: true,
-      data,
+      data: data.ticket,
     };
   }
 
@@ -95,23 +91,13 @@ export class TicketController {
 
     metadata.add('User', JSON.stringify(user));
 
-    const {
-      query: { createdBy, projectId, status },
-    } = listQuery;
+    const { query } = listQuery;
 
     const { totalItemsCount, tickets: data } =
       await this.cmsGrpcClient.listTickets(
         {
           where: {
-            createdBy: {
-              equals: createdBy,
-            },
-            projectId: {
-              equals: projectId,
-            },
-            status: {
-              equals: status,
-            },
+            ...query,
           },
           skip: (page - 1) * limit,
           take: limit,
@@ -154,7 +140,7 @@ export class TicketController {
 
     return {
       success: true,
-      data,
+      data: data.ticket,
     };
   }
 
@@ -162,7 +148,7 @@ export class TicketController {
   @Delete()
   async delete(
     @AuthorizedUser() user: AuthorizedUserPayload,
-    @Body() deleteDto: DeleteTicketQueryDto,
+    @Query() deleteDto: DeleteTicketQueryDto,
   ): Promise<DeleteTicketResponseDto> {
     const metadata = new Metadata();
 
@@ -179,7 +165,7 @@ export class TicketController {
 
     return {
       success: true,
-      data,
+      data: data.ticket,
     };
   }
 }

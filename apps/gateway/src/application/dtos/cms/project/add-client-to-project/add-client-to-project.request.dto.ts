@@ -13,7 +13,7 @@ import {
 class Payload implements Pick<Project, 'clientUserIds'> {
   @IsInt({ each: true })
   @Min(0, { each: true })
-  @IsNumber(null, { each: true })
+  @IsNumber({ maxDecimalPlaces: 0 }, { each: true })
   @ArrayMinSize(1)
   @IsArray()
   @IsNotEmpty()

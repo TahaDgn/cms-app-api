@@ -130,6 +130,9 @@ export class UserUseCase {
         ...where,
         tenantId,
       },
+      include: {
+        tenant: true,
+      },
     });
 
     return {

@@ -57,7 +57,7 @@ export class ProjectController {
 
     return {
       success: true,
-      data,
+      data: data.project,
     };
   }
 
@@ -83,7 +83,7 @@ export class ProjectController {
 
     return {
       success: true,
-      data,
+      data: data.project,
     };
   }
 
@@ -97,14 +97,12 @@ export class ProjectController {
 
     metadata.add('User', JSON.stringify(user));
 
-    const {
-      query: { id },
-    } = queryDto;
+    const { query } = queryDto;
 
     const data = await this.cmsGrpcClient.getProject(
       {
         where: {
-          id: { equals: id },
+          ...query,
         },
       },
       metadata,
@@ -112,7 +110,7 @@ export class ProjectController {
 
     return {
       success: true,
-      data,
+      data: data.project,
     };
   }
 
@@ -129,14 +127,12 @@ export class ProjectController {
 
     metadata.add('User', JSON.stringify(user));
 
-    const {
-      query: { status },
-    } = listQuery;
+    const { query } = listQuery;
 
     const { totalItemsCount, projects: data } =
       await this.cmsGrpcClient.listProjects(
         {
-          where: { status: { equals: status } },
+          where: { ...query },
           skip: (page - 1) * limit,
           take: limit,
         },
@@ -235,7 +231,7 @@ export class ProjectController {
 
     return {
       success: true,
-      data,
+      data: data.project,
     };
   }
 }

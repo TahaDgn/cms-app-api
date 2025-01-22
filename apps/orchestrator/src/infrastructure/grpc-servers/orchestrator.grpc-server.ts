@@ -46,7 +46,7 @@ export class OrchestratorGrpcServer implements OrchestratorService {
     return this.orchestratorUseCase.runUserDeletionSaga(payload, metadata);
   }
 
-  @GrpcMethod('OrchestratorService', 'addClientToProjectSaga')
+  @GrpcMethod('OrchestratorService', 'addClientsToProjectsSaga')
   addClientsToProjectsSaga(
     payload: AddClientsToProjectsSagaPayload,
     metadata: Metadata,
@@ -57,7 +57,7 @@ export class OrchestratorGrpcServer implements OrchestratorService {
     );
   }
 
-  @GrpcMethod('OrchestratorService', 'removeClientFromProjectSaga')
+  @GrpcMethod('OrchestratorService', 'removeClientsFromProjectsSaga')
   removeClientsFromProjectsSaga(
     payload: RemoveClientsFromProjectsSagaPayload,
     metadata: Metadata,

@@ -43,7 +43,7 @@ export async function createProjectSaga(
 
         if (!getProjectResponse) return;
 
-        const { id } = getProjectResponse;
+        const { id } = getProjectResponse.project;
 
         await cmsGrpcClient.deleteProject(
           {
